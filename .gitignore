@@ -1,0 +1,39 @@
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+build/
+.svelte-kit/
+.output/
+
+# env
+.env
+.env.*
+!.env.example
+
+# testing
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Claude Code per-user settings
+.claude/settings.local.json
+
+# misc
+*.tsbuildinfo
+.turbo/

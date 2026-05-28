@@ -1,0 +1,28 @@
+{
+  "name": "petite-poste",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Local Resend-API-compatible mock mailer for development.",
+  "scripts": {
+    "dev": "vite dev --port 8025",
+    "build": "vite build",
+    "preview": "vite preview --port 8025",
+    "start": "node build",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-node": "^5.5.4",
+    "@sveltejs/kit": "^2.57.0",
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^22.9.0",
+    "daisyui": "^5.0.0",
+    "svelte": "^5.55.2",
+    "svelte-check": "^4.4.6",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.2",
+    "vite": "^8.0.7"
+  }
+}

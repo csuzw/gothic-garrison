@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@plugin 'daisyui' {
+  themes: night --default, dim, business, dark;
+}
+
+:root {
+  color-scheme: dark;
+}

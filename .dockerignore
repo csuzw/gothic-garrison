@@ -1,0 +1,17 @@
+**/node_modules
+**/.svelte-kit
+**/build
+**/dist
+**/.turbo
+**/.cache
+.git
+.github
+.vscode
+.idea
+**/coverage
+**/playwright-report
+**/test-results
+**/.env
+**/.env.*
+!.env.example
+**/*.log

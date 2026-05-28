@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gothic
+      POSTGRES_PASSWORD: gothic
+      POSTGRES_DB: gothic_garrison
+    ports:
+      # Host port 5433 by default to avoid clashing with any local Postgres
+      # already on 5432. Override via DB_PORT in .env if you prefer 5432.
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gothic -d gothic_garrison"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Local Resend-API-compatible mock mailer. The app talks to it by setting
+  # RESEND_API_URL=http://localhost:8025 and any non-empty RESEND_API_KEY.
+  petite-poste:
+    build:
+      context: .
+      dockerfile: apps/petite-poste/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+
+volumes:
+  postgres_data:
