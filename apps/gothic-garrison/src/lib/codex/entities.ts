@@ -4,7 +4,7 @@
 // here: their nested editor (loadouts, multi-selects) is a later slice; the
 // Codex shows them read-only via SOLDIER_TYPES_SLUG.
 
-export type CodexFieldType = 'text' | 'textarea' | 'number' | 'boolean' | 'enum' | 'date' | 'source';
+export type CodexFieldType = 'text' | 'textarea' | 'number' | 'boolean' | 'enum' | 'date' | 'source' | 'flag';
 
 export interface CodexField {
   key: string;
@@ -47,11 +47,12 @@ export const CODEX_ENTITIES: CodexEntity[] = [
     slug: 'nations',
     label: 'Nations',
     singular: 'nation',
-    columns: ['name', 'sourceId', 'notes'],
+    columns: ['flag', 'name', 'sourceId', 'notes'],
     fields: [
       { key: 'name', label: 'Name', type: 'text', required: true },
       { key: 'sourceId', label: 'Source', type: 'source', required: true },
       { key: 'notes', label: 'Notes', type: 'textarea' },
+      { key: 'flag', label: 'Flag', type: 'flag' },
     ],
   },
   {
@@ -70,13 +71,12 @@ export const CODEX_ENTITIES: CodexEntity[] = [
     slug: 'equipment',
     label: 'Equipment',
     singular: 'equipment item',
-    columns: ['name', 'category', 'slotCost', 'isSpecial', 'allowedFor', 'sourceId'],
+    columns: ['name', 'category', 'slotCost', 'isSpecial', 'sourceId'],
     fields: [
       { key: 'name', label: 'Name', type: 'text', required: true },
       { key: 'category', label: 'Category', type: 'text', required: true, placeholder: 'weapon' },
       { key: 'slotCost', label: 'Slot cost', type: 'number', min: 0, max: 10, required: true },
       { key: 'isSpecial', label: 'Special armoury', type: 'boolean' },
-      { key: 'allowedFor', label: 'Allowed for', type: 'enum', options: ['officer', 'soldier', 'both'], required: true },
       { key: 'sourceId', label: 'Source', type: 'source', required: true },
       { key: 'notes', label: 'Notes', type: 'textarea' },
     ],

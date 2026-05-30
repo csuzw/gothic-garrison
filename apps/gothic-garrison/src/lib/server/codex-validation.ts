@@ -115,7 +115,6 @@ export function assertUuid(value: string, label = 'id'): string {
 
 export const SOURCE_KINDS = ['core', 'supplement'] as const;
 export const EQUIPMENT_MODES = ['fixed', 'choice', 'pool'] as const;
-export const ALLOWED_FOR = ['officer', 'soldier', 'both'] as const;
 const STAT_KEYS = ['speed', 'melee', 'accuracy', 'defence', 'courage', 'health'] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -131,6 +130,7 @@ export interface NationInput {
   name: string;
   sourceId: string;
   notes: string | null;
+  flag: string | null;
 }
 
 export interface AttributeInput {
@@ -145,7 +145,6 @@ export interface EquipmentInput {
   category: string;
   slotCost: number;
   isSpecial: boolean;
-  allowedFor: (typeof ALLOWED_FOR)[number];
   sourceId: string;
   notes: string | null;
 }
@@ -207,7 +206,7 @@ export function validateSource(body: unknown): SourceInput {
 
 export function validateNation(body: unknown): NationInput {
   const o = obj(body);
-  return { name: reqStr(o, 'name'), sourceId: uuid(o, 'sourceId'), notes: optStr(o, 'notes') };
+  return { name: reqStr(o, 'name'), sourceId: uuid(o, 'sourceId'), notes: optStr(o, 'notes'), flag: optStr(o, 'flag') };
 }
 
 export function validateAttribute(body: unknown): AttributeInput {
@@ -227,7 +226,6 @@ export function validateEquipment(body: unknown): EquipmentInput {
     category: reqStr(o, 'category'),
     slotCost: int(o, 'slotCost', { min: 0, max: 10 }),
     isSpecial: bool(o, 'isSpecial'),
-    allowedFor: enumOf(o, 'allowedFor', ALLOWED_FOR),
     sourceId: uuid(o, 'sourceId'),
     notes: optStr(o, 'notes'),
   };

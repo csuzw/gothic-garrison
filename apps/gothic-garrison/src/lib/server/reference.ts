@@ -15,6 +15,7 @@ import { getDb } from './db';
 export interface RefNation {
   id: string;
   name: string;
+  flag: string | null;
 }
 
 export interface RefAttribute {
@@ -82,7 +83,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
 
   const db = getDb();
   const [nats, attrs, equip, sols, links, fixed, loadouts, loadoutItems] = await Promise.all([
-    db.select({ id: nations.id, name: nations.name }).from(nations).orderBy(asc(nations.name)),
+    db.select({ id: nations.id, name: nations.name, flag: nations.flag }).from(nations).orderBy(asc(nations.name)),
     db
       .select({ id: attributes.id, name: attributes.name, isOfficer: attributes.isOfficer })
       .from(attributes)

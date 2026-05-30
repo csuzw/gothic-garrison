@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
+  import NationFlag from '$lib/components/NationFlag.svelte';
   import { blankRow, codexEntity, pickFields, SOLDIER_TYPES_SLUG, type CodexEntity } from '$lib/codex/entities';
 
   type Row = Record<string, unknown> & { id: string };
@@ -92,6 +93,30 @@
     }
   }
 
+  let flagUploading = $state(false);
+  let flagUploadError = $state<string | null>(null);
+
+  async function uploadFlag(e: Event) {
+    const input = e.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    flagUploading = true;
+    flagUploadError = null;
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/codex/flags', { method: 'POST', body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { flagUploadError = data.message ?? 'Upload failed'; return; }
+      draft['flag'] = data.path;
+    } catch {
+      flagUploadError = 'Upload failed — could not reach the API.';
+    } finally {
+      flagUploading = false;
+      input.value = '';
+    }
+  }
+
   async function remove(row: Row) {
     const label = (row.name as string) ?? (row.code as string) ?? row.id;
     if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
@@ -174,7 +199,9 @@
                 {#each entity.columns as col (col)}
                   {@const field = entity.fields.find((f) => f.key === col)}
                   <td>
-                    {#if field?.type === 'boolean'}
+                    {#if field?.type === 'flag'}
+                      <NationFlag flag={row[col] as string | null} />
+                    {:else if field?.type === 'boolean'}
                       {row[col] ? '✓' : '—'}
                     {:else if field?.type === 'source'}
                       {sourceName(row[col])}
@@ -228,6 +255,30 @@
                   <option value="" disabled>Choose a source…</option>
                   {#each sources as s (s.id)}<option value={s.id}>{s.name}</option>{/each}
                 </select>
+              {:else if field.type === 'flag'}
+                <div class="space-y-2">
+                  {#if draft[field.key]}
+                    <div class="flex items-center gap-3">
+                      <NationFlag flag={draft[field.key]} size="md" />
+                      <span class="font-mono text-xs opacity-60">{draft[field.key]}</span>
+                    </div>
+                  {/if}
+                  <label class="flex cursor-pointer items-center gap-2">
+                    <span class="btn btn-outline btn-sm">
+                      {flagUploading ? 'Uploading…' : draft[field.key] ? 'Replace SVG…' : 'Upload SVG…'}
+                    </span>
+                    <input
+                      type="file"
+                      accept=".svg"
+                      class="hidden"
+                      disabled={flagUploading}
+                      onchange={uploadFlag}
+                    />
+                  </label>
+                  {#if flagUploadError}
+                    <p class="text-xs text-error">{flagUploadError}</p>
+                  {/if}
+                </div>
               {:else}
                 <input type="text" bind:value={draft[field.key]} required={field.required} placeholder={field.placeholder} class="input w-full" />
               {/if}

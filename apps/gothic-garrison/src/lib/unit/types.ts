@@ -33,6 +33,7 @@ export interface EquipmentSnapshot {
 
 export interface OfficerSnapshot {
   name: string;
+  bio?: string;
   combatTraining: CombatTraining;
   physicalEdge: PhysicalEdge;
   commandStyle: CommandStyle;
@@ -53,13 +54,19 @@ export interface SoldierStats {
 export interface MemberSnapshot {
   id: string;
   soldierTypeId: string | null;
+  /** Snapshotted soldier type name (e.g. "Artillerist"). Read-only after creation. */
   name: string;
+  /** Optional player-assigned character name (e.g. "Hans"). */
+  customName?: string;
+  bio?: string;
   cost: number;
   stats: SoldierStats | null;
   /** Attributes picked from the officer pool (for soldiers with attribute_picks). */
   attributes: AttributeSnapshot[];
   /** Carried equipment: the fixed/chosen loadout's items, or pool-built items. */
   equipment: EquipmentSnapshot[];
+  /** One special armoury item pick for fixed/choice-mode soldiers (pool soldiers manage special via EquipmentBuilder). */
+  specialEquipment?: EquipmentSnapshot | null;
   /** For `choice`-mode soldiers: which predetermined loadout is selected. */
   loadoutId: string | null;
 }
@@ -68,6 +75,26 @@ export const MAX_SOLDIERS = 7;
 export const OFFICER_EQUIPMENT_SLOTS = 6;
 export const OFFICER_ATTRIBUTE_PICKS = 2;
 export const SUPERNATURAL_VETERAN = 'Supernatural Veteran';
+
+export const OFFICER_BASE_STATS: SoldierStats = {
+  speed: 6,
+  melee: 1,
+  accuracy: 1,
+  defence: 14,
+  courage: 2,
+  health: 12,
+};
+
+export function officerStats(officer: OfficerSnapshot): SoldierStats {
+  return {
+    speed: OFFICER_BASE_STATS.speed + (officer.physicalEdge === 'speed' ? 1 : 0),
+    melee: OFFICER_BASE_STATS.melee + (officer.combatTraining === 'melee' ? 1 : 0),
+    accuracy: OFFICER_BASE_STATS.accuracy + (officer.combatTraining === 'accuracy' ? 1 : 0),
+    defence: OFFICER_BASE_STATS.defence,
+    courage: OFFICER_BASE_STATS.courage + (officer.commandStyle === 'courage' ? 1 : 0),
+    health: OFFICER_BASE_STATS.health + (officer.physicalEdge === 'health' ? 1 : 0),
+  };
+}
 
 export function slotsUsed(items: EquipmentSnapshot[]): number {
   return items.reduce((n, it) => n + it.slotCost * it.quantity, 0);
@@ -98,6 +125,7 @@ export interface UnitDoc {
 export interface UnitSummary {
   id: string;
   name: string;
+  nationId: string | null;
   updatedAt: string;
 }
 
@@ -131,5 +159,5 @@ export function unitSpent(doc: UnitDoc): number {
 }
 
 export function toSummary(doc: UnitDoc): UnitSummary {
-  return { id: doc.id, name: doc.name, updatedAt: doc.updatedAt };
+  return { id: doc.id, name: doc.name, nationId: doc.nationId, updatedAt: doc.updatedAt };
 }

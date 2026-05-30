@@ -52,7 +52,7 @@ describe('validateSource', () => {
 
 describe('validateNation', () => {
   it('parses name + sourceId and nulls absent notes', () => {
-    expect(validateNation({ name: 'Britain', sourceId: SRC })).toEqual({ name: 'Britain', sourceId: SRC, notes: null });
+    expect(validateNation({ name: 'Britain', sourceId: SRC })).toEqual({ name: 'Britain', sourceId: SRC, notes: null, flag: null });
   });
   it('rejects a non-UUID sourceId', () => {
     expect(() => validateNation({ name: 'Britain', sourceId: 'x' })).toThrow(/sourceId/);
@@ -70,15 +70,12 @@ describe('validateAttribute', () => {
 
 describe('validateEquipment', () => {
   it('parses a valid item', () => {
-    const v = validateEquipment({ name: 'Musket', category: 'weapon', slotCost: 2, isSpecial: false, allowedFor: 'both', sourceId: SRC });
+    const v = validateEquipment({ name: 'Musket', category: 'weapon', slotCost: 2, isSpecial: false, sourceId: SRC });
     expect(v.slotCost).toBe(2);
     expect(v.notes).toBeNull();
   });
   it('rejects a negative slot cost', () => {
-    expect(() => validateEquipment({ name: 'Musket', category: 'weapon', slotCost: -1, isSpecial: false, allowedFor: 'both', sourceId: SRC })).toThrow(/slotCost/);
-  });
-  it('rejects an unknown allowedFor', () => {
-    expect(() => validateEquipment({ name: 'Musket', category: 'weapon', slotCost: 1, isSpecial: false, allowedFor: 'monster', sourceId: SRC })).toThrow(/allowedFor/);
+    expect(() => validateEquipment({ name: 'Musket', category: 'weapon', slotCost: -1, isSpecial: false, sourceId: SRC })).toThrow(/slotCost/);
   });
 });
 

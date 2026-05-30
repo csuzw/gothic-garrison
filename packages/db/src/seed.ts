@@ -39,8 +39,8 @@ const srcId = (code: string) => {
 // ── nations ───────────────────────────────────────────────────────────────────
 await db
   .insert(t.nations)
-  .values(nationData.map((n) => ({ name: n.name, sourceId: srcId(n.sourceCode), notes: n.notes })))
-  .onConflictDoUpdate({ target: t.nations.name, set: { sourceId: sql`excluded.source_id`, notes: sql`excluded.notes` } });
+  .values(nationData.map((n) => ({ name: n.name, sourceId: srcId(n.sourceCode), notes: n.notes, flag: n.flag })))
+  .onConflictDoUpdate({ target: t.nations.name, set: { sourceId: sql`excluded.source_id`, notes: sql`excluded.notes`, flag: sql`excluded.flag` } });
 const nationByName = new Map((await db.select({ id: t.nations.id, name: t.nations.name }).from(t.nations)).map((r) => [r.name, r.id]));
 
 // ── attributes (officer-flagged + extras) ──────────────────────────────────────
@@ -56,10 +56,10 @@ const attrByName = new Map((await db.select({ id: t.attributes.id, name: t.attri
 // ── equipment (all from the core rulebook) ──────────────────────────────────────
 await db
   .insert(t.equipmentItems)
-  .values(equipmentData.map((e) => ({ name: e.name, category: e.category, slotCost: e.slotCost, isSpecial: e.isSpecial, allowedFor: e.allowedFor, sourceId: srcId(e.sourceCode), notes: e.note || null })))
+  .values(equipmentData.map((e) => ({ name: e.name, category: e.category, slotCost: e.slotCost, isSpecial: e.isSpecial, sourceId: srcId(e.sourceCode), notes: e.note || null })))
   .onConflictDoUpdate({
     target: t.equipmentItems.name,
-    set: { category: sql`excluded.category`, slotCost: sql`excluded.slot_cost`, isSpecial: sql`excluded.is_special`, allowedFor: sql`excluded.allowed_for`, sourceId: sql`excluded.source_id`, notes: sql`excluded.notes` },
+    set: { category: sql`excluded.category`, slotCost: sql`excluded.slot_cost`, isSpecial: sql`excluded.is_special`, sourceId: sql`excluded.source_id`, notes: sql`excluded.notes` },
   });
 const equipByName = new Map((await db.select({ id: t.equipmentItems.id, name: t.equipmentItems.name }).from(t.equipmentItems)).map((r) => [r.name, r.id]));
 

@@ -26,11 +26,6 @@ export const sourceKindEnum = pgEnum('source_kind', ['core', 'supplement']);
 
 export const equipmentModeEnum = pgEnum('equipment_mode', ['fixed', 'choice', 'pool']);
 
-export const equipmentAllowedForEnum = pgEnum('equipment_allowed_for', [
-  'officer',
-  'soldier',
-  'both',
-]);
 
 // ── reference data ──────────────────────────────────────────────────────────
 //
@@ -53,6 +48,7 @@ export const nations = pgTable('nations', {
     .notNull()
     .references(() => sources.id, { onDelete: 'restrict' }),
   notes: text('notes'),
+  flag: text('flag'),
 });
 
 // All game attributes, officer-selectable or not. `isOfficer` marks the ones an
@@ -75,7 +71,6 @@ export const equipmentItems = pgTable('equipment_items', {
   category: text('category').notNull(), // e.g. weapon, armour, gear, special-armoury
   slotCost: integer('slot_cost').notNull().default(1),
   isSpecial: boolean('is_special').notNull().default(false),
-  allowedFor: equipmentAllowedForEnum('allowed_for').notNull().default('both'),
   sourceId: uuid('source_id')
     .notNull()
     .references(() => sources.id, { onDelete: 'restrict' }),

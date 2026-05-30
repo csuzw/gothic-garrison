@@ -120,12 +120,11 @@ const SEED_HEADER = `// AUTO-GENERATED — do not edit by hand.
 
 export type EquipmentMode = 'fixed' | 'choice' | 'pool';
 export type SourceKind = 'core' | 'supplement';
-export type AllowedFor = 'officer' | 'soldier' | 'both';
 
 export interface SeedSource { code: string; name: string; kind: SourceKind; publishedDate: string; author: string; }
-export interface SeedNation { name: string; sourceCode: string; notes: string | null; soldiers: string[]; }
+export interface SeedNation { name: string; sourceCode: string; notes: string | null; flag: string | null; soldiers: string[]; }
 export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; note: string; }
-export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; allowedFor: AllowedFor; sourceCode: string; note: string; }
+export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; note: string; }
 export interface SeedOptionalRule { code: string; name: string; description: string; sourceCode: string; }
 export interface SeedLoadoutItem { name: string; qty: number; }
 export interface SeedLoadout { label: string; order: number; items: SeedLoadoutItem[]; }
@@ -262,6 +261,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
         name: n.name,
         sourceCode: srcCode(n.sourceId),
         notes: n.notes,
+        flag: n.flag,
         soldiers: (soldiersByNation.get(n.id) ?? []).slice().sort((a, b) => a.localeCompare(b)),
       }))
       .sort(byName);
@@ -276,7 +276,6 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
         category: e.category,
         slotCost: e.slotCost,
         isSpecial: e.isSpecial,
-        allowedFor: e.allowedFor,
         sourceCode: srcCode(e.sourceId),
         note: e.notes ?? '',
       }))

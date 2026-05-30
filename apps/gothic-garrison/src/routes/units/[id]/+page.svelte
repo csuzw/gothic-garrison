@@ -5,17 +5,22 @@
   import type { PageProps } from './$types';
   import AttributePicker from '$lib/components/AttributePicker.svelte';
   import EquipmentBuilder from '$lib/components/EquipmentBuilder.svelte';
+  import NationFlag from '$lib/components/NationFlag.svelte';
+  import StatLine from '$lib/components/StatLine.svelte';
   import { getUnitStore } from '$lib/unit/store';
   import {
     unitBudget,
     unitSpent,
     officerSpecialMax,
+    officerStats,
+    OFFICER_BASE_STATS,
     MAX_SOLDIERS,
     OFFICER_EQUIPMENT_SLOTS,
     OFFICER_ATTRIBUTE_PICKS,
     type UnitDoc,
     type AttributeSnapshot,
     type EquipmentSnapshot,
+    type MemberSnapshot,
   } from '$lib/unit/types';
 
   let { data }: PageProps = $props();
@@ -46,6 +51,7 @@
   const budget = $derived(doc ? unitBudget(doc) : 0);
   const spent = $derived(doc ? unitSpent(doc) : 0);
   const overBudget = $derived(spent > budget);
+  const officerStatLine = $derived(doc ? officerStats(doc.officer) : null);
 
   const nationId = $derived(doc?.nationId ?? null);
   const members = $derived(doc?.members ?? []);
@@ -53,6 +59,7 @@
 
   const officerPool = $derived(data.reference.attributes.filter((a) => a.isOfficer));
   const equipById = $derived(new Map(data.reference.equipment.map((e) => [e.id, e])));
+  const specialCatalog = $derived(data.reference.equipment.filter((e) => e.isSpecial));
   const soldierRef = (typeId: string | null) => data.reference.soldiers.find((s) => s.id === typeId);
 
   const available = $derived(
@@ -65,10 +72,50 @@
     }),
   );
 
+  interface NationConflict {
+    prevNationId: string | null;
+    prevNationName: string | null;
+    newNationName: string;
+    conflicting: MemberSnapshot[];
+  }
+  let nationConflict = $state<NationConflict | null>(null);
+
   function setNation(value: string) {
     if (!doc) return;
-    doc.nationId = value || null;
-    doc.nationName = data.reference.nations.find((n) => n.id === value)?.name ?? null;
+    const newNationId = value || null;
+    const newNation = data.reference.nations.find((n) => n.id === value);
+
+    if (newNationId && doc.members.length > 0) {
+      const validIds = new Set(
+        data.reference.soldiers.filter((s) => s.nationIds.includes(newNationId)).map((s) => s.id),
+      );
+      const conflicting = doc.members.filter((m) => m.soldierTypeId && !validIds.has(m.soldierTypeId));
+      if (conflicting.length > 0) {
+        const prevNationId = doc.nationId;
+        const prevNationName = doc.nationName;
+        doc.nationId = newNationId;
+        doc.nationName = newNation?.name ?? null;
+        nationConflict = { prevNationId, prevNationName, newNationName: newNation?.name ?? value, conflicting };
+        return;
+      }
+    }
+
+    doc.nationId = newNationId;
+    doc.nationName = newNation?.name ?? null;
+  }
+
+  function confirmNationSwitch() {
+    if (!doc || !nationConflict) return;
+    const ids = new Set(nationConflict.conflicting.map((m) => m.id));
+    doc.members = doc.members.filter((m) => !ids.has(m.id));
+    nationConflict = null;
+  }
+
+  function revertNationSwitch() {
+    if (!doc || !nationConflict) return;
+    doc.nationId = nationConflict.prevNationId;
+    doc.nationName = nationConflict.prevNationName;
+    nationConflict = null;
   }
 
   // ── attributes ────────────────────────────────────────────────────────────
@@ -96,6 +143,13 @@
     if (e.quantity > 1) e.quantity -= 1;
     else list.splice(i, 1);
   }
+  function setMemberSpecial(m: UnitDoc['members'][number], item: { id: string; name: string; slotCost: number; isSpecial: boolean }) {
+    m.specialEquipment = { itemId: item.id, name: item.name, slotCost: item.slotCost, isSpecial: true, quantity: 1 };
+  }
+  function clearMemberSpecial(m: UnitDoc['members'][number]) {
+    m.specialEquipment = null;
+  }
+
   function selectLoadout(m: UnitDoc['members'][number], loadoutId: string) {
     const ref = soldierRef(m.soldierTypeId);
     const lo = ref?.loadouts.find((l) => l.id === loadoutId);
@@ -115,6 +169,7 @@
       stats: s.stats,
       attributes: [] as AttributeSnapshot[],
       equipment: [] as EquipmentSnapshot[],
+      specialEquipment: null as EquipmentSnapshot | null,
       loadoutId: null as string | null,
     };
     const first = s.loadouts[0];
@@ -189,12 +244,18 @@
 
     <label class="block">
       <span class="mb-1 block text-sm font-medium">Nation</span>
-      <select class="select w-full" value={doc.nationId ?? ''} onchange={(e) => setNation(e.currentTarget.value)}>
-        <option value="" disabled>Choose a nation…</option>
-        {#each data.reference.nations as n (n.id)}
-          <option value={n.id}>{n.name}</option>
-        {/each}
-      </select>
+      <div class="flex items-center gap-2">
+        {#if doc.nationId}
+          {@const nat = data.reference.nations.find((n) => n.id === doc!.nationId)}
+          {#if nat?.flag}<NationFlag flag={nat.flag} name={nat.name} />{/if}
+        {/if}
+        <select class="select flex-1" onchange={(e) => setNation(e.currentTarget.value)}>
+          <option value="" disabled selected={!doc.nationId}>Choose a nation…</option>
+          {#each data.reference.nations as n (n.id)}
+            <option value={n.id} selected={n.id === doc.nationId}>{n.name}</option>
+          {/each}
+        </select>
+      </div>
     </label>
 
     <div class="stats bg-base-200 w-full">
@@ -219,25 +280,41 @@
           <input type="text" bind:value={doc.officer.name} class="input w-full" placeholder="Capitaine Renaud" />
         </label>
 
-        <div>
-          <span class="mb-1 block text-sm font-medium">Combat Training</span>
-          <div class="join">
-            <input type="radio" class="join-item btn btn-sm" name="combat" aria-label="+1 Melee" value="melee" bind:group={doc.officer.combatTraining} />
-            <input type="radio" class="join-item btn btn-sm" name="combat" aria-label="+1 Accuracy" value="accuracy" bind:group={doc.officer.combatTraining} />
+        <details>
+          <summary class="cursor-pointer text-xs opacity-60 select-none">Bio / notes</summary>
+          <textarea
+            bind:value={doc.officer.bio}
+            class="textarea textarea-sm mt-1 w-full text-sm"
+            placeholder="Background, appearance, notes…"
+            rows="3"
+          ></textarea>
+        </details>
+
+        {#if officerStatLine}
+          <StatLine stats={officerStatLine} baseStats={OFFICER_BASE_STATS} />
+        {/if}
+
+        <div class="grid gap-3 sm:grid-cols-3">
+          <div>
+            <span class="mb-1 block text-xs font-medium opacity-70">Combat Training</span>
+            <div class="join">
+              <input type="radio" class="join-item btn btn-xs" name="combat" aria-label="+1 Melee" value="melee" bind:group={doc.officer.combatTraining} />
+              <input type="radio" class="join-item btn btn-xs" name="combat" aria-label="+1 Accuracy" value="accuracy" bind:group={doc.officer.combatTraining} />
+            </div>
           </div>
-        </div>
-        <div>
-          <span class="mb-1 block text-sm font-medium">Physical Edge</span>
-          <div class="join">
-            <input type="radio" class="join-item btn btn-sm" name="physical" aria-label="+1 Health" value="health" bind:group={doc.officer.physicalEdge} />
-            <input type="radio" class="join-item btn btn-sm" name="physical" aria-label="+1 Speed" value="speed" bind:group={doc.officer.physicalEdge} />
+          <div>
+            <span class="mb-1 block text-xs font-medium opacity-70">Physical Edge</span>
+            <div class="join">
+              <input type="radio" class="join-item btn btn-xs" name="physical" aria-label="+1 Health" value="health" bind:group={doc.officer.physicalEdge} />
+              <input type="radio" class="join-item btn btn-xs" name="physical" aria-label="+1 Speed" value="speed" bind:group={doc.officer.physicalEdge} />
+            </div>
           </div>
-        </div>
-        <div>
-          <span class="mb-1 block text-sm font-medium">Command Style</span>
-          <div class="join">
-            <input type="radio" class="join-item btn btn-sm" name="command" aria-label="+1 Courage" value="courage" bind:group={doc.officer.commandStyle} />
-            <input type="radio" class="join-item btn btn-sm" name="command" aria-label="+5 Recruitment" value="recruitment" bind:group={doc.officer.commandStyle} />
+          <div>
+            <span class="mb-1 block text-xs font-medium opacity-70">Command Style</span>
+            <div class="join">
+              <input type="radio" class="join-item btn btn-xs" name="command" aria-label="+1 Courage" value="courage" bind:group={doc.officer.commandStyle} />
+              <input type="radio" class="join-item btn btn-xs" name="command" aria-label="+5 Recruitment" value="recruitment" bind:group={doc.officer.commandStyle} />
+            </div>
           </div>
         </div>
 
@@ -292,18 +369,33 @@
                 {@const ref = soldierRef(m.soldierTypeId)}
                 <li class="bg-base-100 space-y-2 rounded p-3">
                   <div class="flex items-center justify-between gap-3">
-                    <div>
+                    <div class="flex min-w-0 flex-1 items-center gap-2">
                       <span class="font-medium">{m.name}</span>
-                      <span class="badge badge-sm ml-1">{m.cost} pts</span>
+                      <span class="badge badge-sm shrink-0">{m.cost} pts</span>
                     </div>
-                    <button class="btn btn-ghost btn-xs text-error" onclick={() => removeMember(m.id)} aria-label="Remove {m.name}">Remove</button>
+                    <button class="btn btn-ghost btn-xs text-error shrink-0" onclick={() => removeMember(m.id)} aria-label="Remove {m.name}">Remove</button>
                   </div>
 
+                  <input
+                    type="text"
+                    bind:value={m.customName}
+                    class="input input-xs w-full"
+                    placeholder="Character name (optional)"
+                    aria-label="Character name for {m.name}"
+                  />
+
+                  <details>
+                    <summary class="cursor-pointer text-xs opacity-60 select-none">Bio / notes</summary>
+                    <textarea
+                      bind:value={m.bio}
+                      class="textarea textarea-sm mt-1 w-full text-sm"
+                      placeholder="Background, appearance, notes…"
+                      rows="2"
+                    ></textarea>
+                  </details>
+
                   {#if m.stats}
-                    <div class="text-xs opacity-60">
-                      Spd {m.stats.speed} · Mel {m.stats.melee} · Acc {m.stats.accuracy} · Def
-                      {m.stats.defence} · Cou {m.stats.courage} · Hp {m.stats.health}
-                    </div>
+                    <StatLine stats={m.stats} />
                   {/if}
 
                   {#if ref}
@@ -333,9 +425,9 @@
                           onRemove={(itemId) => removeEquip(m.equipment, itemId)}
                         />
                       {:else if ref.equipmentMode === 'choice'}
-                        <select class="select select-xs w-full" value={m.loadoutId ?? ''} onchange={(e) => selectLoadout(m, e.currentTarget.value)}>
+                        <select class="select select-xs w-full" onchange={(e) => selectLoadout(m, e.currentTarget.value)}>
                           {#each ref.loadouts as lo (lo.id)}
-                            <option value={lo.id}>{lo.label}</option>
+                            <option value={lo.id} selected={lo.id === m.loadoutId}>{lo.label}</option>
                           {/each}
                         </select>
                       {:else}
@@ -343,6 +435,23 @@
                           {#each m.equipment as it (it.itemId)}
                             <span class="badge badge-sm">{it.quantity > 1 ? `${it.quantity}× ` : ''}{it.name}</span>
                           {/each}
+                        </div>
+                      {/if}
+
+                      {#if ref.equipmentMode === 'fixed' || ref.equipmentMode === 'choice'}
+                        <div class="mt-2">
+                          <span class="mb-1 block text-xs opacity-60">Special item (pick 1)</span>
+                          <div class="flex flex-wrap gap-1">
+                            {#each specialCatalog as item (item.id)}
+                              {@const isSel = m.specialEquipment?.itemId === item.id}
+                              <button
+                                type="button"
+                                class="btn btn-xs {isSel ? 'btn-primary' : 'btn-outline'}"
+                                disabled={!isSel && m.specialEquipment != null}
+                                onclick={() => isSel ? clearMemberSpecial(m) : setMemberSpecial(m, item)}
+                              >{item.name}</button>
+                            {/each}
+                          </div>
                         </div>
                       {/if}
                     </div>
@@ -359,4 +468,31 @@
       <button class="btn btn-ghost btn-sm text-error" onclick={remove}>Delete unit</button>
     </div>
   </section>
+
+  {#if nationConflict}
+    <dialog class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="text-base font-bold">Nation conflict</h3>
+        <p class="py-3 text-sm">
+          The following {nationConflict.conflicting.length === 1 ? 'soldier is' : 'soldiers are'}
+          not available for <strong>{nationConflict.newNationName}</strong>:
+        </p>
+        <ul class="mb-3 space-y-0.5 text-sm opacity-70">
+          {#each nationConflict.conflicting as m}
+            <li>· {m.name}{m.customName ? ` "${m.customName}"` : ''}</li>
+          {/each}
+        </ul>
+        <p class="text-sm">Remove {nationConflict.conflicting.length === 1 ? 'them' : 'them all'} and switch, or revert to {nationConflict.prevNationName ?? 'your previous nation'}?</p>
+        <div class="modal-action">
+          <button class="btn btn-ghost btn-sm" onclick={revertNationSwitch}>
+            Revert to {nationConflict.prevNationName ?? 'previous nation'}
+          </button>
+          <button class="btn btn-error btn-sm" onclick={confirmNationSwitch}>
+            Remove &amp; switch
+          </button>
+        </div>
+      </div>
+      <button class="modal-backdrop" aria-label="Revert nation change" onclick={revertNationSwitch}></button>
+    </dialog>
+  {/if}
 {/if}

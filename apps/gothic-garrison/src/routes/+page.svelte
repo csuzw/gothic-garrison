@@ -2,10 +2,15 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
+  import type { PageProps } from './$types';
+  import NationFlag from '$lib/components/NationFlag.svelte';
   import { getUnitStore } from '$lib/unit/store';
   import { createUnitDoc, type UnitSummary } from '$lib/unit/types';
 
+  let { data }: PageProps = $props();
+
   const signedIn = $derived(!!page.data.user);
+  const flagByNationId = $derived(new Map(data.nations.map((n) => [n.id, n.flag])));
 
   let units = $state<UnitSummary[]>([]);
   let loading = $state(true);
@@ -91,7 +96,10 @@
         <li class="card bg-base-200 card-compact">
           <div class="card-body flex-row items-center justify-between gap-3">
             <a href="/units/{u.id}" class="min-w-0 flex-1">
-              <span class="block truncate font-medium">{u.name}</span>
+              <span class="flex items-center gap-1.5 truncate font-medium">
+                <NationFlag flag={u.nationId ? (flagByNationId.get(u.nationId) ?? null) : null} size="sm" />
+                {u.name}
+              </span>
               <span class="block text-xs opacity-60">
                 Updated {dateFmt.format(new Date(u.updatedAt))}
               </span>
