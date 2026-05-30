@@ -24,7 +24,7 @@ const SEED_PATH = path.join(here, 'seed-data.ts');
 const CHANGELOG_PATH = path.join(here, 'reference-changelog.ts');
 
 export interface ExportResult {
-  counts: { sources: number; nations: number; attributes: number; equipment: number; optionalRules: number; soldiers: number };
+  counts: { sources: number; nations: number; attributes: number; equipment: number; optionalRules: number; soldiers: number; monsters: number };
   changes: ReferenceChange[];
   /** The changelog note used (explicit or derived); null when nothing changed. */
   note: string | null;
@@ -142,6 +142,16 @@ export interface SeedSoldier {
   fixedAttributes: string[];
   loadouts: SeedLoadout[];
 }
+export interface SeedMonster {
+  name: string;
+  sourceCode: string;
+  experience: number;
+  stats: { speed: number; melee: number; accuracy: number; defence: number; courage: number; health: number };
+  equipmentMode: 'fixed' | 'choice';
+  notes: string | null;
+  fixedAttributes: string[];
+  loadouts: SeedLoadout[];
+}
 `;
 
 const CHANGELOG_HEADER = `// AUTO-GENERATED — do not edit by hand.
@@ -194,6 +204,10 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       fixedRows,
       loadoutRows,
       loadoutItemRows,
+      monsterRows,
+      monsterFixedRows,
+      monsterLoadoutRows,
+      monsterLoadoutItemRows,
     ] = await Promise.all([
       db.select().from(t.sources),
       db.select().from(t.nations),
@@ -205,6 +219,10 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       db.select().from(t.soldierTypeFixedAttributes),
       db.select().from(t.soldierLoadouts).orderBy(asc(t.soldierLoadouts.displayOrder)),
       db.select().from(t.soldierLoadoutItems).orderBy(asc(t.soldierLoadoutItems.displayOrder)),
+      db.select().from(t.monsterTypes),
+      db.select().from(t.monsterTypeFixedAttributes),
+      db.select().from(t.monsterLoadouts).orderBy(asc(t.monsterLoadouts.displayOrder)),
+      db.select().from(t.monsterLoadoutItems).orderBy(asc(t.monsterLoadoutItems.displayOrder)),
     ]);
 
     // id → natural-key lookups
@@ -304,6 +322,50 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       })
       .sort(byName);
 
+    // monster types
+    const fixedAttrsByMonster = new Map<string, string[]>();
+    for (const r of monsterFixedRows) {
+      const name = nameByAttr.get(r.attributeId);
+      if (!name) continue;
+      const list = fixedAttrsByMonster.get(r.monsterTypeId);
+      if (list) list.push(name);
+      else fixedAttrsByMonster.set(r.monsterTypeId, [name]);
+    }
+
+    const mItemsByLoadout = new Map<string, { name: string; qty: number }[]>();
+    for (const it of monsterLoadoutItemRows) {
+      const name = nameByEquip.get(it.equipmentItemId);
+      if (!name) continue;
+      const list = mItemsByLoadout.get(it.loadoutId);
+      const entry = { name, qty: it.quantity };
+      if (list) list.push(entry);
+      else mItemsByLoadout.set(it.loadoutId, [entry]);
+    }
+
+    const mLoadoutsByMonster = new Map<string, { label: string; order: number; items: { name: string; qty: number }[] }[]>();
+    for (const lo of monsterLoadoutRows) {
+      const entry = { label: lo.label, order: lo.displayOrder, items: mItemsByLoadout.get(lo.id) ?? [] };
+      const list = mLoadoutsByMonster.get(lo.monsterTypeId);
+      if (list) list.push(entry);
+      else mLoadoutsByMonster.set(lo.monsterTypeId, [entry]);
+    }
+
+    const monsters = monsterRows
+      .map((m) => {
+        const st = m.stats as Record<string, number>;
+        return {
+          name: m.name,
+          sourceCode: srcCode(m.sourceId),
+          experience: m.experience,
+          stats: { speed: st.speed, melee: st.melee, accuracy: st.accuracy, defence: st.defence, courage: st.courage, health: st.health },
+          equipmentMode: m.equipmentMode as 'fixed' | 'choice',
+          notes: m.notes,
+          fixedAttributes: (fixedAttrsByMonster.get(m.id) ?? []).slice().sort((a, b) => a.localeCompare(b)),
+          loadouts: (mLoadoutsByMonster.get(m.id) ?? []).slice().sort((a, b) => a.order - b.order || a.label.localeCompare(b.label)),
+        };
+      })
+      .sort(byName);
+
     // diff against the *previous* committed seed-data.ts (read before writing)
     const changes = [
       diffCollection('source', readExportedArray<(typeof sources)[number]>(SEED_PATH, 'sources'), sources, (x) => x.code, (x) => x.name),
@@ -312,6 +374,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       diffCollection('equipment', readExportedArray<(typeof equipment)[number]>(SEED_PATH, 'equipment'), equipment, (x) => x.name, (x) => x.name),
       diffCollection('optional rule', readExportedArray<(typeof optionalRules)[number]>(SEED_PATH, 'optionalRules'), optionalRules, (x) => x.code, (x) => x.name),
       diffCollection('soldier type', readExportedArray<(typeof soldiers)[number]>(SEED_PATH, 'soldiers'), soldiers, (x) => x.name, (x) => x.name),
+      diffCollection('monster type', readExportedArray<(typeof monsters)[number]>(SEED_PATH, 'monsters'), monsters, (x) => x.name, (x) => x.name),
     ].flat();
 
     const body =
@@ -320,7 +383,8 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       `\nexport const attributes: SeedAttribute[] = ${JSON.stringify(attributes, null, 2)};\n` +
       `\nexport const equipment: SeedEquipment[] = ${JSON.stringify(equipment, null, 2)};\n` +
       `\nexport const optionalRules: SeedOptionalRule[] = ${JSON.stringify(optionalRules, null, 2)};\n` +
-      `\nexport const soldiers: SeedSoldier[] = ${JSON.stringify(soldiers, null, 2)};\n`;
+      `\nexport const soldiers: SeedSoldier[] = ${JSON.stringify(soldiers, null, 2)};\n` +
+      `\nexport const monsters: SeedMonster[] = ${JSON.stringify(monsters, null, 2)};\n`;
     fs.writeFileSync(SEED_PATH, SEED_HEADER + body);
 
     // Append a changelog entry only when something changed — keeps re-export of
@@ -344,6 +408,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
         equipment: equipment.length,
         optionalRules: optionalRules.length,
         soldiers: soldiers.length,
+        monsters: monsters.length,
       },
       changes,
       note,

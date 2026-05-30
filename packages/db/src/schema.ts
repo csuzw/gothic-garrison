@@ -179,6 +179,80 @@ export const soldierLoadoutItems = pgTable(
   }),
 );
 
+// Monster types (Bestiary entries). Fixed attributes; fixed or choice equipment.
+export const monsterTypes = pgTable(
+  'monster_types',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull().unique(),
+    sourceId: uuid('source_id')
+      .notNull()
+      .references(() => sources.id, { onDelete: 'restrict' }),
+    experience: integer('experience').notNull(),
+    stats: jsonb('stats').notNull(),
+    equipmentMode: equipmentModeEnum('equipment_mode').notNull().default('fixed'),
+    notes: text('notes'),
+  },
+  (t) => ({
+    sourceIdx: index('monster_types_source_idx').on(t.sourceId),
+  }),
+);
+
+export const monsterTypeFixedAttributes = pgTable(
+  'monster_type_fixed_attributes',
+  {
+    monsterTypeId: uuid('monster_type_id').notNull(),
+    attributeId: uuid('attribute_id').notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.monsterTypeId, t.attributeId] }),
+    monsterTypeFk: foreignKey({
+      columns: [t.monsterTypeId],
+      foreignColumns: [monsterTypes.id],
+      name: 'monster_type_fixed_attrs_type_fk',
+    }).onDelete('cascade'),
+    attributeFk: foreignKey({
+      columns: [t.attributeId],
+      foreignColumns: [attributes.id],
+      name: 'monster_type_fixed_attrs_attr_fk',
+    }).onDelete('restrict'),
+  }),
+);
+
+// Predetermined loadouts for a monster (one for fixed, two+ for choice).
+export const monsterLoadouts = pgTable(
+  'monster_loadouts',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    monsterTypeId: uuid('monster_type_id')
+      .notNull()
+      .references(() => monsterTypes.id, { onDelete: 'cascade' }),
+    label: text('label').notNull(),
+    displayOrder: integer('display_order').notNull().default(0),
+  },
+  (t) => ({
+    typeIdx: index('monster_loadouts_type_idx').on(t.monsterTypeId),
+  }),
+);
+
+export const monsterLoadoutItems = pgTable(
+  'monster_loadout_items',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    loadoutId: uuid('loadout_id')
+      .notNull()
+      .references(() => monsterLoadouts.id, { onDelete: 'cascade' }),
+    equipmentItemId: uuid('equipment_item_id')
+      .notNull()
+      .references(() => equipmentItems.id, { onDelete: 'restrict' }),
+    quantity: integer('quantity').notNull().default(1),
+    displayOrder: integer('display_order').notNull().default(0),
+  },
+  (t) => ({
+    loadoutIdx: index('monster_loadout_items_loadout_idx').on(t.loadoutId),
+  }),
+);
+
 // Book-level opt-in rules, e.g. "take 1 soldier from outside your nation for +8 pts"
 export const optionalRules = pgTable('optional_rules', {
   id: uuid('id').defaultRandom().primaryKey(),

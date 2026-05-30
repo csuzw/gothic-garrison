@@ -9,6 +9,7 @@ import {
   equipment as equipmentData,
   optionalRules as optionalRuleData,
   soldiers as soldierData,
+  monsters as monsterData,
 } from './seed-data.ts';
 
 const url = process.env.DATABASE_URL;
@@ -139,6 +140,79 @@ for (const s of soldierData) {
   }
 }
 
+// ── monster types ───────────────────────────────────────────────────────────────
+if (monsterData.length) {
+  await db
+    .insert(t.monsterTypes)
+    .values(
+      monsterData.map((m) => ({
+        name: m.name,
+        sourceId: srcId(m.sourceCode),
+        experience: m.experience,
+        stats: m.stats,
+        equipmentMode: m.equipmentMode,
+        notes: m.notes,
+      })),
+    )
+    .onConflictDoUpdate({
+      target: t.monsterTypes.name,
+      set: {
+        sourceId: sql`excluded.source_id`,
+        experience: sql`excluded.experience`,
+        stats: sql`excluded.stats`,
+        equipmentMode: sql`excluded.equipment_mode`,
+        notes: sql`excluded.notes`,
+      },
+    });
+}
+const monsterByName = new Map(
+  (await db.select({ id: t.monsterTypes.id, name: t.monsterTypes.name }).from(t.monsterTypes)).map((r) => [r.name, r.id]),
+);
+
+// ── monster → fixed attributes ──────────────────────────────────────────────────
+const monsterFixedRows = monsterData.flatMap((m) =>
+  m.fixedAttributes
+    .map((name) => {
+      const attrId = attrByName.get(name);
+      if (!attrId) { console.warn(`monster ${m.name}: unknown attribute "${name}"`); return null; }
+      const monsterTypeId = monsterByName.get(m.name)!;
+      return { monsterTypeId, attributeId: attrId };
+    })
+    .filter((r): r is { monsterTypeId: string; attributeId: string } => r !== null),
+);
+if (monsterFixedRows.length) {
+  await db.insert(t.monsterTypeFixedAttributes).values(monsterFixedRows).onConflictDoNothing();
+}
+
+// ── monster loadouts (+ items) — surrogate keys, so clear and re-insert ─────────
+await db.delete(t.monsterLoadoutItems);
+await db.delete(t.monsterLoadouts);
+let monsterLoadoutCount = 0;
+let monsterEquipCount = 0;
+for (const m of monsterData) {
+  const monsterTypeId = monsterByName.get(m.name);
+  if (!monsterTypeId) continue;
+  for (const lo of m.loadouts) {
+    const inserted = await db
+      .insert(t.monsterLoadouts)
+      .values({ monsterTypeId, label: lo.label, displayOrder: lo.order })
+      .returning({ id: t.monsterLoadouts.id });
+    const loadoutId = inserted[0]!.id;
+    monsterLoadoutCount++;
+    if (lo.items.length) {
+      await db.insert(t.monsterLoadoutItems).values(
+        lo.items.map((it, i) => ({
+          loadoutId,
+          equipmentItemId: equipByName.get(it.name)!,
+          quantity: it.qty,
+          displayOrder: i,
+        })),
+      );
+      monsterEquipCount += lo.items.length;
+    }
+  }
+}
+
 // ── optional rules ──────────────────────────────────────────────────────────────
 if (optionalRuleData.length) {
   await db
@@ -153,6 +227,7 @@ if (optionalRuleData.length) {
 console.log(
   `seeded: ${sourceData.length} sources, ${nationData.length} nations, ${attributeData.length} attributes, ` +
     `${equipmentData.length} equipment, ${optionalRuleData.length} optional rules, ${soldierData.length} soldier types, ` +
-    `${nstRows.length} nation-soldier links, ${fixedRows.length} fixed attributes, ${loadoutCount} loadouts (${itemCount} items)`,
+    `${nstRows.length} nation-soldier links, ${fixedRows.length} fixed attributes, ${loadoutCount} loadouts (${itemCount} items), ` +
+    `${monsterData.length} monster types (${monsterFixedRows.length} attributes, ${monsterLoadoutCount} loadouts, ${monsterEquipCount} items)`,
 );
 await client.end();

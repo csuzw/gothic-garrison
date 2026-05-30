@@ -2,13 +2,15 @@
   import { page } from '$app/state';
   import NationFlag from '$lib/components/NationFlag.svelte';
   import CodexSoldierTypeForm from '$lib/components/CodexSoldierTypeForm.svelte';
-  import { blankRow, codexEntity, pickFields, SOLDIER_TYPES_SLUG, type CodexEntity } from '$lib/codex/entities';
+  import CodexMonsterTypeForm from '$lib/components/CodexMonsterTypeForm.svelte';
+  import { blankRow, codexEntity, pickFields, SOLDIER_TYPES_SLUG, MONSTER_TYPES_SLUG, type CodexEntity } from '$lib/codex/entities';
 
   type Row = Record<string, unknown> & { id: string };
 
   const slug = $derived(page.params.entity!);
   const entity = $derived(codexEntity(slug));
   const isSoldierTypes = $derived(slug === SOLDIER_TYPES_SLUG);
+  const isMonsterTypes = $derived(slug === MONSTER_TYPES_SLUG);
 
   let rows = $state<Row[]>([]);
   let sources = $state<{ id: string; name: string }[]>([]);
@@ -32,6 +34,12 @@
   let stSaving = $state(false);
   let stFormError = $state<string | null>(null);
 
+  // Monster-type form state
+  let mtFormMode = $state<'closed' | 'new' | 'edit'>('closed');
+  let mtEditingRow = $state<Row | null>(null);
+  let mtSaving = $state(false);
+  let mtFormError = $state<string | null>(null);
+
   const sourceName = (id: unknown) => sources.find((s) => s.id === id)?.name ?? '—';
 
   async function loadAll() {
@@ -39,8 +47,10 @@
     loadError = null;
     formMode = 'closed';
     stFormMode = 'closed';
+    mtFormMode = 'closed';
     actionError = null;
     const isST = slug === SOLDIER_TYPES_SLUG;
+    const isMT = slug === MONSTER_TYPES_SLUG;
     try {
       const [listRes, srcRes] = await Promise.all([
         fetch(`/api/codex/${slug}`),
@@ -53,7 +63,7 @@
       }
       rows = (await listRes.json()).items ?? [];
       sources = srcRes.ok ? (await srcRes.json()).items ?? [] : [];
-      if (isST) {
+      if (isST || isMT) {
         const [natRes, attrRes, eqRes] = await Promise.all([
           fetch('/api/codex/nations'),
           fetch('/api/codex/attributes'),
@@ -197,21 +207,63 @@
       stSaving = false;
     }
   }
+
+  // ── Monster-type CRUD ─────────────────────────────────────────────────────────
+
+  function startNewMonster() {
+    mtEditingRow = null;
+    mtFormMode = 'new';
+    mtFormError = null;
+  }
+
+  function startEditMonster(row: Row) {
+    mtEditingRow = row;
+    mtFormMode = 'edit';
+    mtFormError = null;
+  }
+
+  async function saveMonster(body: unknown) {
+    mtSaving = true;
+    mtFormError = null;
+    try {
+      const url =
+        mtFormMode === 'edit'
+          ? `/api/codex/${slug}/${mtEditingRow!.id}`
+          : `/api/codex/${slug}`;
+      const res = await fetch(url, {
+        method: mtFormMode === 'edit' ? 'PATCH' : 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        mtFormError = (await res.json().catch(() => ({})))?.message ?? 'Save failed';
+        return;
+      }
+      mtFormMode = 'closed';
+      await loadAll();
+    } catch {
+      mtFormError = 'Save failed — could not reach the API.';
+    } finally {
+      mtSaving = false;
+    }
+  }
 </script>
 
-<svelte:head><title>Codex · {entity?.label ?? (isSoldierTypes ? 'Soldier types' : 'Codex')}</title></svelte:head>
+<svelte:head><title>Codex · {entity?.label ?? (isSoldierTypes ? 'Soldier types' : isMonsterTypes ? 'Monster types' : 'Codex')}</title></svelte:head>
 
-{#if !entity && !isSoldierTypes}
+{#if !entity && !isSoldierTypes && !isMonsterTypes}
   <div class="alert alert-error">Unknown Codex entity: <code>{slug}</code></div>
 {:else}
   <div class="space-y-3">
     <div class="flex items-center gap-2">
-      <h2 class="text-lg font-semibold">{entity?.label ?? 'Soldier types'}</h2>
+      <h2 class="text-lg font-semibold">{entity?.label ?? (isSoldierTypes ? 'Soldier types' : 'Monster types')}</h2>
       <span class="badge badge-ghost badge-sm">{rows.length}</span>
       {#if entity}
         <button class="btn btn-sm btn-primary ml-auto" onclick={() => startNew(entity)}>New {entity.singular}</button>
       {:else if isSoldierTypes}
         <button class="btn btn-sm btn-primary ml-auto" onclick={startNewSoldier}>New soldier type</button>
+      {:else if isMonsterTypes}
+        <button class="btn btn-sm btn-primary ml-auto" onclick={startNewMonster}>New monster type</button>
       {/if}
     </div>
 
@@ -249,6 +301,37 @@
                 <td class="opacity-60">{nations_count}</td>
                 <td class="whitespace-nowrap text-right">
                   <button class="btn btn-ghost btn-xs" onclick={() => startEditSoldier(row)}>Edit</button>
+                  <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    {:else if isMonsterTypes}
+      <div class="overflow-x-auto">
+        <table class="table table-zebra table-sm">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Source</th>
+              <th>XP</th>
+              <th>Mode</th>
+              <th>Attributes</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each rows as row (row.id)}
+              {@const attr_count = (row.fixedAttributeIds as string[])?.length ?? 0}
+              <tr>
+                <td class="font-medium">{row.name}</td>
+                <td>{sourceName(row.sourceId)}</td>
+                <td>{row.experience}</td>
+                <td><span class="badge badge-ghost badge-sm">{row.equipmentMode}</span></td>
+                <td class="opacity-60">{attr_count}</td>
+                <td class="whitespace-nowrap text-right">
+                  <button class="btn btn-ghost btn-xs" onclick={() => startEditMonster(row)}>Edit</button>
                   <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
                 </td>
               </tr>
@@ -392,6 +475,21 @@
       error={stFormError}
       onsave={saveSoldier}
       oncancel={() => (stFormMode = 'closed')}
+    />
+  {/if}
+
+  <!-- Monster-type create/edit modal -->
+  {#if isMonsterTypes && mtFormMode !== 'closed'}
+    <CodexMonsterTypeForm
+      mode={mtFormMode}
+      row={mtEditingRow ?? undefined}
+      {sources}
+      {allAttributes}
+      {allEquipment}
+      saving={mtSaving}
+      error={mtFormError}
+      onsave={saveMonster}
+      oncancel={() => (mtFormMode = 'closed')}
     />
   {/if}
 {/if}

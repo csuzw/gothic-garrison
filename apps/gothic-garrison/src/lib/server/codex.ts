@@ -21,6 +21,10 @@ import {
   soldierTypeFixedAttributes,
   soldierLoadouts,
   soldierLoadoutItems,
+  monsterTypes,
+  monsterTypeFixedAttributes,
+  monsterLoadouts,
+  monsterLoadoutItems,
   units,
 } from '$db/schema';
 import { getDb } from './db';
@@ -34,7 +38,9 @@ import {
   validateEquipment,
   validateOptionalRule,
   validateSoldierType,
+  validateMonsterType,
   type SoldierTypeInput,
+  type MonsterTypeInput,
 } from './codex-validation';
 
 export { CodexError };
@@ -273,6 +279,116 @@ const soldierTypeHandlers: EntityHandlers = {
   remove: (id) => deleteGuarded(soldierTypes, assertUuid(id)),
 };
 
+// ── monster types (with join tables) ──────────────────────────────────────────
+
+function monsterTypeRow(v: MonsterTypeInput) {
+  return {
+    name: v.name,
+    sourceId: v.sourceId,
+    experience: v.experience,
+    stats: v.stats,
+    equipmentMode: v.equipmentMode,
+    notes: v.notes,
+  };
+}
+
+async function writeMonsterJoins(tx: Tx, monsterTypeId: string, v: MonsterTypeInput) {
+  if (v.fixedAttributeIds.length) {
+    await tx
+      .insert(monsterTypeFixedAttributes)
+      .values(v.fixedAttributeIds.map((attributeId) => ({ monsterTypeId, attributeId })));
+  }
+  for (const lo of v.loadouts) {
+    const [row] = await tx
+      .insert(monsterLoadouts)
+      .values({ monsterTypeId, label: lo.label, displayOrder: lo.displayOrder })
+      .returning({ id: monsterLoadouts.id });
+    if (lo.items.length) {
+      await tx.insert(monsterLoadoutItems).values(
+        lo.items.map((it) => ({
+          loadoutId: row.id,
+          equipmentItemId: it.equipmentItemId,
+          quantity: it.quantity,
+          displayOrder: it.displayOrder,
+        })),
+      );
+    }
+  }
+}
+
+async function listMonsterTypes() {
+  const db = getDb();
+  const [types, fixed, loadouts, items] = await Promise.all([
+    db.select().from(monsterTypes).orderBy(asc(monsterTypes.name)),
+    db.select().from(monsterTypeFixedAttributes),
+    db.select().from(monsterLoadouts).orderBy(asc(monsterLoadouts.displayOrder)),
+    db.select().from(monsterLoadoutItems).orderBy(asc(monsterLoadoutItems.displayOrder)),
+  ]);
+
+  function push<V>(map: Map<string, V[]>, key: string, value: V) {
+    const list = map.get(key);
+    if (list) list.push(value);
+    else map.set(key, [value]);
+  }
+
+  const fixedAttrIds = new Map<string, string[]>();
+  for (const r of fixed) push(fixedAttrIds, r.monsterTypeId, r.attributeId);
+
+  const itemsByLoadout = new Map<string, (typeof items)[number][]>();
+  for (const it of items) push(itemsByLoadout, it.loadoutId, it);
+  const loadoutsByType = new Map<string, unknown[]>();
+  for (const lo of loadouts)
+    push(loadoutsByType, lo.monsterTypeId, { ...lo, items: itemsByLoadout.get(lo.id) ?? [] });
+
+  return types.map((t) => ({
+    ...t,
+    fixedAttributeIds: fixedAttrIds.get(t.id) ?? [],
+    loadouts: loadoutsByType.get(t.id) ?? [],
+  }));
+}
+
+const monsterTypeHandlers: EntityHandlers = {
+  list: listMonsterTypes,
+  async create(body) {
+    const v = validateMonsterType(body);
+    try {
+      const id = await getDb().transaction(async (tx) => {
+        const [row] = await tx.insert(monsterTypes).values(monsterTypeRow(v)).returning({ id: monsterTypes.id });
+        await writeMonsterJoins(tx, row.id, v);
+        return row.id;
+      });
+      resetReferenceCache();
+      return { id, ...monsterTypeRow(v), fixedAttributeIds: v.fixedAttributeIds };
+    } catch (e) {
+      mapPgError(e, 'create');
+    }
+  },
+  async update(id, body) {
+    assertUuid(id);
+    const v = validateMonsterType(body);
+    try {
+      const updated = await getDb().transaction(async (tx) => {
+        const [row] = await tx
+          .update(monsterTypes)
+          .set(monsterTypeRow(v))
+          .where(eq(monsterTypes.id, id))
+          .returning({ id: monsterTypes.id });
+        if (!row) return false;
+        await tx.delete(monsterTypeFixedAttributes).where(eq(monsterTypeFixedAttributes.monsterTypeId, id));
+        await tx.delete(monsterLoadouts).where(eq(monsterLoadouts.monsterTypeId, id));
+        await writeMonsterJoins(tx, id, v);
+        return true;
+      });
+      if (!updated) throw new CodexError('Not found', 404);
+      resetReferenceCache();
+      return { id, ...monsterTypeRow(v), fixedAttributeIds: v.fixedAttributeIds };
+    } catch (e) {
+      mapPgError(e, 'update');
+    }
+  },
+  remove: (id) => deleteGuarded(monsterTypes, assertUuid(id)),
+};
+
 // ── registry + dispatcher ─────────────────────────────────────────────────────
 
 const registry: Record<string, EntityHandlers> = {
@@ -282,6 +398,7 @@ const registry: Record<string, EntityHandlers> = {
   equipment: flatEntity({ table: equipmentItems, orderBy: equipmentItems.name, validate: validateEquipment }),
   'optional-rules': flatEntity({ table: optionalRules, orderBy: optionalRules.code, validate: validateOptionalRule }),
   'soldier-types': soldierTypeHandlers,
+  'monster-types': monsterTypeHandlers,
 };
 
 export const ENTITY_SLUGS = Object.keys(registry);

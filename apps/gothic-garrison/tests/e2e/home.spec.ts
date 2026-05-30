@@ -32,3 +32,15 @@ test.describe('about', () => {
     await expect(page.getByRole('heading', { name: /Reference data changelog/i })).toBeVisible();
   });
 });
+
+test.describe('bestiary', () => {
+  test('renders the bestiary page with screenshot', async ({ page }, testInfo) => {
+    await page.goto('/bestiary');
+    await expect(page.getByRole('heading', { name: /Bestiary/i })).toBeVisible();
+    const png = await page.screenshot({
+      path: `test-results/screenshots/bestiary-${testInfo.project.name}.png`,
+      fullPage: true,
+    });
+    await testInfo.attach('bestiary', { body: png, contentType: 'image/png' });
+  });
+});

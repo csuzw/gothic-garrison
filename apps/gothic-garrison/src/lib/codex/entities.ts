@@ -96,11 +96,17 @@ export const CODEX_ENTITIES: CodexEntity[] = [
 ];
 
 export const SOLDIER_TYPES_SLUG = 'soldier-types';
+export const MONSTER_TYPES_SLUG = 'monster-types';
 
-/** Nav entries: editable flat entities + the read-only soldier-types list. */
+/** Nav entries: editable flat entities + the nested-editor types, in display order. */
 export const CODEX_NAV: { slug: string; label: string }[] = [
-  ...CODEX_ENTITIES.map((e) => ({ slug: e.slug, label: e.label })),
-  { slug: SOLDIER_TYPES_SLUG, label: 'Soldier types' },
+  { slug: 'sources', label: 'Sources' },
+  { slug: 'nations', label: 'Nations' },
+  { slug: SOLDIER_TYPES_SLUG, label: 'Soldiers' },
+  { slug: MONSTER_TYPES_SLUG, label: 'Monsters' },
+  { slug: 'attributes', label: 'Attributes' },
+  { slug: 'equipment', label: 'Equipment' },
+  { slug: 'optional-rules', label: 'Optional rules' },
 ];
 
 export function codexEntity(slug: string | undefined): CodexEntity | undefined {

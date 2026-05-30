@@ -170,6 +170,19 @@ export interface LoadoutInput {
   items: LoadoutItemInput[];
 }
 
+export const MONSTER_EQUIPMENT_MODES = ['fixed', 'choice'] as const;
+
+export interface MonsterTypeInput {
+  name: string;
+  sourceId: string;
+  experience: number;
+  stats: SoldierStatsInput;
+  equipmentMode: (typeof MONSTER_EQUIPMENT_MODES)[number];
+  notes: string | null;
+  fixedAttributeIds: string[];
+  loadouts: LoadoutInput[];
+}
+
 export interface SoldierTypeInput {
   name: string;
   sourceId: string;
@@ -237,6 +250,38 @@ export function validateOptionalRule(body: unknown): OptionalRuleInput {
     name: reqStr(o, 'name'),
     description: reqStr(o, 'description'),
     sourceId: uuid(o, 'sourceId'),
+  };
+}
+
+export function validateMonsterType(body: unknown): MonsterTypeInput {
+  const o = obj(body);
+  const experience = int(o, 'experience', { min: 0, max: 999 });
+  const equipmentMode = enumOf(o, 'equipmentMode', MONSTER_EQUIPMENT_MODES);
+
+  const loadoutsRaw = o.loadouts;
+  const loadouts =
+    loadoutsRaw === undefined || loadoutsRaw === null
+      ? []
+      : Array.isArray(loadoutsRaw)
+        ? loadoutsRaw.map(validateLoadout)
+        : (() => { throw new CodexError('"loadouts" must be an array'); })();
+
+  if (equipmentMode === 'fixed' && loadouts.length !== 1) {
+    throw new CodexError('fixed-mode monsters must have exactly one loadout');
+  }
+  if (equipmentMode === 'choice' && loadouts.length < 2) {
+    throw new CodexError('choice-mode monsters must have at least two loadouts');
+  }
+
+  return {
+    name: reqStr(o, 'name'),
+    sourceId: uuid(o, 'sourceId'),
+    experience,
+    stats: validateStats(o.stats),
+    equipmentMode,
+    notes: optStr(o, 'notes'),
+    fixedAttributeIds: uuidArray(o, 'fixedAttributeIds'),
+    loadouts,
   };
 }
 

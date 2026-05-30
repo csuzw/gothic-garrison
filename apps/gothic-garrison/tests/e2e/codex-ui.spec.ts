@@ -141,6 +141,43 @@ test.describe('codex UI (dev only)', () => {
     await expect(page.locator('tbody tr')).toHaveCount(initial);
   });
 
+  test('monster type: create, edit name, delete', async ({ page }, testInfo) => {
+    const name = `E2E Monster ${Date.now()}`;
+    await page.goto('/codex/monster-types');
+    await page.waitForLoadState('networkidle');
+    const initial = await page.locator('tbody tr').count();
+
+    await page.getByRole('button', { name: 'New monster type' }).click();
+    await expect(page.getByRole('heading', { name: 'New monster type' })).toBeVisible();
+
+    await page.getByPlaceholder('e.g. Werewolf').fill(name);
+    await page.getByLabel(/experience/i).fill('3');
+
+    const statInputs = page.locator('.grid input[type="number"]');
+    await statInputs.first().fill('5');
+
+    await testInfo.attach('monster-type-form', { body: await page.screenshot(), contentType: 'image/png' });
+    await page.locator('.modal-open').getByRole('button', { name: 'Create' }).click();
+
+    await expect(page.locator('.modal-open')).toHaveCount(0);
+    await expect(page.getByRole('cell', { name, exact: true })).toBeVisible();
+    await expect(page.locator('tbody tr')).toHaveCount(initial + 1);
+
+    // Edit: rename
+    await page.locator('tbody tr', { hasText: name }).getByRole('button', { name: 'Edit' }).click();
+    await expect(page.getByRole('heading', { name: 'Edit monster type' })).toBeVisible();
+    await page.getByPlaceholder('e.g. Werewolf').fill(`${name} v2`);
+    await page.locator('.modal-open').getByRole('button', { name: 'Save' }).click();
+    await expect(page.locator('.modal-open')).toHaveCount(0);
+    await expect(page.getByRole('cell', { name: `${name} v2`, exact: true })).toBeVisible();
+
+    // Delete
+    page.on('dialog', (d) => d.accept());
+    await page.locator('tbody tr', { hasText: `${name} v2` }).getByRole('button', { name: 'Delete' }).click();
+    await expect(page.locator('tbody tr', { hasText: `${name} v2` })).toHaveCount(0);
+    await expect(page.locator('tbody tr')).toHaveCount(initial);
+  });
+
   test('surfaces a server error (duplicate code) in the form', async ({ page }) => {
     const c = code();
     await page.goto('/codex/optional-rules');
