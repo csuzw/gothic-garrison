@@ -37,3 +37,6 @@ Thumbs.db
 # misc
 *.tsbuildinfo
 .turbo/
+
+# Third-party reference data cached for the one-time seed import (not for committing)
+reference/

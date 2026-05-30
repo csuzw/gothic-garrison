@@ -1,0 +1,135 @@
+import {
+  BASE_RECRUITMENT_BUDGET,
+  recruitmentBudget,
+  spentPoints,
+  type CommandStyle,
+} from './budget.ts';
+
+// The denormalised unit document. This is the single source of truth, stored
+// verbatim in `units.data` (jsonb) for signed-in users and in IndexedDB for
+// anonymous ones — the *same shape* in both places (see CLAUDE.md). Snapshotted
+// fields (member name/cost/stats) make a unit renderable without current
+// reference data.
+
+export const UNIT_SCHEMA_VERSION = 1;
+
+// Officer's three confirmed binary choices (one per row).
+export type CombatTraining = 'melee' | 'accuracy';
+export type PhysicalEdge = 'health' | 'speed';
+export type { CommandStyle };
+
+export interface AttributeSnapshot {
+  id: string;
+  name: string;
+}
+
+export interface EquipmentSnapshot {
+  itemId: string;
+  name: string;
+  slotCost: number;
+  isSpecial: boolean;
+  quantity: number;
+}
+
+export interface OfficerSnapshot {
+  name: string;
+  combatTraining: CombatTraining;
+  physicalEdge: PhysicalEdge;
+  commandStyle: CommandStyle;
+  /** Pick exactly 2 from the officer-flagged pool. */
+  attributes: AttributeSnapshot[];
+  equipment: EquipmentSnapshot[];
+}
+
+export interface SoldierStats {
+  speed: number;
+  melee: number;
+  accuracy: number;
+  defence: number;
+  courage: number;
+  health: number;
+}
+
+export interface MemberSnapshot {
+  id: string;
+  soldierTypeId: string | null;
+  name: string;
+  cost: number;
+  stats: SoldierStats | null;
+  /** Attributes picked from the officer pool (for soldiers with attribute_picks). */
+  attributes: AttributeSnapshot[];
+  /** Carried equipment: the fixed/chosen loadout's items, or pool-built items. */
+  equipment: EquipmentSnapshot[];
+  /** For `choice`-mode soldiers: which predetermined loadout is selected. */
+  loadoutId: string | null;
+}
+
+export const MAX_SOLDIERS = 7;
+export const OFFICER_EQUIPMENT_SLOTS = 6;
+export const OFFICER_ATTRIBUTE_PICKS = 2;
+export const SUPERNATURAL_VETERAN = 'Supernatural Veteran';
+
+export function slotsUsed(items: EquipmentSnapshot[]): number {
+  return items.reduce((n, it) => n + it.slotCost * it.quantity, 0);
+}
+
+export function specialUsed(items: EquipmentSnapshot[]): number {
+  return items.reduce((n, it) => n + (it.isSpecial ? it.quantity : 0), 0);
+}
+
+/** Officer gets 2 Special Armoury slots, or 3 with the Supernatural Veteran attribute. */
+export function officerSpecialMax(officer: OfficerSnapshot): number {
+  return officer.attributes.some((a) => a.name === SUPERNATURAL_VETERAN) ? 3 : 2;
+}
+
+export interface UnitDoc {
+  id: string;
+  schemaVersion: number;
+  name: string;
+  nationId: string | null;
+  nationName: string | null;
+  officer: OfficerSnapshot;
+  members: MemberSnapshot[];
+  /** Opted-in optional-rule codes, e.g. the "+8 pts outside-nation soldier". */
+  optionalRules: string[];
+  updatedAt: string; // ISO timestamp
+}
+
+export interface UnitSummary {
+  id: string;
+  name: string;
+  updatedAt: string;
+}
+
+export function createUnitDoc(name = 'New unit'): UnitDoc {
+  return {
+    id: crypto.randomUUID(),
+    schemaVersion: UNIT_SCHEMA_VERSION,
+    name,
+    nationId: null,
+    nationName: null,
+    officer: {
+      name: '',
+      combatTraining: 'melee',
+      physicalEdge: 'health',
+      commandStyle: 'courage',
+      attributes: [],
+      equipment: [],
+    },
+    members: [],
+    optionalRules: [],
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export function unitBudget(doc: UnitDoc): number {
+  return recruitmentBudget(BASE_RECRUITMENT_BUDGET, doc.officer.commandStyle);
+}
+
+export function unitSpent(doc: UnitDoc): number {
+  return spentPoints(doc.members.map((m) => m.cost));
+}
+
+export function toSummary(doc: UnitDoc): UnitSummary {
+  return { id: doc.id, name: doc.name, updatedAt: doc.updatedAt };
+}

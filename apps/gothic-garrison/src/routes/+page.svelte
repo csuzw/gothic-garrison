@@ -1,49 +1,108 @@
 <script lang="ts">
-  import type { PageProps } from './$types';
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/state';
+  import { getUnitStore } from '$lib/unit/store';
+  import { createUnitDoc, type UnitSummary } from '$lib/unit/types';
 
-  let { data }: PageProps = $props();
+  const signedIn = $derived(!!page.data.user);
 
-  const dateFmt = new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  let units = $state<UnitSummary[]>([]);
+  let loading = $state(true);
+  let error = $state<string | null>(null);
+  let creating = $state(false);
 
-  function formatPublished(d: string): string {
-    return dateFmt.format(new Date(d));
+  const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+
+  async function load() {
+    loading = true;
+    error = null;
+    try {
+      units = await getUnitStore(signedIn).list();
+    } catch (e) {
+      error = (e as Error).message;
+    } finally {
+      loading = false;
+    }
+  }
+
+  onMount(load);
+
+  async function createNew() {
+    creating = true;
+    try {
+      const doc = createUnitDoc();
+      await getUnitStore(signedIn).save(doc);
+      await goto(`/units/${doc.id}`);
+    } catch (e) {
+      error = (e as Error).message;
+      creating = false;
+    }
+  }
+
+  async function remove(id: string) {
+    if (!confirm('Delete this unit? This cannot be undone.')) return;
+    try {
+      await getUnitStore(signedIn).remove(id);
+      await load();
+    } catch (e) {
+      error = (e as Error).message;
+    }
   }
 </script>
 
-<section class="prose prose-invert max-w-none">
-  <h1 class="!mb-2">Build your warband.</h1>
-  <p class="opacity-80">
-    A list builder and (soon) campaign manager for The Silver Bayonet. Works on your phone, works offline,
-    works without an account.
+<svelte:head><title>Units · Gothic Garrison</title></svelte:head>
+
+<section class="space-y-6">
+  <div class="flex items-center justify-between gap-3">
+    <h1 class="text-2xl font-semibold">Your units</h1>
+    <button class="btn btn-primary btn-sm" onclick={createNew} disabled={creating}>
+      {#if creating}<span class="loading loading-spinner loading-xs"></span>{/if}
+      New unit
+    </button>
+  </div>
+
+  <p class="text-sm opacity-70">
+    {#if signedIn}
+      Synced to your account — available on any device you sign in to.
+    {:else}
+      Stored on this device. <a href="/sign-in" class="link link-primary">Sign in</a> to sync across devices.
+    {/if}
   </p>
-</section>
 
-<section class="mt-8">
-  <h2 class="text-lg font-semibold mb-3">Sources</h2>
+  {#if error}
+    <div class="alert alert-error text-sm" role="alert">{error}</div>
+  {/if}
 
-  {#if !data.dbAvailable}
-    <div class="alert alert-warning">
-      Database not reachable. Start Postgres with <code>docker compose up -d</code> and run
-      <code>pnpm db:migrate &amp;&amp; pnpm db:seed</code>.
+  {#if loading}
+    <div class="flex justify-center py-10"><span class="loading loading-spinner"></span></div>
+  {:else if units.length === 0}
+    <div class="card bg-base-200">
+      <div class="card-body items-center text-center">
+        <p class="opacity-70">No units yet.</p>
+        <button class="btn btn-primary btn-sm" onclick={createNew} disabled={creating}>
+          Create your first
+        </button>
+      </div>
     </div>
-  {:else if data.sources.length === 0}
-    <div class="alert">No sources seeded yet — run <code>pnpm db:seed</code>.</div>
   {:else}
     <ul class="grid gap-2 sm:grid-cols-2">
-      {#each data.sources as source (source.id)}
+      {#each units as u (u.id)}
         <li class="card bg-base-200 card-compact">
-          <div class="card-body">
-            <div class="flex items-center justify-between gap-3">
-              <span class="font-medium">{source.name}</span>
-              <span class="badge badge-ghost text-xs">{source.kind}</span>
-            </div>
-            <div class="text-xs opacity-60 mt-1">
-              {source.author} · {formatPublished(source.publishedDate)}
-            </div>
+          <div class="card-body flex-row items-center justify-between gap-3">
+            <a href="/units/{u.id}" class="min-w-0 flex-1">
+              <span class="block truncate font-medium">{u.name}</span>
+              <span class="block text-xs opacity-60">
+                Updated {dateFmt.format(new Date(u.updatedAt))}
+              </span>
+            </a>
+            <button
+              class="btn btn-ghost btn-sm text-error"
+              onclick={() => remove(u.id)}
+              aria-label="Delete {u.name}"
+            >
+              Delete
+            </button>
           </div>
         </li>
       {/each}

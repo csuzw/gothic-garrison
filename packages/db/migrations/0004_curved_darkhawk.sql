@@ -1,0 +1,1 @@
+ALTER TABLE "soldier_types" DROP COLUMN IF EXISTS "is_junior_officer";

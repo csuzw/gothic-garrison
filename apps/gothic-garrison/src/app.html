@@ -6,6 +6,22 @@
     <meta name="description" content="List builder for The Silver Bayonet — a tabletop wargame. Free, account-optional, works offline." />
     <meta name="theme-color" content="#0e0b08" />
     <link rel="icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash, and sync the
+      // address-bar theme-color to match.
+      try {
+        const t = localStorage.getItem('theme');
+        if (t === 'garrison' || t === 'garrison-light') {
+          document.documentElement.dataset.theme = t;
+        }
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          const dark = document.documentElement.dataset.theme !== 'garrison-light';
+          meta.setAttribute('content', dark ? '#0e0b08' : '#f0e9da');
+        }
+      } catch (e) {}
+    </script>
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover" class="bg-base-100 text-base-content">

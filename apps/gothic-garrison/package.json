@@ -12,7 +12,9 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:codex": "playwright test --project=codex-dev",
+    "icons:generate": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@gothic-garrison/db": "workspace:*",

@@ -4,7 +4,7 @@ import {
   isOverBudget,
   recruitmentBudget,
   spentPoints,
-} from '../../src/lib/warband/budget';
+} from '../../src/lib/unit/budget';
 
 describe('recruitmentBudget', () => {
   it('returns the base pool when the officer takes +1 Courage', () => {

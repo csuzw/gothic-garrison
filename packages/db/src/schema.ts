@@ -13,6 +13,12 @@ import {
   foreignKey,
   index,
 } from 'drizzle-orm/pg-core';
+import { user } from './auth-schema.ts';
+
+// better-auth tables (user/session/account/verification) live in a sibling file
+// but are re-exported here so drizzle-kit (which reads only this entrypoint)
+// picks them up and the createDb schema object includes them.
+export * from './auth-schema.ts';
 
 // ── enums ────────────────────────────────────────────────────────────────────
 
@@ -28,8 +34,8 @@ export const equipmentAllowedForEnum = pgEnum('equipment_allowed_for', [
 
 // ── reference data ──────────────────────────────────────────────────────────
 //
-// Reference data is mutable but warbands snapshot what they need on save,
-// so edits here never silently invalidate an existing warband (see CLAUDE.md).
+// Reference data is mutable but units snapshot what they need on save,
+// so edits here never silently invalidate an existing unit (see CLAUDE.md).
 
 export const sources = pgTable('sources', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -49,10 +55,15 @@ export const nations = pgTable('nations', {
   notes: text('notes'),
 });
 
-export const officerAttributes = pgTable('officer_attributes', {
+// All game attributes, officer-selectable or not. `isOfficer` marks the ones an
+// Officer (or a soldier with an "officer attribute pick") may choose from the
+// global pool; the rest are standard soldier / monster attributes (Miracles,
+// Spells, Skinshift, Damage Reduction, …) baked onto a soldier type.
+export const attributes = pgTable('attributes', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull().unique(),
   description: text('description').notNull(),
+  isOfficer: boolean('is_officer').notNull().default(false),
   sourceId: uuid('source_id')
     .notNull()
     .references(() => sources.id, { onDelete: 'restrict' }),
@@ -81,8 +92,7 @@ export const soldierTypes = pgTable(
       .references(() => sources.id, { onDelete: 'restrict' }),
     recruitmentCost: integer('recruitment_cost').notNull(),
     stats: jsonb('stats').notNull(), // { melee, accuracy, courage, health, speed, ... }
-    maxPerUnit: integer('max_per_unit'), // null = unlimited
-    isJuniorOfficer: boolean('is_junior_officer').notNull().default(false),
+    maxPerUnit: integer('max_per_unit'), // null = unlimited; 1 = at most one per unit
 
     // Equipment policy
     equipmentMode: equipmentModeEnum('equipment_mode').notNull().default('fixed'),
@@ -118,25 +128,26 @@ export const nationSoldierTypes = pgTable(
   }),
 );
 
-// soldier type → fixed officer attributes baked in (many-to-many).
+// soldier type → fixed attributes baked in (many-to-many). Any attribute,
+// officer-selectable or not (e.g. Miracles, Skinshift), not just officer ones.
 // FK constraints are explicitly named (with shorter labels) so Postgres
 // doesn't truncate the auto-generated names at its 63-char identifier limit.
 export const soldierTypeFixedAttributes = pgTable(
   'soldier_type_fixed_attributes',
   {
     soldierTypeId: uuid('soldier_type_id').notNull(),
-    officerAttributeId: uuid('officer_attribute_id').notNull(),
+    attributeId: uuid('attribute_id').notNull(),
   },
   (t) => ({
-    pk: primaryKey({ columns: [t.soldierTypeId, t.officerAttributeId] }),
+    pk: primaryKey({ columns: [t.soldierTypeId, t.attributeId] }),
     soldierTypeFk: foreignKey({
       columns: [t.soldierTypeId],
       foreignColumns: [soldierTypes.id],
       name: 'soldier_type_fixed_attrs_type_fk',
     }).onDelete('cascade'),
     attributeFk: foreignKey({
-      columns: [t.officerAttributeId],
-      foreignColumns: [officerAttributes.id],
+      columns: [t.attributeId],
+      foreignColumns: [attributes.id],
       name: 'soldier_type_fixed_attrs_attr_fk',
     }).onDelete('restrict'),
   }),
@@ -189,18 +200,20 @@ export const optionalRules = pgTable('optional_rules', {
 
 // ── user data ────────────────────────────────────────────────────────────────
 //
-// `userId` will FK to better-auth's user table once auth is wired; left as a
-// plain uuid for now so this package stays independent of auth choices.
+// `userId` is null for anonymous (IndexedDB) units and FKs to better-auth's
+// `user` table for signed-in users. Deleting a user removes their units.
+// ("unit" is the rulebook term for a player's force.)
 
-export const warbands = pgTable(
-  'warbands',
+export const units = pgTable(
+  'units',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id'),
+    userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
-    nationId: uuid('nation_id')
-      .notNull()
-      .references(() => nations.id, { onDelete: 'restrict' }),
+    // Nullable: the denormalised `data` jsonb is the source of truth, and a
+    // draft unit may not have a nation yet (and nations aren't seeded). The
+    // FK still guards against dangling references once nations exist.
+    nationId: uuid('nation_id').references(() => nations.id, { onDelete: 'restrict' }),
     data: jsonb('data').notNull(), // officer choices + snapshotted members
     referenceSnapshotAt: timestamp('reference_snapshot_at', { withTimezone: true })
       .notNull()
@@ -209,6 +222,6 @@ export const warbands = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
-    userIdx: index('warbands_user_idx').on(t.userId),
+    userIdx: index('units_user_idx').on(t.userId),
   }),
 );

@@ -18,6 +18,7 @@
     "db:generate": "pnpm --filter @gothic-garrison/db generate",
     "db:migrate": "pnpm --filter @gothic-garrison/db migrate",
     "db:seed": "pnpm --filter @gothic-garrison/db seed",
+    "db:export-seed": "pnpm --filter @gothic-garrison/db export-seed",
     "db:studio": "pnpm --filter @gothic-garrison/db studio"
   },
   "devDependencies": {

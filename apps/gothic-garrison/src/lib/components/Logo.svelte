@@ -1,0 +1,25 @@
+<script lang="ts">
+  // Gothic Garrison emblem: a crenellated fortress gatehouse with flanking
+  // towers and a gothic pointed-arch gate. Uses currentColor so it adapts to
+  // the surrounding text colour / theme. Negative spaces (gate, windows) are
+  // cut out with evenodd, so they show the background through.
+  let { class: className = 'size-7' }: { class?: string } = $props();
+</script>
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  class={className}
+  fill="currentColor"
+  fill-rule="evenodd"
+  role="img"
+  aria-label="Gothic Garrison"
+>
+  <path
+    d="M8 56 L8 10 L12 10 L12 14 L13 14 L13 10 L17 10 L17 14 L18 14 L18 10 L22 10 L22 16 L27 16 L27 20 L29.5 20 L29.5 16 L34.5 16 L34.5 20 L37 20 L37 16 L42 16 L42 10 L46 10 L46 14 L47 14 L47 10 L51 10 L51 14 L52 14 L52 10 L56 10 L56 56 Z
+       M27 56 L27 44 Q27 36 32 36 Q37 36 37 44 L37 56 Z
+       M14 32 L14 26 Q14 22 15 22 Q16 22 16 26 L16 32 Z
+       M48 32 L48 26 Q48 22 49 22 Q50 22 50 26 L50 32 Z
+       M30 31 L30 26 Q30 24 32 24 Q34 24 34 26 L34 31 Z"
+  />
+</svg>

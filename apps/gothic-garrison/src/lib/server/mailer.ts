@@ -1,4 +1,4 @@
-import { Resend } from 'resend';
+import type { Resend } from 'resend';
 import { serverEnv } from './env';
 
 export interface SendEmailInput {
@@ -12,14 +12,17 @@ export interface Mailer {
   send(input: SendEmailInput): Promise<{ id: string }>;
 }
 
-// Resend-compatible Mailer. In dev, point RESEND_API_URL at the local
-// petite-poste service; in prod, leave it unset to hit api.resend.com.
+// Resend-compatible Mailer.
+//
+// The Resend SDK has no constructor option for its base URL — it only reads the
+// RESEND_BASE_URL env var, *once* at import time. Our config lives in .env as
+// RESEND_API_URL (read via $env/dynamic/private), which SvelteKit does NOT mirror
+// into process.env. So we bridge the value across to process.env and then
+// dynamically import the SDK, so its import-time read picks it up. In dev this
+// points at petite-poste; in prod RESEND_API_URL is unset and the SDK defaults
+// to https://api.resend.com — dev and prod share one code path, only env changes.
 class ResendMailer implements Mailer {
-  private client: Resend;
-
-  constructor(apiKey: string, baseUrl: string) {
-    this.client = new Resend(apiKey, { baseUrl } as ConstructorParameters<typeof Resend>[1]);
-  }
+  constructor(private client: Resend) {}
 
   async send(input: SendEmailInput): Promise<{ id: string }> {
     const { data, error } = await this.client.emails.send({
@@ -36,9 +39,12 @@ class ResendMailer implements Mailer {
 
 let cached: Mailer | undefined;
 
-export function getMailer(): Mailer {
+export async function getMailer(): Promise<Mailer> {
   if (!cached) {
-    cached = new ResendMailer(serverEnv.resendApiKey(), serverEnv.resendApiUrl());
+    // Must be set before the SDK is imported (see note above).
+    process.env.RESEND_BASE_URL = serverEnv.resendApiUrl();
+    const { Resend } = await import('resend');
+    cached = new ResendMailer(new Resend(serverEnv.resendApiKey()));
   }
   return cached;
 }
