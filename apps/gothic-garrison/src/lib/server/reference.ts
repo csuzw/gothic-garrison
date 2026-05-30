@@ -1,6 +1,7 @@
 import { asc, eq } from 'drizzle-orm';
 import {
   nations,
+  sources,
   soldierTypes,
   nationSoldierTypes,
   attributes,
@@ -16,6 +17,8 @@ export interface RefNation {
   id: string;
   name: string;
   flag: string | null;
+  notes: string | null;
+  sourceCode: string;
 }
 
 export interface RefAttribute {
@@ -82,7 +85,11 @@ export async function getReferenceData(): Promise<ReferenceData> {
 
   const db = getDb();
   const [nats, attrs, equip, sols, links, fixed, loadouts, loadoutItems] = await Promise.all([
-    db.select({ id: nations.id, name: nations.name, flag: nations.flag }).from(nations).orderBy(asc(nations.name)),
+    db
+      .select({ id: nations.id, name: nations.name, flag: nations.flag, notes: nations.notes, sourceCode: sources.code })
+      .from(nations)
+      .innerJoin(sources, eq(nations.sourceId, sources.id))
+      .orderBy(asc(nations.name)),
     db
       .select({ id: attributes.id, name: attributes.name, isOfficer: attributes.isOfficer })
       .from(attributes)

@@ -17,6 +17,9 @@
   let error = $state<string | null>(null);
   let creating = $state(false);
 
+  let pickerOpen = $state(false);
+  let selectedNation = $state<{ id: string; name: string } | null>(null);
+
   const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
 
   async function load() {
@@ -33,16 +36,24 @@
 
   onMount(load);
 
-  async function createNew() {
+  async function createWithNation() {
+    if (!selectedNation) return;
     creating = true;
     try {
       const doc = createUnitDoc();
+      doc.nationId = selectedNation.id;
+      doc.nationName = selectedNation.name;
       await getUnitStore(signedIn).save(doc);
       await goto(`/units/${doc.id}`);
     } catch (e) {
       error = (e as Error).message;
       creating = false;
     }
+  }
+
+  function togglePicker() {
+    pickerOpen = !pickerOpen;
+    if (!pickerOpen) selectedNation = null;
   }
 
   async function remove(id: string) {
@@ -59,13 +70,52 @@
 <svelte:head><title>Units · Gothic Garrison</title></svelte:head>
 
 <section class="space-y-6">
-  <div class="flex items-center justify-between gap-3">
+  <div class="flex flex-wrap items-center justify-between gap-3">
     <h1 class="text-2xl font-semibold">Your units</h1>
-    <button class="btn btn-primary btn-sm" onclick={createNew} disabled={creating}>
-      {#if creating}<span class="loading loading-spinner loading-xs"></span>{/if}
+    <button class="btn btn-primary btn-sm" onclick={togglePicker} disabled={creating}>
       New unit
+      <span class="text-xs opacity-60">{pickerOpen ? '▲' : '▼'}</span>
     </button>
   </div>
+
+  {#if pickerOpen}
+    <div class="card bg-base-200">
+      <div class="card-body gap-4 p-4">
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm font-medium opacity-80">Select a nation to start your unit:</p>
+          <button
+            class="btn btn-primary btn-sm shrink-0"
+            onclick={createWithNation}
+            disabled={!selectedNation || creating}
+          >
+            {#if creating}<span class="loading loading-spinner loading-xs"></span>{/if}
+            Create
+          </button>
+        </div>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+          {#each data.nations as n (n.id)}
+            {@const selected = selectedNation?.id === n.id}
+            <button
+              class="card w-full cursor-pointer text-left transition-all
+                {selected ? 'bg-primary/15 ring-2 ring-primary' : 'bg-base-100 hover:bg-base-300'}"
+              onclick={() => (selectedNation = selected ? null : { id: n.id, name: n.name })}
+            >
+              <div class="card-body gap-1.5 p-3">
+                <div class="flex flex-wrap items-center gap-2">
+                  <NationFlag flag={n.flag} name={n.name} />
+                  <span class="font-semibold">{n.name}</span>
+                  <span class="badge badge-outline badge-sm ml-auto font-mono">{n.sourceCode}</span>
+                </div>
+                {#if n.notes}
+                  <p class="hidden text-xs leading-relaxed opacity-60 sm:block">{n.notes}</p>
+                {/if}
+              </div>
+            </button>
+          {/each}
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <p class="text-sm opacity-70">
     {#if signedIn}
@@ -85,8 +135,8 @@
     <div class="card bg-base-200">
       <div class="card-body items-center text-center">
         <p class="opacity-70">No units yet.</p>
-        <button class="btn btn-primary btn-sm" onclick={createNew} disabled={creating}>
-          Create your first
+        <button class="btn btn-primary btn-sm" onclick={togglePicker} disabled={creating}>
+          Choose a nation to get started
         </button>
       </div>
     </div>

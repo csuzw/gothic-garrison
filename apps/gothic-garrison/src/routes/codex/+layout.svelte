@@ -63,7 +63,7 @@
     reachable in production.
   </p>
 
-  <nav class="tabs tabs-box w-fit">
+  <nav class="tabs tabs-box w-fit border border-primary">
     {#each CODEX_NAV as item (item.slug)}
       <a href="/codex/{item.slug}" class="tab" class:tab-active={isActive(item.slug)}>{item.label}</a>
     {/each}

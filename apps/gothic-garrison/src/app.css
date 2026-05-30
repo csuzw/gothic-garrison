@@ -41,6 +41,17 @@
   --noise: 0;
 }
 
+/* Global card border in primary (antique gold / bronze) */
+.card {
+  border: 1px solid var(--color-primary);
+}
+
+/* Active nav button — primary outline */
+.navbar .btn.btn-active {
+  outline: 1px solid var(--color-primary);
+  outline-offset: -1px;
+}
+
 /* Parchment — light alternative. Aged cream paper, sepia ink, bronze, oxblood. */
 @plugin 'daisyui/theme' {
   name: 'garrison-light';

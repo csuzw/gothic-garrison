@@ -160,7 +160,7 @@
 
 <div class="modal modal-open" role="dialog">
   <div class="modal-box max-w-2xl overflow-y-auto">
-    <h3 class="mb-4 text-lg font-semibold">{mode === 'edit' ? 'Edit' : 'New'} soldier type</h3>
+    <h3 class="mb-4 text-lg font-semibold">{mode === 'edit' ? 'Edit' : 'New'} soldier</h3>
 
     <form onsubmit={handleSubmit} class="space-y-5">
 

@@ -35,52 +35,53 @@
             <StatLine stats={monster.stats} />
 
             <!-- Attributes -->
-            {#if monster.attributes.length > 0}
-              <div class="space-y-1">
-                <p class="text-xs font-semibold">Attributes</p>
+            <div class="space-y-1">
+              <p class="text-xs font-semibold">Attributes</p>
+              {#if monster.attributes.length > 0}
                 <div class="flex flex-wrap gap-1">
                   {#each monster.attributes as attr (attr)}
                     <span class="badge badge-outline badge-sm">{attr}</span>
                   {/each}
                 </div>
-              </div>
-            {/if}
+              {:else}
+                <p class="text-xs opacity-50">None</p>
+              {/if}
+            </div>
 
             <!-- Equipment -->
-            {#if monster.loadouts.length > 0}
-              {#if monster.equipmentMode === 'fixed'}
+            <div class="space-y-1">
+              <p class="text-xs font-semibold">Equipment</p>
+              {#if monster.loadouts.length === 0}
+                <p class="text-xs opacity-50">None</p>
+              {:else if monster.equipmentMode === 'fixed'}
                 {@const items = monster.loadouts[0]?.items ?? []}
                 {#if items.length > 0}
-                  <div class="space-y-1">
-                    <p class="text-xs font-semibold">Equipment</p>
-                    <div class="flex flex-wrap gap-1">
-                      {#each items as item (item.name)}
-                        <span class="badge badge-outline badge-sm">
-                          {item.quantity > 1 ? `${item.name} ×${item.quantity}` : item.name}
-                        </span>
-                      {/each}
-                    </div>
+                  <div class="flex flex-wrap gap-1">
+                    {#each items as item (item.name)}
+                      <span class="badge badge-outline badge-sm">
+                        {item.quantity > 1 ? `${item.name} ×${item.quantity}` : item.name}
+                      </span>
+                    {/each}
                   </div>
+                {:else}
+                  <p class="text-xs opacity-50">None</p>
                 {/if}
               {:else}
-                <div class="space-y-1">
-                  <p class="text-xs font-semibold">Equipment</p>
-                  {#each monster.loadouts as lo, i (i)}
-                    <div class="flex flex-wrap items-center gap-1">
-                      <span class="text-xs opacity-50 shrink-0">Option {i + 1}:</span>
-                      {#each lo.items as item (item.name)}
-                        <span class="badge badge-outline badge-sm">
-                          {item.quantity > 1 ? `${item.name} ×${item.quantity}` : item.name}
-                        </span>
-                      {/each}
-                      {#if lo.items.length === 0}
-                        <span class="text-xs opacity-40">—</span>
-                      {/if}
-                    </div>
-                  {/each}
-                </div>
+                {#each monster.loadouts as lo, i (i)}
+                  <div class="flex flex-wrap items-center gap-1">
+                    <span class="text-xs opacity-50 shrink-0">Option {i + 1}:</span>
+                    {#each lo.items as item (item.name)}
+                      <span class="badge badge-outline badge-sm">
+                        {item.quantity > 1 ? `${item.name} ×${item.quantity}` : item.name}
+                      </span>
+                    {/each}
+                    {#if lo.items.length === 0}
+                      <span class="text-xs opacity-50">None</span>
+                    {/if}
+                  </div>
+                {/each}
               {/if}
-            {/if}
+            </div>
 
           </div>
         </div>

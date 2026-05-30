@@ -249,21 +249,21 @@
   }
 </script>
 
-<svelte:head><title>Codex · {entity?.label ?? (isSoldierTypes ? 'Soldier types' : isMonsterTypes ? 'Monster types' : 'Codex')}</title></svelte:head>
+<svelte:head><title>Codex · {entity?.label ?? (isSoldierTypes ? 'Soldiers' : isMonsterTypes ? 'Monsters' : 'Codex')}</title></svelte:head>
 
 {#if !entity && !isSoldierTypes && !isMonsterTypes}
   <div class="alert alert-error">Unknown Codex entity: <code>{slug}</code></div>
 {:else}
   <div class="space-y-3">
     <div class="flex items-center gap-2">
-      <h2 class="text-lg font-semibold">{entity?.label ?? (isSoldierTypes ? 'Soldier types' : 'Monster types')}</h2>
+      <h2 class="text-lg font-semibold">{entity?.label ?? (isSoldierTypes ? 'Soldiers' : 'Monsters')}</h2>
       <span class="badge badge-ghost badge-sm">{rows.length}</span>
       {#if entity}
         <button class="btn btn-sm btn-primary ml-auto" onclick={() => startNew(entity)}>New {entity.singular}</button>
       {:else if isSoldierTypes}
-        <button class="btn btn-sm btn-primary ml-auto" onclick={startNewSoldier}>New soldier type</button>
+        <button class="btn btn-sm btn-primary ml-auto" onclick={startNewSoldier}>New soldier</button>
       {:else if isMonsterTypes}
-        <button class="btn btn-sm btn-primary ml-auto" onclick={startNewMonster}>New monster type</button>
+        <button class="btn btn-sm btn-primary ml-auto" onclick={startNewMonster}>New monster</button>
       {/if}
     </div>
 

@@ -72,52 +72,6 @@
     }),
   );
 
-  interface NationConflict {
-    prevNationId: string | null;
-    prevNationName: string | null;
-    newNationName: string;
-    conflicting: MemberSnapshot[];
-  }
-  let nationConflict = $state<NationConflict | null>(null);
-
-  function setNation(value: string) {
-    if (!doc) return;
-    const newNationId = value || null;
-    const newNation = data.reference.nations.find((n) => n.id === value);
-
-    if (newNationId && doc.members.length > 0) {
-      const validIds = new Set(
-        data.reference.soldiers.filter((s) => s.nationIds.includes(newNationId)).map((s) => s.id),
-      );
-      const conflicting = doc.members.filter((m) => m.soldierTypeId && !validIds.has(m.soldierTypeId));
-      if (conflicting.length > 0) {
-        const prevNationId = doc.nationId;
-        const prevNationName = doc.nationName;
-        doc.nationId = newNationId;
-        doc.nationName = newNation?.name ?? null;
-        nationConflict = { prevNationId, prevNationName, newNationName: newNation?.name ?? value, conflicting };
-        return;
-      }
-    }
-
-    doc.nationId = newNationId;
-    doc.nationName = newNation?.name ?? null;
-  }
-
-  function confirmNationSwitch() {
-    if (!doc || !nationConflict) return;
-    const ids = new Set(nationConflict.conflicting.map((m) => m.id));
-    doc.members = doc.members.filter((m) => !ids.has(m.id));
-    nationConflict = null;
-  }
-
-  function revertNationSwitch() {
-    if (!doc || !nationConflict) return;
-    doc.nationId = nationConflict.prevNationId;
-    doc.nationName = nationConflict.prevNationName;
-    nationConflict = null;
-  }
-
   // ── attributes ────────────────────────────────────────────────────────────
   function toggleAttr(list: AttributeSnapshot[], attrId: string, name: string, max: number) {
     const i = list.findIndex((a) => a.id === attrId);
@@ -223,28 +177,25 @@
 
     {#if error}<div class="alert alert-error text-sm" role="alert">{error}</div>{/if}
 
+    <div>
+      <span class="mb-1 block text-sm font-medium">Nation</span>
+      {#if doc.nationName}
+        {@const nat = data.reference.nations.find((n) => n.id === doc!.nationId)}
+        <div class="flex items-center gap-2 rounded-box bg-base-200 px-3 py-2.5">
+          <NationFlag flag={nat?.flag ?? null} name={doc.nationName} />
+          <span class="text-sm">{doc.nationName}</span>
+        </div>
+      {:else}
+        <div class="rounded-box bg-base-200 px-3 py-2.5 text-sm opacity-50">No nation set</div>
+      {/if}
+    </div>
+
     <label class="block">
       <span class="mb-1 block text-sm font-medium">Unit name</span>
       <input type="text" bind:value={doc.name} class="input w-full" placeholder="The Night Watch" />
     </label>
 
-    <label class="block">
-      <span class="mb-1 block text-sm font-medium">Nation</span>
-      <div class="flex items-center gap-2">
-        {#if doc.nationId}
-          {@const nat = data.reference.nations.find((n) => n.id === doc!.nationId)}
-          {#if nat?.flag}<NationFlag flag={nat.flag} name={nat.name} />{/if}
-        {/if}
-        <select class="select flex-1" onchange={(e) => setNation(e.currentTarget.value)}>
-          <option value="" disabled selected={!doc.nationId}>Choose a nation…</option>
-          {#each data.reference.nations as n (n.id)}
-            <option value={n.id} selected={n.id === doc.nationId}>{n.name}</option>
-          {/each}
-        </select>
-      </div>
-    </label>
-
-    <div class="stats bg-base-200 w-full">
+    <div class="stats bg-base-200 w-full border border-primary">
       <div class="stat">
         <div class="stat-title">Recruitment</div>
         <div class="stat-value text-2xl" class:text-error={overBudget}>{spent} / {budget}</div>
@@ -453,30 +404,4 @@
     </div>
   </section>
 
-  {#if nationConflict}
-    <dialog class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="text-base font-bold">Nation conflict</h3>
-        <p class="py-3 text-sm">
-          The following {nationConflict.conflicting.length === 1 ? 'soldier is' : 'soldiers are'}
-          not available for <strong>{nationConflict.newNationName}</strong>:
-        </p>
-        <ul class="mb-3 space-y-0.5 text-sm opacity-70">
-          {#each nationConflict.conflicting as m}
-            <li>· {m.name}{m.customName ? ` "${m.customName}"` : ''}</li>
-          {/each}
-        </ul>
-        <p class="text-sm">Remove {nationConflict.conflicting.length === 1 ? 'them' : 'them all'} and switch, or revert to {nationConflict.prevNationName ?? 'your previous nation'}?</p>
-        <div class="modal-action">
-          <button class="btn btn-ghost btn-sm" onclick={revertNationSwitch}>
-            Revert to {nationConflict.prevNationName ?? 'previous nation'}
-          </button>
-          <button class="btn btn-error btn-sm" onclick={confirmNationSwitch}>
-            Remove &amp; switch
-          </button>
-        </div>
-      </div>
-      <button class="modal-backdrop" aria-label="Revert nation change" onclick={revertNationSwitch}></button>
-    </dialog>
-  {/if}
 {/if}

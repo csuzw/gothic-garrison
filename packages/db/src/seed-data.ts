@@ -284,7 +284,7 @@ export const nations: SeedNation[] = [
   {
     "name": "Prussia",
     "sourceCode": "core",
-    "notes": "A kingdom coasting on the reputation of Frederick the Great while its army and institutions slowly ossified—a complacency brutally exposed at Jena-Auerstedt in 1806. Stripped of half its territory, Prussia rebuilt under the reformers Scharnhorst and Gneisenau and emerged as a cornerstone of the coalitions that finally ended Napoleon.",
+    "notes": "Frederick the Great's shadow masked Prussia's institutional rot until Jena-Auerstedt in 1806 broke the spell. Rebuilt under Scharnhorst and Gneisenau, it became a cornerstone of the coalitions that ended Napoleon.",
     "flag": "/flags/prussia.svg",
     "soldiers": [
       "Agent Provocateur",

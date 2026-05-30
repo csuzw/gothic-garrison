@@ -11,10 +11,10 @@
   // href === null → shown but disabled ("coming soon").
   const baseLinks: { label: string; href: string | null }[] = [
     { label: 'Units', href: '/' },
+    { label: 'Campaigns', href: null },
+    { label: 'Cheat Sheet', href: null },
     { label: 'Bestiary', href: '/bestiary' },
     { label: 'Scenarios', href: null },
-    { label: 'Campaigns', href: null },
-    { label: 'About', href: '/about' },
   ];
 
   // Codex is a local-development-only reference-data editor; the route 404s in
@@ -32,7 +32,7 @@
 </script>
 
 <div class="flex min-h-dvh flex-col">
-  <header class="navbar bg-base-200 shadow-sm">
+  <header class="navbar bg-base-200 border-b border-primary shadow-sm">
     <div class="container mx-auto flex items-center gap-2 px-4">
       <!-- Mobile: page links in a dropdown -->
       <details class="dropdown lg:hidden">
@@ -77,6 +77,12 @@
       <div class="ml-auto flex items-center gap-1">
         <UserMenu user={data.user} />
         <ThemeToggle />
+        <a href="/about" class="btn btn-ghost btn-sm btn-square" class:btn-active={isActive('/about')} aria-label="About">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path stroke-linecap="round" d="M12 16v-4M12 8h.01" />
+          </svg>
+        </a>
       </div>
     </div>
   </header>
@@ -87,15 +93,14 @@
     {@render children()}
   </main>
 
-  <footer class="border-base-200 mt-8 border-t">
+  <footer class="mt-8 border-t border-primary">
     <div class="container mx-auto space-y-2 px-4 py-6 text-center text-xs opacity-70">
       <p>
         Gothic Garrison · An unofficial fan-made list builder for <em>The Silver Bayonet</em>.
       </p>
       <p>
-        <em>The Silver Bayonet</em> and its supplements were created by
-        <strong>Joseph A. McCullough</strong>, <strong>Ash Barker</strong>, and
-        <strong>T.C. Stephen</strong>, and are published by
+        <em>The Silver Bayonet</em> was created by <strong>Joseph A. McCullough</strong>, with
+        supplements by <strong>Ash Barker</strong> and <strong>T.C. Stephen</strong>, and is published by
         <a href="https://www.ospreypublishing.com/" target="_blank" rel="noopener noreferrer" class="link">
           Osprey Publishing
         </a>. All game content and rules data remain the property of the authors and Osprey
