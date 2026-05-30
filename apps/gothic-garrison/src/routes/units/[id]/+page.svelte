@@ -129,20 +129,6 @@
   function snapshotItems(items: EquipmentSnapshot[]): EquipmentSnapshot[] {
     return items.map((it) => ({ ...it }));
   }
-  function addEquip(list: EquipmentSnapshot[], itemId: string) {
-    const c = equipById.get(itemId);
-    if (!c) return;
-    const existing = list.find((x) => x.itemId === itemId);
-    if (existing) existing.quantity += 1;
-    else list.push({ itemId, name: c.name, slotCost: c.slotCost, isSpecial: c.isSpecial, quantity: 1 });
-  }
-  function removeEquip(list: EquipmentSnapshot[], itemId: string) {
-    const i = list.findIndex((x) => x.itemId === itemId);
-    if (i < 0) return;
-    const e = list[i]!;
-    if (e.quantity > 1) e.quantity -= 1;
-    else list.splice(i, 1);
-  }
   function setMemberSpecial(m: UnitDoc['members'][number], item: { id: string; name: string; slotCost: number; isSpecial: boolean }) {
     m.specialEquipment = { itemId: item.id, name: item.name, slotCost: item.slotCost, isSpecial: true, quantity: 1 };
   }
@@ -334,8 +320,7 @@
             items={doc.officer.equipment}
             slots={OFFICER_EQUIPMENT_SLOTS}
             specialMax={officerSpecialMax(doc.officer)}
-            onAdd={(itemId) => addEquip(doc!.officer.equipment, itemId)}
-            onRemove={(itemId) => removeEquip(doc!.officer.equipment, itemId)}
+            onChange={(newItems) => { doc!.officer.equipment = newItems; }}
           />
         </div>
       </div>
@@ -407,9 +392,9 @@
                         fixed={ref.fixedAttributes}
                         onToggle={(aid, name) => toggleAttr(m.attributes, aid, name, ref.attributePicks)}
                       />
-                    {:else if ref.fixedAttributes.length || ref.abilities.length}
+                    {:else if ref.fixedAttributes.length}
                       <div class="flex flex-wrap gap-1">
-                        {#each ref.abilities as a}<span class="badge badge-xs badge-ghost">{a}</span>{/each}
+                        {#each ref.fixedAttributes as a}<span class="badge badge-xs badge-ghost">{a}</span>{/each}
                       </div>
                     {/if}
 
@@ -421,8 +406,7 @@
                           items={m.equipment}
                           slots={ref.equipmentSlots ?? OFFICER_EQUIPMENT_SLOTS}
                           specialMax={ref.specialSlots ?? 2}
-                          onAdd={(itemId) => addEquip(m.equipment, itemId)}
-                          onRemove={(itemId) => removeEquip(m.equipment, itemId)}
+                          onChange={(newItems) => { m.equipment = newItems; }}
                         />
                       {:else if ref.equipmentMode === 'choice'}
                         <select class="select select-xs w-full" onchange={(e) => selectLoadout(m, e.currentTarget.value)}>

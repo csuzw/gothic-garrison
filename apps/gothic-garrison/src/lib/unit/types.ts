@@ -51,6 +51,22 @@ export interface SoldierStats {
   health: number;
 }
 
+/** Display metadata for each stat, in rulebook column order. */
+export const STAT_META: Array<{
+  key: keyof SoldierStats;
+  label: string;
+  short: string;
+  /** True for dice-modifier stats shown as +N / -N (Melee, Accuracy, Courage). */
+  mod: boolean;
+}> = [
+  { key: 'speed',    label: 'Speed',    short: 'Spd', mod: false },
+  { key: 'melee',    label: 'Melee',    short: 'Mel', mod: true  },
+  { key: 'accuracy', label: 'Accuracy', short: 'Acc', mod: true  },
+  { key: 'defence',  label: 'Defence',  short: 'Def', mod: false },
+  { key: 'courage',  label: 'Courage',  short: 'Cou', mod: true  },
+  { key: 'health',   label: 'Health',   short: 'Hp',  mod: false },
+];
+
 export interface MemberSnapshot {
   id: string;
   soldierTypeId: string | null;

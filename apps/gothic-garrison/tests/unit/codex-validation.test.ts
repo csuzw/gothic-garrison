@@ -87,7 +87,6 @@ describe('validateSoldierType', () => {
     stats: STATS,
     maxPerUnit: null,
     attributePicks: 0,
-    abilities: [],
     nationIds: [NATION],
     fixedAttributeIds: [ATTR],
   };
@@ -131,6 +130,33 @@ describe('validateSoldierType', () => {
 
   it('rejects a pool-mode soldier missing slot counts', () => {
     expect(() => validateSoldierType({ ...base, equipmentMode: 'pool', loadouts: [] })).toThrow(/equipmentSlots/);
+  });
+
+  it('parses a choice-mode soldier with multiple loadouts', () => {
+    const v = validateSoldierType({
+      ...base,
+      equipmentMode: 'choice',
+      loadouts: [
+        { label: 'Option A', items: [{ equipmentItemId: ITEM, quantity: 1 }] },
+        { label: 'Option B', items: [{ equipmentItemId: ITEM, quantity: 2 }] },
+      ],
+    });
+    expect(v.equipmentMode).toBe('choice');
+    expect(v.loadouts).toHaveLength(2);
+    expect(v.equipmentSlots).toBeNull();
+    expect(v.specialSlots).toBeNull();
+  });
+
+  it('rejects a choice-mode soldier with only one loadout', () => {
+    expect(() =>
+      validateSoldierType({ ...base, equipmentMode: 'choice', loadouts: [{ label: 'Only', items: [] }] }),
+    ).toThrow(/at least two loadouts/);
+  });
+
+  it('rejects a choice-mode soldier with no loadouts', () => {
+    expect(() =>
+      validateSoldierType({ ...base, equipmentMode: 'choice', loadouts: [] }),
+    ).toThrow(/at least two loadouts/);
   });
 
   it('dedupes nationIds', () => {

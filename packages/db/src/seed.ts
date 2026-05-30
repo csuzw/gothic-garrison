@@ -77,7 +77,6 @@ await db
       equipmentSlots: s.equipmentSlots,
       specialSlots: s.specialSlots,
       attributePicks: s.attributePicks,
-      abilities: s.abilities,
       notes: s.notes,
     })),
   )
@@ -87,7 +86,7 @@ await db
       sourceId: sql`excluded.source_id`, recruitmentCost: sql`excluded.recruitment_cost`, stats: sql`excluded.stats`,
       maxPerUnit: sql`excluded.max_per_unit`, equipmentMode: sql`excluded.equipment_mode`,
       equipmentSlots: sql`excluded.equipment_slots`, specialSlots: sql`excluded.special_slots`, attributePicks: sql`excluded.attribute_picks`,
-      abilities: sql`excluded.abilities`, notes: sql`excluded.notes`,
+      notes: sql`excluded.notes`,
     },
   });
 const soldierByName = new Map((await db.select({ id: t.soldierTypes.id, name: t.soldierTypes.name }).from(t.soldierTypes)).map((r) => [r.name, r.id]));

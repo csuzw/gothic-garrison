@@ -180,7 +180,6 @@ export interface SoldierTypeInput {
   equipmentSlots: number | null;
   specialSlots: number | null;
   attributePicks: number;
-  abilities: string[];
   notes: string | null;
   nationIds: string[];
   fixedAttributeIds: string[];
@@ -285,7 +284,7 @@ export function validateSoldierType(body: unknown): SoldierTypeInput {
 
   // Equipment-mode coherence (mirrors the schema's documented invariants):
   //   fixed  → exactly one predetermined loadout, no pool slots
-  //   choice → one or more predetermined loadouts, no pool slots
+  //   choice → two or more predetermined loadouts, no pool slots
   //   pool   → no loadouts, build from equipmentSlots/specialSlots
   let equipmentSlots: number | null = null;
   let specialSlots: number | null = null;
@@ -299,8 +298,8 @@ export function validateSoldierType(body: unknown): SoldierTypeInput {
     if (equipmentMode === 'fixed' && loadouts.length !== 1) {
       throw new CodexError('fixed-mode soldiers must have exactly one loadout');
     }
-    if (equipmentMode === 'choice' && loadouts.length < 1) {
-      throw new CodexError('choice-mode soldiers must have at least one loadout');
+    if (equipmentMode === 'choice' && loadouts.length < 2) {
+      throw new CodexError('choice-mode soldiers must have at least two loadouts');
     }
   }
 
@@ -314,7 +313,6 @@ export function validateSoldierType(body: unknown): SoldierTypeInput {
     equipmentSlots,
     specialSlots,
     attributePicks: nullableInt(o, 'attributePicks', { min: 0, max: 10 }) ?? 0,
-    abilities: strArray(o, 'abilities').map((a) => a.trim()).filter(Boolean),
     notes: optStr(o, 'notes'),
     nationIds: uuidArray(o, 'nationIds'),
     fixedAttributeIds: uuidArray(o, 'fixedAttributeIds'),

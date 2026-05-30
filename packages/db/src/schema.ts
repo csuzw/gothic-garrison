@@ -97,9 +97,6 @@ export const soldierTypes = pgTable(
     // Attribute policy
     attributePicks: integer('attribute_picks').notNull().default(0),
 
-    // Inherent abilities, free-form so we don't over-normalise upfront
-    abilities: jsonb('abilities').notNull().default(sql`'[]'::jsonb`),
-
     notes: text('notes'),
   },
   (t) => ({

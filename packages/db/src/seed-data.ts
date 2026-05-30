@@ -1,4 +1,4 @@
-// AUTO-GENERATED — do not edit by hand.
+﻿// AUTO-GENERATED — do not edit by hand.
 // Exported from the database by `pnpm db:export-seed` (src/export-seed-data.ts).
 // This is the canonical, git-committed reference data seeded into every
 // environment via `pnpm db:seed`. To change it, edit reference rows in the
@@ -25,7 +25,6 @@ export interface SeedSoldier {
   equipmentSlots: number | null;
   specialSlots: number | null;
   attributePicks: number;
-  abilities: string[];
   notes: string | null;
   fixedAttributes: string[];
   loadouts: SeedLoadout[];
@@ -912,12 +911,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Master of Cover",
-      "Sneak",
-      "Supernatural Veteran"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Master of Cover",
@@ -1007,10 +1001,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Artillerist"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Artillerist"
@@ -1048,11 +1039,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Combat Rider",
-      "Experience in the Desert"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Combat Rider",
@@ -1095,8 +1082,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -1132,10 +1118,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Great Faith"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Great Faith"
@@ -1211,11 +1194,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Miracles",
-      "Supernatural Veteran"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Miracles",
@@ -1250,10 +1229,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Hard to Put Down"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Hard to Put Down"
@@ -1295,10 +1271,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Quick to Run"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Quick to Run"
@@ -1336,12 +1309,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "pool",
     "equipmentSlots": 6,
     "specialSlots": 2,
-    "attributePicks": 0,
-    "abilities": [
-      "Damage Reduction (1)",
-      "Strong",
-      "Indefatigable"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Damage Reduction (1)",
@@ -1366,11 +1334,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Expert Climber",
-      "Steady Legs"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Expert Climber",
@@ -1417,10 +1381,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Medic"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Medic"
@@ -1458,8 +1419,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -1491,11 +1451,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Ancient Spells",
-      "Supernatural Veteran"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Ancient Spells",
@@ -1530,8 +1486,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -1567,10 +1522,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Supernatural Veteran"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Supernatural Veteran"
@@ -1608,10 +1560,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Combat Rider"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Combat Rider"
@@ -1653,8 +1602,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -1704,10 +1652,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Combat Rider"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Combat Rider"
@@ -1741,8 +1686,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -1778,11 +1722,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Nimble",
-      "Master of Cover"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Master of Cover",
@@ -1835,8 +1775,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -1876,8 +1815,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 1,
-    "abilities": [],
+    "attributePicks": 1,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -1927,10 +1865,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Medic"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Medic"
@@ -1968,10 +1903,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Combat Rider"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Combat Rider"
@@ -2009,10 +1941,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Light Infantry Training"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Light Infantry Training"
@@ -2050,13 +1979,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Skinshift (Wolf)",
-      "Allergy (Silver)",
-      "Allergy (Fire)",
-      "Quick Heal"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Allergy (Fire)",
@@ -2097,10 +2020,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Skinshift (Werewolf)"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Skinshift (Werewolf)"
@@ -2134,10 +2054,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 1,
-    "abilities": [
-      "Combat Rider"
-    ],
+    "attributePicks": 1,
     "notes": null,
     "fixedAttributes": [
       "Combat Rider"
@@ -2205,10 +2122,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Steady Legs"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Steady Legs"
@@ -2246,10 +2160,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Master of Cover"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Master of Cover"
@@ -2297,11 +2208,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Spells",
-      "Supernatural Veteran"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Spells",
@@ -2336,8 +2243,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -2373,8 +2279,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": [
@@ -2410,11 +2315,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Expert Climber",
-      "Steady Legs"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Expert Climber",
@@ -2453,10 +2354,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Combat Engineer"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Combat Engineer"
@@ -2498,11 +2396,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Supernatural Veteran",
-      "Monster Expert"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Monster Expert",
@@ -2555,10 +2449,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Indefatigable"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Indefatigable"
@@ -2596,10 +2487,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "choice",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Tactician"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Tactician"
@@ -2651,8 +2539,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "pool",
     "equipmentSlots": 6,
     "specialSlots": 2,
-    "attributePicks": 1,
-    "abilities": [],
+    "attributePicks": 1,
     "notes": null,
     "fixedAttributes": [],
     "loadouts": []
@@ -2673,12 +2560,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Inspiring",
-      "Master of Cover",
-      "Supernatural Veteran"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Inspiring",
@@ -2714,11 +2596,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Nimble",
-      "Light Infantry Training"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Light Infantry Training",
@@ -2757,11 +2635,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Steady Legs",
-      "Strong"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Steady Legs",
@@ -2804,10 +2678,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Skinshift (Bear)"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Skinshift (Bear)"
@@ -2841,11 +2712,7 @@ export const soldiers: SeedSoldier[] = [
     "equipmentMode": "fixed",
     "equipmentSlots": null,
     "specialSlots": null,
-    "attributePicks": 0,
-    "abilities": [
-      "Nimble",
-      "Fire-Starter"
-    ],
+    "attributePicks": 0,
     "notes": null,
     "fixedAttributes": [
       "Fire-Starter",

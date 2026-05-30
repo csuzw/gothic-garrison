@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SoldierStats } from '$lib/unit/types';
+  import { STAT_META, type SoldierStats } from '$lib/unit/types';
 
   let { stats, baseStats }: { stats: SoldierStats; baseStats?: SoldierStats } = $props();
 
@@ -8,15 +8,13 @@
   const deltaClass = (delta: number) =>
     delta > 0 ? 'text-success' : delta < 0 ? 'text-error' : 'opacity-60';
 
-  // Speed, Defence, Health are absolute values; Melee, Accuracy, Courage are dice modifiers.
-  const cols = $derived([
-    { label: 'Speed',    short: 'Spd', value: stats.speed,    mod: false, delta: baseStats ? stats.speed    - baseStats.speed    : 0 },
-    { label: 'Melee',   short: 'Mel', value: stats.melee,    mod: true,  delta: baseStats ? stats.melee    - baseStats.melee    : 0 },
-    { label: 'Accuracy',short: 'Acc', value: stats.accuracy, mod: true,  delta: baseStats ? stats.accuracy - baseStats.accuracy : 0 },
-    { label: 'Defence', short: 'Def', value: stats.defence,  mod: false, delta: baseStats ? stats.defence  - baseStats.defence  : 0 },
-    { label: 'Courage', short: 'Cou', value: stats.courage,  mod: true,  delta: baseStats ? stats.courage  - baseStats.courage  : 0 },
-    { label: 'Health',  short: 'Hp',  value: stats.health,   mod: false, delta: baseStats ? stats.health   - baseStats.health   : 0 },
-  ]);
+  const cols = $derived(
+    STAT_META.map((m) => ({
+      ...m,
+      value: stats[m.key],
+      delta: baseStats ? stats[m.key] - baseStats[m.key] : 0,
+    })),
+  );
 </script>
 
 <!-- Mobile: flex row with even gaps (abbreviated labels) -->

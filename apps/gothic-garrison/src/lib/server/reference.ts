@@ -56,7 +56,6 @@ export interface RefSoldier {
   equipmentSlots: number | null;
   specialSlots: number | null;
   attributePicks: number;
-  abilities: string[];
   fixedAttributes: string[];
   nationIds: string[];
   loadouts: RefLoadout[];
@@ -160,7 +159,6 @@ export async function getReferenceData(): Promise<ReferenceData> {
       equipmentSlots: s.equipmentSlots,
       specialSlots: s.specialSlots,
       attributePicks: s.attributePicks,
-      abilities: (s.abilities as string[]) ?? [],
       fixedAttributes: fixedBySoldier.get(s.id) ?? [],
       nationIds: nationsBySoldier.get(s.id) ?? [],
       loadouts: loadoutsBySoldier.get(s.id) ?? [],

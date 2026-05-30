@@ -94,6 +94,53 @@ test.describe('codex UI (dev only)', () => {
     await expect(page.locator('tbody tr')).toHaveCount(initial);
   });
 
+  test('soldier type: create (pool), edit name, delete', async ({ page }, testInfo) => {
+    const name = `E2E Soldier ${Date.now()}`;
+    await page.goto('/codex/soldier-types');
+    await page.waitForLoadState('networkidle');
+    const initial = await page.locator('tbody tr').count();
+
+    // Open the new soldier type form
+    await page.getByRole('button', { name: 'New soldier type' }).click();
+    await expect(page.getByRole('heading', { name: 'New soldier type' })).toBeVisible();
+
+    // Fill basic info
+    await page.getByPlaceholder('e.g. Rifleman').fill(name);
+    // Source defaults to the first option (The Silver Bayonet) — leave it
+    // Cost
+    await page.locator('input[min="0"][max="999"]').fill('15');
+
+    // Stats — fill speed; leave others at 0
+    const statInputs = page.locator('.grid input[type="number"]');
+    await statInputs.first().fill('6');
+
+    // Equipment mode: Pool
+    await page.getByRole('button', { name: 'Pool', exact: true }).click();
+    await page.locator('input[min="0"][max="20"]').first().fill('6');
+    await page.locator('input[min="0"][max="20"]').nth(1).fill('2');
+
+    await testInfo.attach('soldier-type-form', { body: await page.screenshot(), contentType: 'image/png' });
+    await page.locator('.modal-open').getByRole('button', { name: 'Create' }).click();
+
+    await expect(page.locator('.modal-open')).toHaveCount(0);
+    await expect(page.getByRole('cell', { name, exact: true })).toBeVisible();
+    await expect(page.locator('tbody tr')).toHaveCount(initial + 1);
+
+    // Edit: rename
+    await page.locator('tbody tr', { hasText: name }).getByRole('button', { name: 'Edit' }).click();
+    await expect(page.getByRole('heading', { name: 'Edit soldier type' })).toBeVisible();
+    await page.getByPlaceholder('e.g. Rifleman').fill(`${name} v2`);
+    await page.locator('.modal-open').getByRole('button', { name: 'Save' }).click();
+    await expect(page.locator('.modal-open')).toHaveCount(0);
+    await expect(page.getByRole('cell', { name: `${name} v2`, exact: true })).toBeVisible();
+
+    // Delete
+    page.on('dialog', (d) => d.accept());
+    await page.locator('tbody tr', { hasText: `${name} v2` }).getByRole('button', { name: 'Delete' }).click();
+    await expect(page.locator('tbody tr', { hasText: `${name} v2` })).toHaveCount(0);
+    await expect(page.locator('tbody tr')).toHaveCount(initial);
+  });
+
   test('surfaces a server error (duplicate code) in the form', async ({ page }) => {
     const c = code();
     await page.goto('/codex/optional-rules');

@@ -129,14 +129,11 @@ test.describe('units', () => {
     await expect(officerCard.getByText('2 / 2')).toBeVisible();
     await expect(officerCard.getByRole('button', { name: 'Nimble', exact: true })).toBeDisabled();
 
-    // Officer: add a Musket (2 slots)
-    const officerEquip = officerCard.locator('select');
-    const musketValue = await officerEquip
-      .locator('option', { hasText: 'Musket' })
-      .first()
-      .getAttribute('value');
-    await officerEquip.selectOption(musketValue!);
-    await officerCard.getByRole('button', { name: 'Add' }).click();
+    // Officer: add a Musket (2 slots) via the row-based equipment builder
+    await officerCard.getByRole('button', { name: '+ Add item' }).click();
+    // A row appeared; change its select to Musket
+    const musketValue = await officerCard.locator('option', { hasText: 'Musket' }).first().getAttribute('value');
+    await officerCard.locator('ul li select').selectOption(musketValue!);
     await expect(officerCard.getByText(/Slots 2 \/ 6/)).toBeVisible();
 
     // Add a Veteran Hunter (pool mode → its own equipment builder + attribute pick)

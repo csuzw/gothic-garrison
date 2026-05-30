@@ -162,7 +162,6 @@ function soldierTypeRow(v: SoldierTypeInput) {
     equipmentSlots: v.equipmentSlots,
     specialSlots: v.specialSlots,
     attributePicks: v.attributePicks,
-    abilities: v.abilities,
     notes: v.notes,
   };
 }
@@ -277,7 +276,7 @@ const soldierTypeHandlers: EntityHandlers = {
 // ── registry + dispatcher ─────────────────────────────────────────────────────
 
 const registry: Record<string, EntityHandlers> = {
-  sources: flatEntity({ table: sources, orderBy: sources.code, validate: validateSource }),
+  sources: flatEntity({ table: sources, orderBy: sources.publishedDate, validate: validateSource }),
   nations: flatEntity({ table: nations, orderBy: nations.name, validate: validateNation }),
   attributes: flatEntity({ table: attributes, orderBy: attributes.name, validate: validateAttribute }),
   equipment: flatEntity({ table: equipmentItems, orderBy: equipmentItems.name, validate: validateEquipment }),

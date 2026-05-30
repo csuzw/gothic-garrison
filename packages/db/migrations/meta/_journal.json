@@ -57,6 +57,13 @@
       "when": 1780156100513,
       "tag": "0007_long_mentallo",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1780161428127,
+      "tag": "0008_serious_proemial_gods",
+      "breakpoints": true
     }
   ]
 }

@@ -138,7 +138,6 @@ export interface SeedSoldier {
   equipmentSlots: number | null;
   specialSlots: number | null;
   attributePicks: number;
-  abilities: string[];
   notes: string | null;
   fixedAttributes: string[];
   loadouts: SeedLoadout[];
@@ -298,7 +297,6 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
           equipmentSlots: s.equipmentSlots,
           specialSlots: s.specialSlots,
           attributePicks: s.attributePicks,
-          abilities: (s.abilities as string[]) ?? [], // preserve stored order (display-significant)
           notes: s.notes,
           fixedAttributes: (fixedAttrsBySoldier.get(s.id) ?? []).slice().sort((a, b) => a.localeCompare(b)),
           loadouts: (loadoutsBySoldier.get(s.id) ?? []).slice().sort((a, b) => a.order - b.order || a.label.localeCompare(b.label)),

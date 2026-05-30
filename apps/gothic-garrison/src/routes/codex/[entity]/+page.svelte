@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state';
   import NationFlag from '$lib/components/NationFlag.svelte';
+  import CodexSoldierTypeForm from '$lib/components/CodexSoldierTypeForm.svelte';
   import { blankRow, codexEntity, pickFields, SOLDIER_TYPES_SLUG, type CodexEntity } from '$lib/codex/entities';
 
   type Row = Record<string, unknown> & { id: string };
@@ -11,17 +12,25 @@
 
   let rows = $state<Row[]>([]);
   let sources = $state<{ id: string; name: string }[]>([]);
+  let nations = $state<{ id: string; name: string }[]>([]);
+  let allAttributes = $state<{ id: string; name: string; isOfficer: boolean }[]>([]);
+  let allEquipment = $state<{ id: string; name: string; slotCost: number; isSpecial: boolean }[]>([]);
   let loading = $state(true);
   let loadError = $state<string | null>(null);
 
+  // Flat-entity form state
   let formMode = $state<'closed' | 'new' | 'edit'>('closed');
-  // Dynamic form values keyed by field name; `any` so each input can bind:value
-  // without a per-type cast (which Svelte disallows on a binding target).
   let draft = $state<Record<string, any>>({});
   let editingId = $state<string | null>(null);
   let saving = $state(false);
   let formError = $state<string | null>(null);
   let actionError = $state<string | null>(null);
+
+  // Soldier-type form state (separate to avoid clash with generic form state)
+  let stFormMode = $state<'closed' | 'new' | 'edit'>('closed');
+  let stEditingRow = $state<Row | null>(null);
+  let stSaving = $state(false);
+  let stFormError = $state<string | null>(null);
 
   const sourceName = (id: unknown) => sources.find((s) => s.id === id)?.name ?? '—';
 
@@ -29,7 +38,9 @@
     loading = true;
     loadError = null;
     formMode = 'closed';
+    stFormMode = 'closed';
     actionError = null;
+    const isST = slug === SOLDIER_TYPES_SLUG;
     try {
       const [listRes, srcRes] = await Promise.all([
         fetch(`/api/codex/${slug}`),
@@ -42,6 +53,20 @@
       }
       rows = (await listRes.json()).items ?? [];
       sources = srcRes.ok ? (await srcRes.json()).items ?? [] : [];
+      if (isST) {
+        const [natRes, attrRes, eqRes] = await Promise.all([
+          fetch('/api/codex/nations'),
+          fetch('/api/codex/attributes'),
+          fetch('/api/codex/equipment'),
+        ]);
+        nations = natRes.ok ? (await natRes.json()).items ?? [] : [];
+        allAttributes = attrRes.ok ? (await attrRes.json()).items ?? [] : [];
+        allEquipment = eqRes.ok ? (await eqRes.json()).items ?? [] : [];
+      } else {
+        nations = [];
+        allAttributes = [];
+        allEquipment = [];
+      }
     } catch {
       loadError = 'Could not reach the Codex API.';
     } finally {
@@ -132,6 +157,46 @@
       actionError = 'Delete failed — could not reach the API.';
     }
   }
+
+  // ── Soldier-type CRUD ─────────────────────────────────────────────────────────
+
+  function startNewSoldier() {
+    stEditingRow = null;
+    stFormMode = 'new';
+    stFormError = null;
+  }
+
+  function startEditSoldier(row: Row) {
+    stEditingRow = row;
+    stFormMode = 'edit';
+    stFormError = null;
+  }
+
+  async function saveSoldier(body: unknown) {
+    stSaving = true;
+    stFormError = null;
+    try {
+      const url =
+        stFormMode === 'edit'
+          ? `/api/codex/${slug}/${stEditingRow!.id}`
+          : `/api/codex/${slug}`;
+      const res = await fetch(url, {
+        method: stFormMode === 'edit' ? 'PATCH' : 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        stFormError = (await res.json().catch(() => ({})))?.message ?? 'Save failed';
+        return;
+      }
+      stFormMode = 'closed';
+      await loadAll();
+    } catch {
+      stFormError = 'Save failed — could not reach the API.';
+    } finally {
+      stSaving = false;
+    }
+  }
 </script>
 
 <svelte:head><title>Codex · {entity?.label ?? (isSoldierTypes ? 'Soldier types' : 'Codex')}</title></svelte:head>
@@ -145,14 +210,10 @@
       <span class="badge badge-ghost badge-sm">{rows.length}</span>
       {#if entity}
         <button class="btn btn-sm btn-primary ml-auto" onclick={() => startNew(entity)}>New {entity.singular}</button>
+      {:else if isSoldierTypes}
+        <button class="btn btn-sm btn-primary ml-auto" onclick={startNewSoldier}>New soldier type</button>
       {/if}
     </div>
-
-    {#if isSoldierTypes}
-      <div class="alert alert-info text-sm">
-        Soldier types are read-only here — their loadout/attribute editor is a later slice.
-      </div>
-    {/if}
 
     {#if actionError}
       <div class="alert alert-error text-sm" role="alert">{actionError}</div>
@@ -168,15 +229,28 @@
       <div class="overflow-x-auto">
         <table class="table table-zebra table-sm">
           <thead>
-            <tr><th>Name</th><th>Source</th><th>Cost</th><th>Equipment</th></tr>
+            <tr>
+              <th>Name</th>
+              <th>Source</th>
+              <th>Cost</th>
+              <th>Mode</th>
+              <th>Nations</th>
+              <th class="text-right">Actions</th>
+            </tr>
           </thead>
           <tbody>
             {#each rows as row (row.id)}
+              {@const nations_count = (row.nationIds as string[])?.length ?? 0}
               <tr>
                 <td class="font-medium">{row.name}</td>
                 <td>{sourceName(row.sourceId)}</td>
                 <td>{row.recruitmentCost}</td>
-                <td>{row.equipmentMode}</td>
+                <td><span class="badge badge-ghost badge-sm">{row.equipmentMode}</span></td>
+                <td class="opacity-60">{nations_count}</td>
+                <td class="whitespace-nowrap text-right">
+                  <button class="btn btn-ghost btn-xs" onclick={() => startEditSoldier(row)}>Edit</button>
+                  <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
+                </td>
               </tr>
             {/each}
           </tbody>
@@ -224,6 +298,7 @@
     {/if}
   </div>
 
+  <!-- Flat-entity create/edit modal -->
   {#if entity && formMode !== 'closed'}
     <div class="modal modal-open" role="dialog">
       <div class="modal-box">
@@ -302,5 +377,21 @@
       </div>
       <button class="modal-backdrop" onclick={() => (formMode = 'closed')} aria-label="Close">close</button>
     </div>
+  {/if}
+
+  <!-- Soldier-type create/edit modal -->
+  {#if isSoldierTypes && stFormMode !== 'closed'}
+    <CodexSoldierTypeForm
+      mode={stFormMode}
+      row={stEditingRow ?? undefined}
+      {sources}
+      {nations}
+      {allAttributes}
+      {allEquipment}
+      saving={stSaving}
+      error={stFormError}
+      onsave={saveSoldier}
+      oncancel={() => (stFormMode = 'closed')}
+    />
   {/if}
 {/if}
