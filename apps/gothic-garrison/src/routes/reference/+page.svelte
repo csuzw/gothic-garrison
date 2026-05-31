@@ -6,7 +6,7 @@
 
   $effect(() => {
     for (const item of CODEX_NAV) {
-      fetch(`/api/codex/${item.slug}`)
+      fetch(`/api/reference/${item.slug}`)
         .then((r) => (r.ok ? r.json() : { items: [] }))
         .then((d) => (counts[item.slug] = d.items?.length ?? 0))
         .catch(() => (counts[item.slug] = null));
@@ -14,12 +14,12 @@
   });
 </script>
 
-<svelte:head><title>Codex · Gothic Garrison</title></svelte:head>
+<svelte:head><title>Reference · Gothic Garrison</title></svelte:head>
 
 <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
   {#each CODEX_NAV as item (item.slug)}
     <li>
-      <a href="/codex/{item.slug}" class="card bg-base-200 card-compact transition hover:bg-base-300">
+      <a href="/reference/{item.slug}" class="card bg-base-200 card-compact transition hover:bg-base-300">
         <div class="card-body flex-row items-center justify-between">
           <span class="font-medium">{item.label}</span>
           <span class="badge badge-ghost">

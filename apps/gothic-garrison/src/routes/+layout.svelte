@@ -12,8 +12,8 @@
   const navLinks: { label: string; href: string | null }[] = [
     { label: 'Units', href: '/' },
     { label: 'Campaigns', href: null },
-    { label: 'Cheat Sheet', href: null },
-    { label: 'Codex', href: '/codex' },
+    { label: 'Cheat Sheet', href: '/cheat-sheet' },
+    { label: 'Reference', href: '/reference' },
   ];
 
   const pathname = $derived(page.url.pathname);
@@ -25,7 +25,7 @@
 </script>
 
 <div class="flex min-h-dvh flex-col">
-  <header class="navbar bg-base-200 border-b border-primary shadow-sm">
+  <header class="navbar bg-base-200 border-b border-primary shadow-sm print:hidden">
     <div class="container mx-auto flex items-center gap-2 px-4">
       <!-- Mobile: page links in a dropdown -->
       <details class="dropdown lg:hidden">
@@ -86,7 +86,7 @@
     {@render children()}
   </main>
 
-  <footer class="mt-8 border-t border-primary">
+  <footer class="mt-8 border-t border-primary print:hidden">
     <div class="container mx-auto space-y-2 px-4 py-6 text-center text-xs opacity-70">
       <p>
         Gothic Garrison · An unofficial fan-made list builder for <em>The Silver Bayonet</em>.

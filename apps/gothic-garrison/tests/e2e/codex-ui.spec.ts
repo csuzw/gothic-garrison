@@ -18,7 +18,7 @@ const code = () => `e2e_${Date.now()}`;
 
 test.describe('codex read-only preview toggle (dev only)', () => {
   test('toggle hides write controls and the entity page responds reactively', async ({ page }, testInfo) => {
-    await page.goto('/codex');
+    await page.goto('/reference');
 
     // Dev defaults: write controls and the toggle button are present.
     await expect(page.getByRole('button', { name: /Export to repo/ })).toBeVisible();
@@ -54,11 +54,11 @@ test.describe('codex read-only preview toggle (dev only)', () => {
 // ── DB-dependent write UI tests ───────────────────────────────────────────────
 
 async function deleteSourcesByPrefix(request: APIRequestContext, prefix: string) {
-  const res = await request.get('/api/codex/sources');
+  const res = await request.get('/api/reference/sources');
   if (!res.ok()) return;
   const { items } = await res.json();
   for (const r of items as { id: string; code: string }[]) {
-    if (r.code.startsWith(prefix)) await request.delete(`/api/codex/sources/${r.id}`);
+    if (r.code.startsWith(prefix)) await request.delete(`/api/reference/sources/${r.id}`);
   }
 }
 
@@ -70,7 +70,7 @@ test.describe('codex UI (dev only)', () => {
   test.beforeEach(async ({ request }) => {
     let ready = false;
     try {
-      const res = await request.get('/api/codex/sources');
+      const res = await request.get('/api/reference/sources');
       ready = res.ok() && ((await res.json()).items?.length ?? 0) > 0;
     } catch {
       ready = false;
@@ -84,9 +84,9 @@ test.describe('codex UI (dev only)', () => {
   });
 
   test('overview lists entities with counts and an export action', async ({ page }, testInfo) => {
-    await page.goto('/codex');
+    await page.goto('/reference');
     await page.waitForLoadState('networkidle'); // client fetches run post-hydration
-    await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Reference' })).toBeVisible();
     // "Equipment" appears as both a nav tab and an overview card — scope to nav.
     await expect(page.locator('nav.tabs').getByRole('link', { name: 'Equipment' })).toBeVisible();
     await expect(page.getByRole('button', { name: /Export to repo/ })).toBeVisible();
@@ -104,7 +104,7 @@ test.describe('codex UI (dev only)', () => {
 
   test('create, edit, then delete a flat entity', async ({ page }, testInfo) => {
     const c = code();
-    await page.goto('/codex/sources');
+    await page.goto('/reference/sources');
     await page.waitForLoadState('networkidle'); // client fetches run post-hydration
     await expect(page.getByRole('heading', { name: 'Sources' })).toBeVisible();
     const initial = await page.locator('tbody tr').count();
@@ -139,7 +139,7 @@ test.describe('codex UI (dev only)', () => {
 
   test('soldier type: create (pool), edit name, delete', async ({ page }, testInfo) => {
     const name = `E2E Soldier ${Date.now()}`;
-    await page.goto('/codex/soldier-types');
+    await page.goto('/reference/soldier-types');
     await page.waitForLoadState('networkidle');
     const initial = await page.locator('tbody tr').count();
 
@@ -187,7 +187,7 @@ test.describe('codex UI (dev only)', () => {
 
   test('monster type: create, edit name, delete', async ({ page }, testInfo) => {
     const name = `E2E Monster ${Date.now()}`;
-    await page.goto('/codex/monster-types');
+    await page.goto('/reference/monster-types');
     await page.waitForLoadState('networkidle');
     const initial = await page.locator('tbody tr').count();
 
@@ -225,7 +225,7 @@ test.describe('codex UI (dev only)', () => {
 
   test('surfaces a server-side error (duplicate code) in the form', async ({ page }) => {
     const c = code();
-    await page.goto('/codex/sources');
+    await page.goto('/reference/sources');
     await page.waitForLoadState('networkidle'); // client fetches run post-hydration
 
     async function fillNew(name: string) {

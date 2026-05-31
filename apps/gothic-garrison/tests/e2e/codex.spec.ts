@@ -9,13 +9,13 @@ import { expect, test } from '@playwright/test';
 
 test.describe('codex (production build)', () => {
   test.describe('route availability', () => {
-    test('/codex loads in a production build', async ({ page }) => {
-      const response = await page.goto('/codex');
+    test('/reference loads in a production build', async ({ page }) => {
+      const response = await page.goto('/reference');
       expect(response?.status()).toBe(200);
     });
 
     test('a Codex entity page loads in a production build', async ({ page }) => {
-      const response = await page.goto('/codex/sources');
+      const response = await page.goto('/reference/sources');
       expect(response?.status()).toBe(200);
     });
 
@@ -23,66 +23,66 @@ test.describe('codex (production build)', () => {
       await page.goto('/');
       // The link exists in both the mobile dropdown and the desktop nav; check
       // presence rather than visibility to avoid mobile-Safari dropdown failures.
-      await expect(page.locator('a[href="/codex"]')).not.toHaveCount(0);
+      await expect(page.locator('a[href="/reference"]')).not.toHaveCount(0);
     });
   });
 
   test.describe('read-only UI in production', () => {
     test('no "Export to repo" button on the Codex overview', async ({ page }) => {
-      await page.goto('/codex');
+      await page.goto('/reference');
       await expect(page.getByRole('button', { name: /Export to repo/ })).toHaveCount(0);
     });
 
     test('no dev-only controls (warning badge, preview toggle)', async ({ page }) => {
-      await page.goto('/codex');
+      await page.goto('/reference');
       await expect(page.locator('.badge-warning')).toHaveCount(0);
       await expect(page.getByRole('button', { name: /Preview read-only/ })).toHaveCount(0);
     });
 
     test('no "New" button on a flat entity page', async ({ page }) => {
-      await page.goto('/codex/sources');
+      await page.goto('/reference/sources');
       await expect(page.getByRole('button', { name: /New source/ })).toHaveCount(0);
     });
 
     test('no "New" button on the soldier types page', async ({ page }) => {
-      await page.goto('/codex/soldier-types');
+      await page.goto('/reference/soldier-types');
       await expect(page.getByRole('button', { name: /New soldier/ })).toHaveCount(0);
     });
 
     test('no "New" button on the monster types page', async ({ page }) => {
-      await page.goto('/codex/monster-types');
+      await page.goto('/reference/monster-types');
       await expect(page.getByRole('button', { name: /New monster/ })).toHaveCount(0);
     });
   });
 
   test.describe('write API is blocked in production', () => {
-    test('GET /api/codex/:entity is not 404 (read gate removed)', async ({ request }) => {
-      const res = await request.get('/api/codex/nations');
+    test('GET /api/reference/:entity is not 404 (read gate removed)', async ({ request }) => {
+      const res = await request.get('/api/reference/nations');
       expect(res.status()).not.toBe(404);
     });
 
-    test('POST /api/codex/:entity is 404', async ({ request }) => {
-      const res = await request.post('/api/codex/nations', { data: { name: 'X', sourceId: 'x' } });
+    test('POST /api/reference/:entity is 404', async ({ request }) => {
+      const res = await request.post('/api/reference/nations', { data: { name: 'X', sourceId: 'x' } });
       expect(res.status()).toBe(404);
     });
 
-    test('PATCH /api/codex/:entity/:id is 404', async ({ request }) => {
+    test('PATCH /api/reference/:entity/:id is 404', async ({ request }) => {
       const res = await request.patch(
-        '/api/codex/nations/00000000-0000-0000-0000-000000000000',
+        '/api/reference/nations/00000000-0000-0000-0000-000000000000',
         { data: { name: 'X' } },
       );
       expect(res.status()).toBe(404);
     });
 
-    test('DELETE /api/codex/:entity/:id is 404', async ({ request }) => {
+    test('DELETE /api/reference/:entity/:id is 404', async ({ request }) => {
       const res = await request.delete(
-        '/api/codex/nations/00000000-0000-0000-0000-000000000000',
+        '/api/reference/nations/00000000-0000-0000-0000-000000000000',
       );
       expect(res.status()).toBe(404);
     });
 
-    test('POST /api/codex/export is 404', async ({ request }) => {
-      const res = await request.post('/api/codex/export', { data: { note: 'x' } });
+    test('POST /api/reference/export is 404', async ({ request }) => {
+      const res = await request.post('/api/reference/export', { data: { note: 'x' } });
       expect(res.status()).toBe(404);
     });
   });

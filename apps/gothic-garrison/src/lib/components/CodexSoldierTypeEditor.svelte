@@ -24,7 +24,7 @@
     saveError = null;
     try {
       const editingId = target?.mode === 'edit' ? target.row.id : null;
-      const url = editingId ? `/api/codex/${slug}/${editingId}` : `/api/codex/${slug}`;
+      const url = editingId ? `/api/reference/${slug}/${editingId}` : `/api/reference/${slug}`;
       const res = await fetch(url, {
         method: editingId ? 'PATCH' : 'POST',
         headers: { 'content-type': 'application/json' },

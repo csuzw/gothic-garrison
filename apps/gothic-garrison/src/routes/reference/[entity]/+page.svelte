@@ -100,8 +100,8 @@
     const isMT = slug === MONSTER_TYPES_SLUG;
     try {
       const [listRes, srcRes] = await Promise.all([
-        fetch(`/api/codex/${slug}`),
-        fetch('/api/codex/sources'),
+        fetch(`/api/reference/${slug}`),
+        fetch('/api/reference/sources'),
       ]);
       if (!listRes.ok) {
         loadError = (await listRes.json().catch(() => ({})))?.message ?? `Failed to load ${slug}`;
@@ -112,9 +112,9 @@
       sources = srcRes.ok ? (await srcRes.json()).items ?? [] : [];
       if (isST || isMT) {
         const [natRes, attrRes, eqRes] = await Promise.all([
-          fetch('/api/codex/nations'),
-          fetch('/api/codex/attributes'),
-          fetch('/api/codex/equipment'),
+          fetch('/api/reference/nations'),
+          fetch('/api/reference/attributes'),
+          fetch('/api/reference/equipment'),
         ]);
         nations = natRes.ok ? (await natRes.json()).items ?? [] : [];
         allAttributes = attrRes.ok ? (await attrRes.json()).items ?? [] : [];
@@ -142,7 +142,7 @@
     if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
     actionError = null;
     try {
-      const res = await fetch(`/api/codex/${slug}/${row.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/reference/${slug}/${row.id}`, { method: 'DELETE' });
       if (!res.ok) {
         actionError = (await res.json().catch(() => ({})))?.message ?? 'Delete failed';
         return;
@@ -154,7 +154,7 @@
   }
 </script>
 
-<svelte:head><title>Codex · {entity?.label ?? (isSoldierTypes ? 'Soldiers' : isMonsterTypes ? 'Monsters' : 'Codex')}</title></svelte:head>
+<svelte:head><title>Reference · {entity?.label ?? (isSoldierTypes ? 'Soldiers' : isMonsterTypes ? 'Monsters' : 'Reference')}</title></svelte:head>
 
 {#if !entity && !isSoldierTypes && !isMonsterTypes}
   <div class="alert alert-error">Unknown Codex entity: <code>{slug}</code></div>

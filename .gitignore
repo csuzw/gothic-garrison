@@ -40,4 +40,4 @@ Thumbs.db
 .turbo/
 
 # Third-party reference data cached for the one-time seed import (not for committing)
-reference/
+/reference/

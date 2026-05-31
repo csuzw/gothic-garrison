@@ -7,7 +7,7 @@
   let { data, children } = $props();
 
   const path = $derived(page.url.pathname);
-  const isActive = (slug: string) => path === `/codex/${slug}` || path.startsWith(`/codex/${slug}/`);
+  const isActive = (slug: string) => path === `/reference/${slug}` || path.startsWith(`/reference/${slug}/`);
 
   // In dev, allow simulating the production read-only view for testing.
   let readonlyOverride = $state(false);
@@ -39,7 +39,7 @@
     exportError = null;
     result = null;
     try {
-      const res = await fetch('/api/codex/export', {
+      const res = await fetch('/api/reference/export', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ note }),
@@ -61,7 +61,7 @@
 
 <div class="space-y-4">
   <div class="flex flex-wrap items-center gap-2">
-    <h1 class="text-2xl font-semibold tracking-wide">Codex</h1>
+    <h1 class="text-2xl font-semibold tracking-wide">Reference</h1>
     {#if dev}
       {#if readonlyOverride}
         <span class="badge badge-info badge-sm">read-only preview</span>
@@ -85,7 +85,7 @@
 
   <nav class="tabs tabs-box w-fit border border-primary">
     {#each CODEX_NAV as item (item.slug)}
-      <a href="/codex/{item.slug}" class="tab" class:tab-active={isActive(item.slug)}>{item.label}</a>
+      <a href="/reference/{item.slug}" class="tab" class:tab-active={isActive(item.slug)}>{item.label}</a>
     {/each}
   </nav>
 

@@ -41,7 +41,7 @@
     saving = true;
     formError = null;
     try {
-      const url = editingId ? `/api/codex/${slug}/${editingId}` : `/api/codex/${slug}`;
+      const url = editingId ? `/api/reference/${slug}/${editingId}` : `/api/reference/${slug}`;
       const res = await fetch(url, {
         method: editingId ? 'PATCH' : 'POST',
         headers: { 'content-type': 'application/json' },
@@ -69,7 +69,7 @@
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch('/api/codex/flags', { method: 'POST', body: fd });
+      const res = await fetch('/api/reference/flags', { method: 'POST', body: fd });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { flagUploadError = data.message ?? 'Upload failed'; return; }
       draft['flag'] = data.path;
