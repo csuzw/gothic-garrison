@@ -1,11 +1,17 @@
 <script lang="ts">
+  import { getContext } from 'svelte';
   import { page } from '$app/state';
   import NationFlag from '$lib/components/NationFlag.svelte';
-  import CodexSoldierTypeForm from '$lib/components/CodexSoldierTypeForm.svelte';
-  import CodexMonsterTypeForm from '$lib/components/CodexMonsterTypeForm.svelte';
-  import { blankRow, codexEntity, pickFields, SOLDIER_TYPES_SLUG, MONSTER_TYPES_SLUG, type CodexEntity } from '$lib/codex/entities';
+  import CodexFlatEntityEditor from '$lib/components/CodexFlatEntityEditor.svelte';
+  import CodexSoldierTypeEditor from '$lib/components/CodexSoldierTypeEditor.svelte';
+  import CodexMonsterTypeEditor from '$lib/components/CodexMonsterTypeEditor.svelte';
+  import { codexEntity, SOLDIER_TYPES_SLUG, MONSTER_TYPES_SLUG, type CodexEntity } from '$lib/codex/entities';
+
+  const codexCtx = getContext<{ readonly: boolean }>('codex');
+  const readonly = $derived(codexCtx.readonly);
 
   type Row = Record<string, unknown> & { id: string };
+  type EditTarget = { mode: 'new'; sourceId?: string } | { mode: 'edit'; row: Row } | null;
 
   const slug = $derived(page.params.entity!);
   const entity = $derived(codexEntity(slug));
@@ -67,25 +73,13 @@
       : filteredRows
   );
 
-  // Flat-entity form state
-  let formMode = $state<'closed' | 'new' | 'edit'>('closed');
-  let draft = $state<Record<string, any>>({});
-  let editingId = $state<string | null>(null);
-  let saving = $state(false);
-  let formError = $state<string | null>(null);
+  // Edit targets — one per entity type, drives the editor modals
+  let flatTarget = $state<EditTarget>(null);
+  let stTarget = $state<EditTarget>(null);
+  let mtTarget = $state<EditTarget>(null);
+
+  // Delete error (shared across all entity types)
   let actionError = $state<string | null>(null);
-
-  // Soldier-type form state (separate to avoid clash with generic form state)
-  let stFormMode = $state<'closed' | 'new' | 'edit'>('closed');
-  let stEditingRow = $state<Row | null>(null);
-  let stSaving = $state(false);
-  let stFormError = $state<string | null>(null);
-
-  // Monster-type form state
-  let mtFormMode = $state<'closed' | 'new' | 'edit'>('closed');
-  let mtEditingRow = $state<Row | null>(null);
-  let mtSaving = $state(false);
-  let mtFormError = $state<string | null>(null);
 
   const sourceName = (id: unknown) => sources.find((s) => s.id === id)?.name ?? '—';
   const sourceCode = (id: unknown) => sources.find((s) => s.id === id)?.code ?? '?';
@@ -98,9 +92,9 @@
       sortKey = '';
       sortDir = 'asc';
     }
-    formMode = 'closed';
-    stFormMode = 'closed';
-    mtFormMode = 'closed';
+    flatTarget = null;
+    stTarget = null;
+    mtTarget = null;
     actionError = null;
     const isST = slug === SOLDIER_TYPES_SLUG;
     const isMT = slug === MONSTER_TYPES_SLUG;
@@ -143,69 +137,6 @@
     loadAll();
   });
 
-  function startNew(e: CodexEntity) {
-    draft = blankRow(e);
-    if (sourceFilter) draft['sourceId'] = sourceFilter;
-    editingId = null;
-    formMode = 'new';
-    formError = null;
-  }
-
-  function startEdit(e: CodexEntity, row: Row) {
-    draft = pickFields(e, row);
-    editingId = row.id;
-    formMode = 'edit';
-    formError = null;
-  }
-
-  async function save(event: SubmitEvent) {
-    event.preventDefault();
-    saving = true;
-    formError = null;
-    try {
-      const url = formMode === 'edit' ? `/api/codex/${slug}/${editingId}` : `/api/codex/${slug}`;
-      const res = await fetch(url, {
-        method: formMode === 'edit' ? 'PATCH' : 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(draft),
-      });
-      if (!res.ok) {
-        formError = (await res.json().catch(() => ({})))?.message ?? 'Save failed';
-        return;
-      }
-      formMode = 'closed';
-      await loadAll(true);
-    } catch {
-      formError = 'Save failed — could not reach the API.';
-    } finally {
-      saving = false;
-    }
-  }
-
-  let flagUploading = $state(false);
-  let flagUploadError = $state<string | null>(null);
-
-  async function uploadFlag(e: Event) {
-    const input = e.currentTarget as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    flagUploading = true;
-    flagUploadError = null;
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/codex/flags', { method: 'POST', body: fd });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) { flagUploadError = data.message ?? 'Upload failed'; return; }
-      draft['flag'] = data.path;
-    } catch {
-      flagUploadError = 'Upload failed — could not reach the API.';
-    } finally {
-      flagUploading = false;
-      input.value = '';
-    }
-  }
-
   async function remove(row: Row) {
     const label = (row.name as string) ?? (row.code as string) ?? row.id;
     if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
@@ -219,86 +150,6 @@
       await loadAll(true);
     } catch {
       actionError = 'Delete failed — could not reach the API.';
-    }
-  }
-
-  // ── Soldier-type CRUD ─────────────────────────────────────────────────────────
-
-  function startNewSoldier() {
-    stEditingRow = sourceFilter ? ({ sourceId: sourceFilter } as unknown as Row) : null;
-    stFormMode = 'new';
-    stFormError = null;
-  }
-
-  function startEditSoldier(row: Row) {
-    stEditingRow = row;
-    stFormMode = 'edit';
-    stFormError = null;
-  }
-
-  async function saveSoldier(body: unknown) {
-    stSaving = true;
-    stFormError = null;
-    try {
-      const url =
-        stFormMode === 'edit'
-          ? `/api/codex/${slug}/${stEditingRow!.id}`
-          : `/api/codex/${slug}`;
-      const res = await fetch(url, {
-        method: stFormMode === 'edit' ? 'PATCH' : 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        stFormError = (await res.json().catch(() => ({})))?.message ?? 'Save failed';
-        return;
-      }
-      stFormMode = 'closed';
-      await loadAll(true);
-    } catch {
-      stFormError = 'Save failed — could not reach the API.';
-    } finally {
-      stSaving = false;
-    }
-  }
-
-  // ── Monster-type CRUD ─────────────────────────────────────────────────────────
-
-  function startNewMonster() {
-    mtEditingRow = sourceFilter ? ({ sourceId: sourceFilter } as unknown as Row) : null;
-    mtFormMode = 'new';
-    mtFormError = null;
-  }
-
-  function startEditMonster(row: Row) {
-    mtEditingRow = row;
-    mtFormMode = 'edit';
-    mtFormError = null;
-  }
-
-  async function saveMonster(body: unknown) {
-    mtSaving = true;
-    mtFormError = null;
-    try {
-      const url =
-        mtFormMode === 'edit'
-          ? `/api/codex/${slug}/${mtEditingRow!.id}`
-          : `/api/codex/${slug}`;
-      const res = await fetch(url, {
-        method: mtFormMode === 'edit' ? 'PATCH' : 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        mtFormError = (await res.json().catch(() => ({})))?.message ?? 'Save failed';
-        return;
-      }
-      mtFormMode = 'closed';
-      await loadAll(true);
-    } catch {
-      mtFormError = 'Save failed — could not reach the API.';
-    } finally {
-      mtSaving = false;
     }
   }
 </script>
@@ -327,12 +178,14 @@
             {/each}
           </div>
         {/if}
-        {#if entity}
-          <button class="btn btn-sm btn-primary" onclick={() => startNew(entity)}>New {entity.singular}</button>
-        {:else if isSoldierTypes}
-          <button class="btn btn-sm btn-primary" onclick={startNewSoldier}>New soldier</button>
-        {:else if isMonsterTypes}
-          <button class="btn btn-sm btn-primary" onclick={startNewMonster}>New monster</button>
+        {#if !readonly}
+          {#if entity}
+            <button class="btn btn-sm btn-primary" onclick={() => (flatTarget = { mode: 'new', sourceId: sourceFilter || undefined })}>New {entity.singular}</button>
+          {:else if isSoldierTypes}
+            <button class="btn btn-sm btn-primary" onclick={() => (stTarget = { mode: 'new', sourceId: sourceFilter || undefined })}>New soldier</button>
+          {:else if isMonsterTypes}
+            <button class="btn btn-sm btn-primary" onclick={() => (mtTarget = { mode: 'new', sourceId: sourceFilter || undefined })}>New monster</button>
+          {/if}
         {/if}
       </div>
     </div>
@@ -365,7 +218,7 @@
               <th>Attributes</th>
               <th>Equipment</th>
               <th>Nations</th>
-              <th class="text-right">Actions</th>
+              {#if !readonly}<th class="text-right">Actions</th>{/if}
             </tr>
           </thead>
           <tbody>
@@ -431,10 +284,12 @@
                     {/each}
                   </div>
                 </td>
-                <td class="whitespace-nowrap text-right">
-                  <button class="btn btn-ghost btn-xs" onclick={() => startEditSoldier(row)}>Edit</button>
-                  <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
-                </td>
+                {#if !readonly}
+                  <td class="whitespace-nowrap text-right">
+                    <button class="btn btn-ghost btn-xs" onclick={() => (stTarget = { mode: 'edit', row })}>Edit</button>
+                    <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
+                  </td>
+                {/if}
               </tr>
             {/each}
           </tbody>
@@ -454,7 +309,7 @@
               <th class="cursor-pointer select-none" onclick={() => sortToggle('health')}>HP{si('health')}</th>
               <th>Attributes</th>
               <th>Equipment</th>
-              <th class="text-right">Actions</th>
+              {#if !readonly}<th class="text-right">Actions</th>{/if}
             </tr>
           </thead>
           <tbody>
@@ -501,10 +356,12 @@
                     {/each}
                   </div>
                 </td>
-                <td class="whitespace-nowrap text-right">
-                  <button class="btn btn-ghost btn-xs" onclick={() => startEditMonster(row)}>Edit</button>
-                  <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
-                </td>
+                {#if !readonly}
+                  <td class="whitespace-nowrap text-right">
+                    <button class="btn btn-ghost btn-xs" onclick={() => (mtTarget = { mode: 'edit', row })}>Edit</button>
+                    <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
+                  </td>
+                {/if}
               </tr>
             {/each}
           </tbody>
@@ -524,7 +381,7 @@
                   onclick={sortable ? () => sortToggle(col) : undefined}
                 >{field?.label ?? col}{sortable ? si(col) : ''}</th>
               {/each}
-              <th class="text-right">Actions</th>
+              {#if !readonly}<th class="text-right">Actions</th>{/if}
             </tr>
           </thead>
           <tbody>
@@ -551,10 +408,12 @@
                     {/if}
                   </td>
                 {/each}
-                <td class="text-right whitespace-nowrap">
-                  <button class="btn btn-ghost btn-xs" onclick={() => startEdit(entity, row)}>Edit</button>
-                  <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
-                </td>
+                {#if !readonly}
+                  <td class="text-right whitespace-nowrap">
+                    <button class="btn btn-ghost btn-xs" onclick={() => (flatTarget = { mode: 'edit', row })}>Edit</button>
+                    <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
+                  </td>
+                {/if}
               </tr>
             {/each}
           </tbody>
@@ -563,128 +422,37 @@
     {/if}
   </div>
 
-  <!-- Flat-entity create/edit modal -->
-  {#if entity && formMode !== 'closed'}
-    <div class="modal modal-open" role="dialog">
-      <div class="modal-box">
-        <h3 class="text-lg font-semibold">
-          {formMode === 'edit' ? 'Edit' : 'New'} {entity.singular}
-        </h3>
-
-        <form onsubmit={save} class="mt-4 space-y-3">
-          {#each entity.fields as field (field.key)}
-            <label class="block">
-              <span class="mb-1 block text-sm font-medium">
-                {field.label}{#if field.required}<span class="text-error"> *</span>{/if}
-              </span>
-
-              {#if field.type === 'boolean'}
-                <input type="checkbox" bind:checked={draft[field.key]} class="toggle toggle-sm" />
-              {:else if field.type === 'textarea'}
-                <textarea bind:value={draft[field.key]} class="textarea w-full" rows="2" placeholder={field.placeholder}></textarea>
-              {:else if field.type === 'number'}
-                <input type="number" bind:value={draft[field.key]} min={field.min} max={field.max} required={field.required} class="input w-full" />
-              {:else if field.type === 'date'}
-                <input type="date" bind:value={draft[field.key]} required={field.required} class="input w-full" />
-              {:else if field.type === 'enum'}
-                {#if field.widget === 'tag-group'}
-                  <div class="join flex-wrap">
-                    {#each field.options ?? [] as opt (opt)}
-                      <button
-                        type="button"
-                        class="btn btn-sm join-item {draft[field.key] === opt ? 'btn-primary' : 'btn-ghost'}"
-                        class:capitalize={field.capitalize}
-                        onclick={() => (draft[field.key] = opt)}
-                      >{opt}</button>
-                    {/each}
-                  </div>
-                {:else}
-                  <select bind:value={draft[field.key]} class="select w-full">
-                    {#each field.options ?? [] as opt (opt)}<option value={opt}>{opt}</option>{/each}
-                  </select>
-                {/if}
-              {:else if field.type === 'source'}
-                <select bind:value={draft[field.key]} required={field.required} class="select w-full">
-                  <option value="" disabled>Choose a source…</option>
-                  {#each sources as s (s.id)}<option value={s.id}>{s.name}</option>{/each}
-                </select>
-              {:else if field.type === 'flag'}
-                <div class="space-y-2">
-                  {#if draft[field.key]}
-                    <div class="flex items-center gap-3">
-                      <NationFlag flag={draft[field.key]} size="md" />
-                      <span class="font-mono text-xs opacity-60">{draft[field.key]}</span>
-                    </div>
-                  {/if}
-                  <label class="flex cursor-pointer items-center gap-2">
-                    <span class="btn btn-outline btn-sm">
-                      {flagUploading ? 'Uploading…' : draft[field.key] ? 'Replace SVG…' : 'Upload SVG…'}
-                    </span>
-                    <input
-                      type="file"
-                      accept=".svg"
-                      class="hidden"
-                      disabled={flagUploading}
-                      onchange={uploadFlag}
-                    />
-                  </label>
-                  {#if flagUploadError}
-                    <p class="text-xs text-error">{flagUploadError}</p>
-                  {/if}
-                </div>
-              {:else}
-                <input type="text" bind:value={draft[field.key]} required={field.required} placeholder={field.placeholder} class="input w-full" />
-              {/if}
-
-              {#if field.help}<span class="mt-1 block text-xs opacity-60">{field.help}</span>{/if}
-            </label>
-          {/each}
-
-          {#if formError}
-            <div class="alert alert-error text-sm" role="alert">{formError}</div>
-          {/if}
-
-          <div class="modal-action">
-            <button type="button" class="btn btn-ghost" onclick={() => (formMode = 'closed')} disabled={saving}>Cancel</button>
-            <button type="submit" class="btn btn-primary" disabled={saving}>
-              {#if saving}<span class="loading loading-spinner loading-sm"></span>{/if}
-              {formMode === 'edit' ? 'Save' : 'Create'}
-            </button>
-          </div>
-        </form>
-      </div>
-      <button class="modal-backdrop" onclick={() => (formMode = 'closed')} aria-label="Close">close</button>
-    </div>
-  {/if}
-
-  <!-- Soldier-type create/edit modal -->
-  {#if isSoldierTypes && stFormMode !== 'closed'}
-    <CodexSoldierTypeForm
-      mode={stFormMode}
-      row={stEditingRow ?? undefined}
-      {sources}
-      {nations}
-      {allAttributes}
-      {allEquipment}
-      saving={stSaving}
-      error={stFormError}
-      onsave={saveSoldier}
-      oncancel={() => (stFormMode = 'closed')}
-    />
-  {/if}
-
-  <!-- Monster-type create/edit modal -->
-  {#if isMonsterTypes && mtFormMode !== 'closed'}
-    <CodexMonsterTypeForm
-      mode={mtFormMode}
-      row={mtEditingRow ?? undefined}
-      {sources}
-      {allAttributes}
-      {allEquipment}
-      saving={mtSaving}
-      error={mtFormError}
-      onsave={saveMonster}
-      oncancel={() => (mtFormMode = 'closed')}
-    />
+  {#if !readonly}
+    {#if entity}
+      <CodexFlatEntityEditor
+        {slug}
+        {entity}
+        {sources}
+        target={flatTarget}
+        onsaved={() => loadAll(true)}
+        onclose={() => (flatTarget = null)}
+      />
+    {:else if isSoldierTypes}
+      <CodexSoldierTypeEditor
+        {slug}
+        {sources}
+        {nations}
+        {allAttributes}
+        {allEquipment}
+        target={stTarget}
+        onsaved={() => loadAll(true)}
+        onclose={() => (stTarget = null)}
+      />
+    {:else if isMonsterTypes}
+      <CodexMonsterTypeEditor
+        {slug}
+        {sources}
+        {allAttributes}
+        {allEquipment}
+        target={mtTarget}
+        onsaved={() => loadAll(true)}
+        onclose={() => (mtTarget = null)}
+      />
+    {/if}
   {/if}
 {/if}

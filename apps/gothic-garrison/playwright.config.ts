@@ -1,11 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // Two surfaces are tested:
-//  • the production build (`pnpm preview`, :4173) — everything except the Codex
-//    UI, including the prod-gate checks that the Codex 404s there.
-//  • the dev server (`pnpm dev`, :5173) — the local-development-only Codex UI,
-//    which by design only exists when `dev` is true. Its tests live in
-//    codex-ui.spec.ts and run under the `codex-dev` project; they need Postgres
+//  • the production build (`pnpm preview`, :4173) — all routes including the
+//    Codex read-only view; prod-gate checks that Codex write paths 404 there.
+//  • the dev server (`pnpm dev`, :5173) — the Codex write UI and the read-only
+//    preview toggle. Tests live in codex-ui.spec.ts and run under the
+//    `codex-dev` project; DB-dependent tests need Postgres
 //    (`docker compose up -d`) and skip themselves if the dev API isn't reachable.
 const CODEX_UI = /codex-ui\.spec\.ts/;
 

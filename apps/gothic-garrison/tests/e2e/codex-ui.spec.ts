@@ -1,28 +1,70 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 
 // Runs under the `codex-dev` Playwright project against `pnpm dev` (:5173),
-// where the local-development-only Codex is reachable. Needs Postgres up
-// (`docker compose up -d`); skips itself if the dev API isn't available.
+// where the Codex write UI is reachable. Needs Postgres up
+// (`docker compose up -d`); DB-dependent tests skip themselves if the dev API
+// isn't available.
 //
-// Uses optional-rules (normally an empty table) as the throwaway entity, with a
-// unique code per run, and cleans up after itself. It deliberately does NOT
-// click "Export" — that would rewrite the committed seed-data.ts / changelog.
-// The export endpoint + file writing are covered by the db round-trip checks.
+// The flat-entity CRUD tests use sources as the throwaway entity (unique `code`
+// per run) and clean up after themselves. They deliberately do NOT click
+// "Export" — that would rewrite the committed seed-data.ts / changelog.
 
 const code = () => `e2e_${Date.now()}`;
 
-async function deleteRulesByPrefix(request: APIRequestContext, prefix: string) {
-  const res = await request.get('/api/codex/optional-rules');
+// ── Read-only preview toggle ──────────────────────────────────────────────────
+// Does not need Postgres — only exercises the layout-level toggle UI and checks
+// the reactive chain from the layout button down to the entity page's write
+// controls. Runs independently of the DB-guarded describe block below.
+
+test.describe('codex read-only preview toggle (dev only)', () => {
+  test('toggle hides write controls and the entity page responds reactively', async ({ page }, testInfo) => {
+    await page.goto('/codex');
+
+    // Dev defaults: write controls and the toggle button are present.
+    await expect(page.getByRole('button', { name: /Export to repo/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Preview read-only' })).toBeVisible();
+    await expect(page.locator('.badge-warning')).toBeVisible();
+
+    // Activate preview mode.
+    await page.getByRole('button', { name: 'Preview read-only' }).click();
+    await expect(page.getByRole('button', { name: /Export to repo/ })).toHaveCount(0);
+    await expect(page.locator('.badge-info')).toContainText('read-only preview');
+    await expect(page.getByRole('button', { name: 'Exit preview' })).toBeVisible();
+
+    // Navigate to an entity page via the tab — SvelteKit soft-nav keeps the
+    // layout mounted so readonlyOverride state is preserved. Use exact: true to
+    // avoid matching both the tab link and the overview card on the /codex page.
+    await page.getByRole('link', { name: 'Sources', exact: true }).click();
+    await expect(page.getByRole('button', { name: /New source/ })).toHaveCount(0);
+
+    await testInfo.attach('sources-readonly-preview', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+
+    // Deactivate preview — the entity page's New button and the Export button
+    // should reappear reactively without a page reload, validating the full
+    // Svelte 5 context signal chain through the getter.
+    await page.getByRole('button', { name: 'Exit preview' }).click();
+    await expect(page.getByRole('button', { name: /New source/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Export to repo/ })).toBeVisible();
+  });
+});
+
+// ── DB-dependent write UI tests ───────────────────────────────────────────────
+
+async function deleteSourcesByPrefix(request: APIRequestContext, prefix: string) {
+  const res = await request.get('/api/codex/sources');
   if (!res.ok()) return;
   const { items } = await res.json();
   for (const r of items as { id: string; code: string }[]) {
-    if (r.code.startsWith(prefix)) await request.delete(`/api/codex/optional-rules/${r.id}`);
+    if (r.code.startsWith(prefix)) await request.delete(`/api/codex/sources/${r.id}`);
   }
 }
 
 test.describe('codex UI (dev only)', () => {
-  // These tests share one database (optional-rules), so run them serially to
-  // avoid one test's cleanup deleting another's rows.
+  // These tests share one database (sources), so run them serially to avoid
+  // one test's cleanup deleting another's rows.
   test.describe.configure({ mode: 'serial' });
 
   test.beforeEach(async ({ request }) => {
@@ -34,11 +76,11 @@ test.describe('codex UI (dev only)', () => {
       ready = false;
     }
     test.skip(!ready, 'Codex dev API/DB not available — run `docker compose up -d` + `pnpm db:seed`.');
-    await deleteRulesByPrefix(request, 'e2e_');
+    await deleteSourcesByPrefix(request, 'e2e_');
   });
 
   test.afterEach(async ({ request }) => {
-    await deleteRulesByPrefix(request, 'e2e_').catch(() => {});
+    await deleteSourcesByPrefix(request, 'e2e_').catch(() => {});
   });
 
   test('overview lists entities with counts and an export action', async ({ page }, testInfo) => {
@@ -62,17 +104,18 @@ test.describe('codex UI (dev only)', () => {
 
   test('create, edit, then delete a flat entity', async ({ page }, testInfo) => {
     const c = code();
-    await page.goto('/codex/optional-rules');
+    await page.goto('/codex/sources');
     await page.waitForLoadState('networkidle'); // client fetches run post-hydration
-    await expect(page.getByRole('heading', { name: 'Optional rules' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sources' })).toBeVisible();
     const initial = await page.locator('tbody tr').count();
 
-    // Create
-    await page.getByRole('button', { name: 'New optional rule' }).click();
+    // Create — all required fields for a source row.
+    await page.getByRole('button', { name: 'New source' }).click();
     await page.getByLabel('Code').fill(c);
-    await page.getByLabel('Name').fill('E2E Rule');
-    await page.getByLabel('Description').fill('Created by the Codex UI e2e test.');
-    await page.getByLabel('Source').selectOption({ index: 1 });
+    await page.getByLabel('Name').fill('E2E Source');
+    await page.getByLabel('Published').fill('2025-01-01');
+    await page.getByLabel('Author').fill('E2E Test');
+    // Kind defaults to 'core' via the select's first option.
     await testInfo.attach('codex-create-form', { body: await page.screenshot(), contentType: 'image/png' });
     await page.locator('.modal-open').getByRole('button', { name: 'Create' }).click();
 
@@ -82,10 +125,10 @@ test.describe('codex UI (dev only)', () => {
 
     // Edit
     await page.locator('tbody tr', { hasText: c }).getByRole('button', { name: 'Edit' }).click();
-    await page.getByLabel('Name').fill('E2E Rule Renamed');
+    await page.getByLabel('Name').fill('E2E Source Renamed');
     await page.locator('.modal-open').getByRole('button', { name: 'Save' }).click();
     await expect(page.locator('.modal-open')).toHaveCount(0);
-    await expect(page.getByRole('cell', { name: 'E2E Rule Renamed', exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'E2E Source Renamed', exact: true })).toBeVisible();
 
     // Delete (accept the confirm())
     page.on('dialog', (d) => d.accept());
@@ -101,8 +144,8 @@ test.describe('codex UI (dev only)', () => {
     const initial = await page.locator('tbody tr').count();
 
     // Open the new soldier type form
-    await page.getByRole('button', { name: 'New soldier type' }).click();
-    await expect(page.getByRole('heading', { name: 'New soldier type' })).toBeVisible();
+    await page.getByRole('button', { name: 'New soldier' }).click();
+    await expect(page.getByRole('heading', { name: 'New soldier' })).toBeVisible();
 
     // Fill basic info
     await page.getByPlaceholder('e.g. Rifleman').fill(name);
@@ -123,16 +166,17 @@ test.describe('codex UI (dev only)', () => {
     await page.locator('.modal-open').getByRole('button', { name: 'Create' }).click();
 
     await expect(page.locator('.modal-open')).toHaveCount(0);
-    await expect(page.getByRole('cell', { name, exact: true })).toBeVisible();
+    // Name cell includes a source-code badge, so match at the row level.
+    await expect(page.locator('tbody tr').filter({ hasText: name })).toBeVisible();
     await expect(page.locator('tbody tr')).toHaveCount(initial + 1);
 
     // Edit: rename
     await page.locator('tbody tr', { hasText: name }).getByRole('button', { name: 'Edit' }).click();
-    await expect(page.getByRole('heading', { name: 'Edit soldier type' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Edit soldier' })).toBeVisible();
     await page.getByPlaceholder('e.g. Rifleman').fill(`${name} v2`);
     await page.locator('.modal-open').getByRole('button', { name: 'Save' }).click();
     await expect(page.locator('.modal-open')).toHaveCount(0);
-    await expect(page.getByRole('cell', { name: `${name} v2`, exact: true })).toBeVisible();
+    await expect(page.locator('tbody tr').filter({ hasText: `${name} v2` })).toBeVisible();
 
     // Delete
     page.on('dialog', (d) => d.accept());
@@ -147,8 +191,8 @@ test.describe('codex UI (dev only)', () => {
     await page.waitForLoadState('networkidle');
     const initial = await page.locator('tbody tr').count();
 
-    await page.getByRole('button', { name: 'New monster type' }).click();
-    await expect(page.getByRole('heading', { name: 'New monster type' })).toBeVisible();
+    await page.getByRole('button', { name: 'New monster' }).click();
+    await expect(page.getByRole('heading', { name: 'New monster' })).toBeVisible();
 
     await page.getByPlaceholder('e.g. Werewolf').fill(name);
     await page.getByLabel(/experience/i).fill('3');
@@ -160,16 +204,17 @@ test.describe('codex UI (dev only)', () => {
     await page.locator('.modal-open').getByRole('button', { name: 'Create' }).click();
 
     await expect(page.locator('.modal-open')).toHaveCount(0);
-    await expect(page.getByRole('cell', { name, exact: true })).toBeVisible();
+    // Name cell includes a source-code badge, so match at the row level.
+    await expect(page.locator('tbody tr').filter({ hasText: name })).toBeVisible();
     await expect(page.locator('tbody tr')).toHaveCount(initial + 1);
 
     // Edit: rename
     await page.locator('tbody tr', { hasText: name }).getByRole('button', { name: 'Edit' }).click();
-    await expect(page.getByRole('heading', { name: 'Edit monster type' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Edit monster' })).toBeVisible();
     await page.getByPlaceholder('e.g. Werewolf').fill(`${name} v2`);
     await page.locator('.modal-open').getByRole('button', { name: 'Save' }).click();
     await expect(page.locator('.modal-open')).toHaveCount(0);
-    await expect(page.getByRole('cell', { name: `${name} v2`, exact: true })).toBeVisible();
+    await expect(page.locator('tbody tr').filter({ hasText: `${name} v2` })).toBeVisible();
 
     // Delete
     page.on('dialog', (d) => d.accept());
@@ -178,17 +223,17 @@ test.describe('codex UI (dev only)', () => {
     await expect(page.locator('tbody tr')).toHaveCount(initial);
   });
 
-  test('surfaces a server error (duplicate code) in the form', async ({ page }) => {
+  test('surfaces a server-side error (duplicate code) in the form', async ({ page }) => {
     const c = code();
-    await page.goto('/codex/optional-rules');
+    await page.goto('/codex/sources');
     await page.waitForLoadState('networkidle'); // client fetches run post-hydration
 
     async function fillNew(name: string) {
-      await page.getByRole('button', { name: 'New optional rule' }).click();
+      await page.getByRole('button', { name: 'New source' }).click();
       await page.getByLabel('Code').fill(c);
       await page.getByLabel('Name').fill(name);
-      await page.getByLabel('Description').fill('duplicate-code test');
-      await page.getByLabel('Source').selectOption({ index: 1 });
+      await page.getByLabel('Published').fill('2025-01-01');
+      await page.getByLabel('Author').fill('E2E Test');
       await page.locator('.modal-open').getByRole('button', { name: 'Create' }).click();
     }
 

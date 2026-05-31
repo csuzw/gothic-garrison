@@ -9,19 +9,12 @@
   let { children, data } = $props();
 
   // href === null → shown but disabled ("coming soon").
-  const baseLinks: { label: string; href: string | null }[] = [
+  const navLinks: { label: string; href: string | null }[] = [
     { label: 'Units', href: '/' },
     { label: 'Campaigns', href: null },
     { label: 'Cheat Sheet', href: null },
-    { label: 'Bestiary', href: '/bestiary' },
-    { label: 'Scenarios', href: null },
+    { label: 'Codex', href: '/codex' },
   ];
-
-  // Codex is a local-development-only reference-data editor; the route 404s in
-  // any production build, so only surface the link when the server reports dev.
-  const navLinks = $derived(
-    data.dev ? [...baseLinks, { label: 'Codex', href: '/codex' }] : baseLinks
-  );
 
   const pathname = $derived(page.url.pathname);
   function isActive(href: string | null): boolean {

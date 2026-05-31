@@ -403,16 +403,10 @@ const registry: Record<string, EntityHandlers> = {
 
 export const ENTITY_SLUGS = Object.keys(registry);
 
-/**
- * Run a Codex API operation: enforce the dev-only gate, resolve the entity, and
- * translate CodexError / unexpected failures into JSON responses. Keeps the
- * route handlers in src/routes/api/codex thin.
- */
-export async function runCodex(
+async function dispatch(
   slug: string | undefined,
   fn: (handlers: EntityHandlers) => Promise<Response>,
 ): Promise<Response> {
-  if (!dev) return new Response('Not Found', { status: 404 });
   const handlers = slug ? registry[slug] : undefined;
   if (!handlers) return json({ message: `Unknown Codex entity: ${slug ?? ''}` }, { status: 404 });
   try {
@@ -422,4 +416,24 @@ export async function runCodex(
     console.error('[codex] unexpected error:', e);
     return json({ message: 'Internal error' }, { status: 500 });
   }
+}
+
+/** Read-only Codex API dispatch — no dev gate, available in production. */
+export async function runCodexRead(
+  slug: string | undefined,
+  fn: (handlers: EntityHandlers) => Promise<Response>,
+): Promise<Response> {
+  return dispatch(slug, fn);
+}
+
+/**
+ * Write Codex API dispatch — dev-only gate. Production returns 404 so there
+ * is no write path to reference data outside of a local dev environment.
+ */
+export async function runCodex(
+  slug: string | undefined,
+  fn: (handlers: EntityHandlers) => Promise<Response>,
+): Promise<Response> {
+  if (!dev) return new Response('Not Found', { status: 404 });
+  return dispatch(slug, fn);
 }
