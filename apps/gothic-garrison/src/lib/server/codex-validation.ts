@@ -286,10 +286,12 @@ export function validateMonsterType(body: unknown): MonsterTypeInput {
   };
 }
 
+const MOD_STAT_KEYS = new Set(['melee', 'accuracy', 'courage']);
+
 function validateStats(body: unknown): SoldierStatsInput {
   const o = obj(body);
   const stats = {} as SoldierStatsInput;
-  for (const key of STAT_KEYS) stats[key] = int(o, key, { min: 0, max: 99 });
+  for (const key of STAT_KEYS) stats[key] = int(o, key, { min: MOD_STAT_KEYS.has(key) ? -99 : 0, max: 99 });
   return stats;
 }
 

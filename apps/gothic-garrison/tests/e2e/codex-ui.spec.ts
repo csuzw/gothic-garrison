@@ -137,6 +137,68 @@ test.describe('codex UI (dev only)', () => {
     await expect(page.locator('tbody tr')).toHaveCount(initial);
   });
 
+  test('new-entity modal opens without Svelte effect cycle (regression for effect_update_depth_exceeded)', async ({ page }, testInfo) => {
+    // The bug: $effect in CodexFlatEntityEditor read `draft` after writing to it
+    // (draft['sourceId'] = target.sourceId), creating a read-write cycle that
+    // exceeded Svelte's update depth limit. Triggered when a source filter is
+    // active (which populates target.sourceId) on any flat entity with a source field.
+    const errors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(msg.text());
+    });
+
+    // Attributes has a source field → source filter buttons appear → sourceId is
+    // passed to the editor on "New" — the exact path that triggered the bug.
+    await page.goto('/reference/attributes');
+    await page.waitForLoadState('networkidle');
+
+    // Activate a source filter so sourceId is non-empty when opening the modal.
+    const filterButtons = page.locator('nav, .join').filter({ hasText: /^(all|core|SB|TSB)/i });
+    const firstSource = page.locator('.join button:not(:first-child)').first();
+    if (await firstSource.isVisible()) {
+      await firstSource.click();
+    }
+
+    await page.getByRole('button', { name: 'New attribute' }).click();
+    await expect(page.getByRole('heading', { name: 'New attribute' })).toBeVisible();
+
+    // Form must be interactive — fields should be present and accept input.
+    await expect(page.locator('.modal-open input[type="text"]').first()).toBeVisible();
+    await page.locator('.modal-open input[type="text"]').first().fill('Test attr');
+
+    await testInfo.attach('new-attribute-modal', { body: await page.screenshot(), contentType: 'image/png' });
+
+    // No Svelte effect cycle errors should have fired.
+    const cycleErrors = errors.filter((e) => e.includes('effect_update_depth_exceeded'));
+    expect(cycleErrors).toHaveLength(0);
+
+    // Close without submitting.
+    await page.locator('.modal-open').getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.locator('.modal-open')).toHaveCount(0);
+
+    // Same check for Nations (also has a source field) — open and close without error.
+    errors.length = 0;
+    await page.goto('/reference/nations');
+    await page.waitForLoadState('networkidle');
+    const firstNationSource = page.locator('.join button:not(:first-child)').first();
+    if (await firstNationSource.isVisible()) await firstNationSource.click();
+    await page.getByRole('button', { name: 'New nation' }).click();
+    await expect(page.getByRole('heading', { name: 'New nation' })).toBeVisible();
+    expect(errors.filter((e) => e.includes('effect_update_depth_exceeded'))).toHaveLength(0);
+    await page.locator('.modal-open').getByRole('button', { name: 'Cancel' }).click();
+
+    // Equipment too.
+    errors.length = 0;
+    await page.goto('/reference/equipment');
+    await page.waitForLoadState('networkidle');
+    const firstEqSource = page.locator('.join button:not(:first-child)').first();
+    if (await firstEqSource.isVisible()) await firstEqSource.click();
+    await page.getByRole('button', { name: 'New equipment item' }).click();
+    await expect(page.getByRole('heading', { name: 'New equipment item' })).toBeVisible();
+    expect(errors.filter((e) => e.includes('effect_update_depth_exceeded'))).toHaveLength(0);
+    await page.locator('.modal-open').getByRole('button', { name: 'Cancel' }).click();
+  });
+
   test('soldier type: create (pool), edit name, delete', async ({ page }, testInfo) => {
     const name = `E2E Soldier ${Date.now()}`;
     await page.goto('/reference/soldier-types');

@@ -1,6 +1,11 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import NationFlag from '$lib/components/NationFlag.svelte';
   import { blankRow, pickFields, type CodexEntity } from '$lib/codex/entities';
+
+  function autofocusFirst(node: HTMLElement) {
+    tick().then(() => node.querySelector<HTMLElement>('input:not([type=hidden]), select, textarea')?.focus());
+  }
 
   type Row = Record<string, unknown> & { id: string };
 
@@ -27,8 +32,9 @@
     formError = null;
     flagUploadError = null;
     if (target.mode === 'new') {
-      draft = blankRow(entity);
-      if (target.sourceId) draft['sourceId'] = target.sourceId;
+      const newDraft = blankRow(entity);
+      if (target.sourceId) newDraft['sourceId'] = target.sourceId;
+      draft = newDraft;
       editingId = null;
     } else {
       draft = pickFields(entity, target.row);
@@ -84,7 +90,7 @@
 
 {#if target !== null}
   <div class="modal modal-open" role="dialog">
-    <div class="modal-box">
+    <div class="modal-box" use:autofocusFirst>
       <h3 class="text-lg font-semibold">
         {target.mode === 'edit' ? 'Edit' : 'New'} {entity.singular}
       </h3>

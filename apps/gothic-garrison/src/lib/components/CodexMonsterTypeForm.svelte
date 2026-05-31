@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { untrack, tick } from 'svelte';
+
+  function autofocusFirst(node: HTMLElement) {
+    tick().then(() => node.querySelector<HTMLElement>('input:not([type=hidden]), select, textarea')?.focus());
+  }
   import { STAT_META, type SoldierStats } from '$lib/unit/types';
 
   interface DraftItem {
@@ -139,7 +143,7 @@
 </script>
 
 <div class="modal modal-open" role="dialog">
-  <div class="modal-box max-w-2xl overflow-y-auto">
+  <div class="modal-box max-w-2xl overflow-y-auto" use:autofocusFirst>
     <h3 class="mb-4 text-lg font-semibold">{mode === 'edit' ? 'Edit' : 'New'} monster</h3>
 
     <form onsubmit={handleSubmit} class="space-y-5">
@@ -187,7 +191,7 @@
               <input
                 type="number"
                 bind:value={stats[m.key]}
-                min="0"
+                min={m.mod ? -99 : 0}
                 max="99"
                 required
                 class="input input-sm w-full text-center"

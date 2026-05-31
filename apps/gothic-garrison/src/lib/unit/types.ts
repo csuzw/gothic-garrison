@@ -81,8 +81,8 @@ export interface MemberSnapshot {
   attributes: AttributeSnapshot[];
   /** Carried equipment: the fixed/chosen loadout's items, or pool-built items. */
   equipment: EquipmentSnapshot[];
-  /** One special armoury item pick for fixed/choice-mode soldiers (pool soldiers manage special via EquipmentBuilder). */
-  specialEquipment?: EquipmentSnapshot | null;
+  /** Special Armoury picks for fixed/choice-mode soldiers (1 normally, 2 with Supernatural Veteran). Pool soldiers manage special via EquipmentBuilder. */
+  specialEquipment: EquipmentSnapshot[];
   /** For `choice`-mode soldiers: which predetermined loadout is selected. */
   loadoutId: string | null;
 }
@@ -123,6 +123,44 @@ export function specialUsed(items: EquipmentSnapshot[]): number {
 /** Officer gets 2 Special Armoury slots, or 3 with the Supernatural Veteran attribute. */
 export function officerSpecialMax(officer: OfficerSnapshot): number {
   return officer.attributes.some((a) => a.name === SUPERNATURAL_VETERAN) ? 3 : 2;
+}
+
+function hasSV(picked: AttributeSnapshot[], fixed: { name: string }[]): boolean {
+  return picked.some((a) => a.name === SUPERNATURAL_VETERAN) ||
+    fixed.some((a) => a.name === SUPERNATURAL_VETERAN);
+}
+
+/** Pool soldier gets their type's base special slots, +1 with the Supernatural Veteran attribute. */
+export function soldierSpecialMax(
+  member: MemberSnapshot,
+  baseSpecialSlots: number,
+  fixedAttributes: { name: string }[] = [],
+): number {
+  return hasSV(member.attributes, fixedAttributes) ? baseSpecialSlots + 1 : baseSpecialSlots;
+}
+
+/** Fixed/choice soldier gets 1 Special Armoury pick, or 2 with the Supernatural Veteran attribute. */
+export function memberSpecialPicks(
+  member: MemberSnapshot,
+  fixedAttributes: { name: string }[] = [],
+): number {
+  return hasSV(member.attributes, fixedAttributes) ? 2 : 1;
+}
+
+/** Normalize a raw stored UnitDoc to the current schema. Handles the migration from
+ *  `specialEquipment: null | EquipmentSnapshot` (v1) to `specialEquipment: EquipmentSnapshot[]`. */
+export function normalizeUnitDoc(raw: any): UnitDoc {
+  return {
+    ...raw,
+    members: (raw.members ?? []).map((m: any) => ({
+      ...m,
+      specialEquipment: Array.isArray(m.specialEquipment)
+        ? m.specialEquipment
+        : m.specialEquipment
+        ? [m.specialEquipment]
+        : [],
+    })),
+  };
 }
 
 export interface UnitDoc {

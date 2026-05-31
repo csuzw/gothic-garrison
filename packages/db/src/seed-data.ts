@@ -518,6 +518,24 @@ export const attributes: SeedAttribute[] = [
     "rules": "Once per game, convert one Power Die to a Skill Die or vice versa; this figure regains up to 3 lost Health."
   },
   {
+    "name": "Brittle",
+    "isOfficer": false,
+    "sourceCode": "italy",
+    "rules": "If struck with a Heavy Weapon, or critically hit by any weapon, remove this figure from the table."
+  },
+  {
+    "name": "Chaotic",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "If a Monster Die is used to influence this figure's movement.  Roll a D10, on a 1-3 discard the Monster Die with no effect, other it works as normal."
+  },
+  {
+    "name": "Chilling Touch",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Melee attacks ignore armour and deal +1 damage."
+  },
+  {
     "name": "Combat Engineer",
     "isOfficer": true,
     "sourceCode": "core",
@@ -528,6 +546,30 @@ export const attributes: SeedAttribute[] = [
     "isOfficer": true,
     "sourceCode": "core",
     "rules": "This figure is trained to fight while mounted on a horse. See Cavalry rules."
+  },
+  {
+    "name": "Command Skeletal Roman Legionary",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "All Skeletal Roman Legionaries gain +1 Speed, +1 Courage, and the Strong attribute while this figure is in play."
+  },
+  {
+    "name": "Curse of the Evil Eye",
+    "isOfficer": false,
+    "sourceCode": "italy",
+    "rules": "Attack rolls of 9 or 10 against this figure, or Attack rolls of 1 or 2 made by this figure are rerolled.  Second roll stands.  Figures with Great Faith attribute or Holy Symbol are immune to this."
+  },
+  {
+    "name": "Damage Reduction - Projectiles Only (4)",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Whenever this figure takes damage from a projectile, reduce it by 4 (minimum 0)."
+  },
+  {
+    "name": "Damage Reduction - Projectiles Only (8)",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Whenever this figure takes damage from a projectile, reduce it by 8 (minimum 0)."
   },
   {
     "name": "Damage Reduction (1)",
@@ -560,6 +602,54 @@ export const attributes: SeedAttribute[] = [
     "rules": "Whenever this figure takes damage, reduce it by 5 (minimum 0)."
   },
   {
+    "name": "Damage Reduction (6)",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Whenever this figure takes damage, reduce it by 6 (minimum 0)."
+  },
+  {
+    "name": "Damage Reduction (7)",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Whenever this figure takes damage, reduce it by 7 (minimum 0)."
+  },
+  {
+    "name": "Damage Reduction (8)",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Whenever this figure takes damage, reduce it by 8 (minimum 0)."
+  },
+  {
+    "name": "Dark Gift",
+    "isOfficer": false,
+    "sourceCode": "italy",
+    "rules": "On activation, make a Courage Check (TN10).  On success, heal any undead creatures within 6\" by 2.  If there are no undead creatures within 6\", heal self 2 or if at full Health, use Raise  the Dead attribute."
+  },
+  {
+    "name": "Demonic Fire",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Can make Shooting Attacks at 12\" that are enchanted and +2 damage.  Does not require reloading."
+  },
+  {
+    "name": "Ethereal",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "See and move through terrain.  Never suffers Speed penalties for difficult ground, obstacles, or climbing."
+  },
+  {
+    "name": "Ethereal Cavalry",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "All cavalry rules apply to Melee and Shooting for this figure but not Movement.  Counts as having Ethereal.  Cannot dismount."
+  },
+  {
+    "name": "Ethereal Firearms",
+    "isOfficer": false,
+    "sourceCode": "italy",
+    "rules": "Acts like a musket, but does not need reloading.  Can only fire once per turn.  Ignores armour and does +1 damage.  Optionally, hard mode, ignores cover."
+  },
+  {
     "name": "Experience in the Desert",
     "isOfficer": false,
     "sourceCode": "egypt",
@@ -574,14 +664,32 @@ export const attributes: SeedAttribute[] = [
   {
     "name": "Fey-Touched",
     "isOfficer": true,
-    "sourceCode": "core",
+    "sourceCode": "carpathians",
     "rules": "All attacks made by this figure count as Enchanted. May be given to any soldier at +4 recruitment cost."
   },
   {
     "name": "Fire-Starter",
     "isOfficer": true,
-    "sourceCode": "core",
+    "sourceCode": "carpathians",
     "rules": "May replace a Move or Shoot action to swap one carried Specialist Equipment item for Oil and Torches. Returns to normal equipment after the game."
+  },
+  {
+    "name": "Flitting Movement",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "When activated, move 6\" in a random direction.  Moves through other figures, cannot move off the table or be within 1\" of another figure at end of movement."
+  },
+  {
+    "name": "Flying",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Can move over  or up any terrain without movement penalty."
+  },
+  {
+    "name": "Frenzy",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "If this figure causes damage with a Melee Attack, it's opponent must Back Off.  A Monster Die can only be used to change movement to a Movement to Attack action for this figure."
   },
   {
     "name": "Great Faith",
@@ -596,10 +704,40 @@ export const attributes: SeedAttribute[] = [
     "rules": "If a Fate Die is used to negate damage to this figure, the player may roll the die twice and choose which result to take."
   },
   {
+    "name": "Head-Taker",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "Any figure reduced to 0 Health by this figure suffers -1 to roll on Injury and Death table after game."
+  },
+  {
+    "name": "Hypnotic",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Enemies that Move to Attack this figure must make a Courage Check (TN12).  If they fail, they still move but cannot make a Melee Check.  This figure can still Strike Back or Back Off."
+  },
+  {
     "name": "Indefatigable",
     "isOfficer": true,
     "sourceCode": "core",
-    "rules": "This figure may never have more than one fatigue token; any effect that would give a second is ignored."
+    "rules": "This figure may never have more than one fatigue token.  Any effect that would give a second is ignored."
+  },
+  {
+    "name": "Indestructible",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Immune to all sources of damage except those it has an Allergy to."
+  },
+  {
+    "name": "Induce Terror",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "On activation, any opponents in LoS make a Terror Check at -3 within 8\", and -1 otherwise."
+  },
+  {
+    "name": "Inimical to Technology",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Cannot use technology with 6\" of this figure.  Shooting Checks for firearms or artillery will automatically miss."
   },
   {
     "name": "Inspiring",
@@ -608,15 +746,27 @@ export const attributes: SeedAttribute[] = [
     "rules": "Allied figures within 6\" and LoS receive +1 to Courage Checks (not the Inspiring figure itself). Only one Inspiring bonus applies per figure regardless of how many are in range."
   },
   {
+    "name": "Irritant",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "This figure will never attack.  If it moves into contact with an enemy, give the enemy a fatigue token and move this figure 1\" back.  If attacked, this creature will always Back Off."
+  },
+  {
+    "name": "Large",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Shooting Checks made against this figure are at +1."
+  },
+  {
     "name": "Light Infantry Training",
     "isOfficer": true,
-    "sourceCode": "core",
+    "sourceCode": "italy",
     "rules": "This figure does not suffer a -1 modifier when Moving and Shooting, but can only move at a Speed of 4 when utilising this ability."
   },
   {
     "name": "Lunge",
     "isOfficer": true,
-    "sourceCode": "core",
+    "sourceCode": "canada",
     "rules": "Spend an action to fight melee against a target within 1\" without needing contact (within 2\" if this figure also has Large). May be measured vertically."
   },
   {
@@ -650,10 +800,28 @@ export const attributes: SeedAttribute[] = [
     "rules": "Suffers no movement penalties for difficult ground."
   },
   {
+    "name": "Paralyse",
+    "isOfficer": false,
+    "sourceCode": "italy",
+    "rules": "If this figure damages another figure with a Melee Attack, that figure is Paralysed (see Terror Check rules)."
+  },
+  {
+    "name": "Powerful Jaws",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "On Melee Attack use higher of Power Die and Skill Die to determine damage."
+  },
+  {
     "name": "Quick Heal",
     "isOfficer": false,
     "sourceCode": "canada",
     "rules": "At the start of each turn, this figure regains 1 lost Health point (up to its starting Health)."
+  },
+  {
+    "name": "Quick Healing",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Gain 2 points of Health every time it activates up to it's starting value."
   },
   {
     "name": "Quick Load",
@@ -668,10 +836,46 @@ export const attributes: SeedAttribute[] = [
     "rules": "Any time this character receives damage to their Health, roll a Terror Check."
   },
   {
+    "name": "Rage",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Make a Courage Check (TN14).  On failure must Move or Move to Attack the closest enemy.  On success can use actions normally."
+  },
+  {
+    "name": "Raise the Dead",
+    "isOfficer": false,
+    "sourceCode": "italy",
+    "rules": "Roll D10 to summon monster with 3\" of this figure (1-5: Skeletal Soldier, 6-8: Revenant, 9: Black Dog, 10: Ghost)."
+  },
+  {
+    "name": "Reanimate",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "If reduced to 0 Health lay on side.  At end of each turn roll D10 and on a 10 stand back up with 1 Health.  If reduced to 0 Health with Blessed or Fire attack or a figure with a Blessed of Fire Attack moves into contact while at 0 Health remove from table."
+  },
+  {
+    "name": "Rock Hurler",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "Can make Shooting Attacks at 12\" and uses the Power die for damage."
+  },
+  {
+    "name": "Rusted Weapon",
+    "isOfficer": false,
+    "sourceCode": "italy",
+    "rules": "All this figures weapons treated as Hand Weapons regardless of type."
+  },
+  {
     "name": "Scourge of Britain",
     "isOfficer": false,
     "sourceCode": "britain",
     "rules": "Once per game, convert one Skill Die or Fate Die to a Monster Die; this figure regains up to 3 lost Health."
+  },
+  {
+    "name": "Skeleton",
+    "isOfficer": false,
+    "sourceCode": "italy",
+    "rules": "When reduced to 0 Health, becomes a Bone Pile (unless destroyed due to Brittle attribute).  If there are no figures with the Raise the Dead attribute in play, becomes a Bone Pile.  A figure with Raise the Dead attribute can choose, instead of rolling, to spend a Monster Die to turn a Bone Pile in LoS into a Skeletal Soldier with full health"
   },
   {
     "name": "Skinshift (Bear)",
@@ -694,14 +898,20 @@ export const attributes: SeedAttribute[] = [
   {
     "name": "Sneak",
     "isOfficer": true,
-    "sourceCode": "core",
+    "sourceCode": "italy",
     "rules": "Once per scenario, move unseen by not attacking and staying more than own movement range from all enemies. Sneak persists until next activation or an enemy enters movement range. While sneaking: enemies cannot draw LoS unless (1) this figure is not in cover, or (2) the enemy is within movement range. Substantial cover maintains sneak even in melee range."
+  },
+  {
+    "name": "Soul Shear",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "If this figure damages an enemy with a Melee Attack, the damaged figure must take a Terror Check (-Damage)."
   },
   {
     "name": "Spells",
     "isOfficer": false,
     "sourceCode": "core",
-    "rules": "Spend an action; Courage Check (TN10). On success, choose one: Curse (target in LoS must pass TN18 Courage or suffer -1 to all rolls for the game; max -2), Manipulate (convert one Fate Pool die to any other type), or Enchant Weapon (figure within 8\" LoS has one weapon count as Enchanted for the game). Figure suffers 1 damage either way."
+    "rules": "Spend an action; Courage Check (TN10). On success, choose one: Curse (target in LoS must pass Courage Check (TN18) or suffer -1 to all rolls for the game; max -2), Manipulate (convert one Fate Pool die to any other type), or Enchant Weapon (figure within 8\" LoS has one weapon count as Enchanted for the game). Figure suffers 1 damage either way."
   },
   {
     "name": "Steady Legs",
@@ -724,7 +934,7 @@ export const attributes: SeedAttribute[] = [
   {
     "name": "Swimmer",
     "isOfficer": true,
-    "sourceCode": "core",
+    "sourceCode": "canada",
     "rules": "Does not count water terrain as difficult ground; may count as in cover while in water. If used as cover during a game, all ranged weapons are fouled for the rest of that encounter."
   },
   {
@@ -740,10 +950,22 @@ export const attributes: SeedAttribute[] = [
     "rules": "When this figure fails a Courage Check (including Terror Checks), spend any die from the Fate Pool to pass automatically (or get No Effect on a Terror Check)."
   },
   {
+    "name": "Very Strong",
+    "isOfficer": false,
+    "sourceCode": "core",
+    "rules": "This figure does +2 damage whenever it hits with a Melee Attack."
+  },
+  {
     "name": "Weakened by Faith",
     "isOfficer": false,
     "sourceCode": "core",
-    "rules": "This figure suffers -3 to Melee attack rolls when fighting against a figure carrying a Holy Symbol."
+    "rules": "This figure suffers -3 to Melee Attack rolls when fighting against a figure carrying a Holy Symbol."
+  },
+  {
+    "name": "Weather Control",
+    "isOfficer": false,
+    "sourceCode": "britain",
+    "rules": "At end of each turn roll D10.  1-3: Wind - All Shooting Attacks -2.  4-6: Rain - All Shooting Attacks that only roll 1s and 2s are treated as Critical Failures.  7-8: Ice - All Sprint Checks -4.  If roll 0 or less fall over and lose 2 Health.  Effects last until end of scenario.  9-10: Lightning Strike - Roll Power Die.  Unit member closest to this figure takes that damage.  The player whose figure suffered damage may use a Power Die to reroll the damage."
   }
 ];
 
@@ -754,7 +976,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "8\", Power Die+1, −1 to Shoot Checks, 2 potential targets (with 1\" of each other, separate Check for each), ignore Armour (1), Shot Bag to reload, can be used as Improvised Weapon"
+    "rules": "8\", Power Die+1, −1 to Shoot Checks, 2 potential targets (with 1\" of each other, separate Check for each), ignore Armour (1), Shot Bag to reload, can be used as Improvised Weapon."
   },
   {
     "name": "Breastplate",
@@ -762,7 +984,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Armour (1) - firearms ignore it, Speed -1"
+    "rules": "Armour (1) - firearms ignore it, Speed -1."
   },
   {
     "name": "Cartridge Box",
@@ -770,7 +992,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Reload musket or rifle"
+    "rules": "Reload musket or rifle."
   },
   {
     "name": "Cold Iron Shot",
@@ -778,7 +1000,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 0,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "Ammo upgrade, shooting attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron), 0 slots"
+    "rules": "Ammo upgrade, shooting attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron), 0 slots."
   },
   {
     "name": "Cold Iron Weapon",
@@ -786,7 +1008,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 0,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "Melee weapon upgrade, attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron), 0 slots"
+    "rules": "Melee weapon upgrade, attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron), 0 slots."
   },
   {
     "name": "Fencing Weapon",
@@ -794,7 +1016,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Melee, Skill Die"
+    "rules": "Melee, Skill Die."
   },
   {
     "name": "Hand Weapon",
@@ -802,7 +1024,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Melee, Power Die"
+    "rules": "Melee, Power Die."
   },
   {
     "name": "Heavy Weapon",
@@ -810,7 +1032,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Melee, Power Die+1, 2 slots"
+    "rules": "Melee, Power Die+1, 2 slots."
   },
   {
     "name": "Holy Symbol",
@@ -818,7 +1040,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "Figures with Weakened by Faith suffer -3 to Melee attack rolls when in combat against the carrier"
+    "rules": "Figures with Weakened by Faith suffer -3 to Melee attack rolls when in combat against the carrier."
   },
   {
     "name": "Improvised Weapon",
@@ -826,7 +1048,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Melee, Power Die−1"
+    "rules": "Melee, Power Die−1."
   },
   {
     "name": "Musket",
@@ -834,7 +1056,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "24\", Power Die, Cartridge Box to reload, ignore Armour (1), includes bayonet (Hand Weapon), 2 slots"
+    "rules": "24\", Power Die, Cartridge Box to reload, ignore Armour (1), includes bayonet (Hand Weapon), 2 slots."
   },
   {
     "name": "Oil and Torches",
@@ -842,7 +1064,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "Counts as Improvised Weapon but cannot use weapons that take up 2 or more slots, spend action to light, fire attacks ignore Damage Reduction and Indestructible on targets with Allergy (Fire)"
+    "rules": "Counts as Improvised Weapon but cannot use weapons that take up 2 or more slots, spend action to light, fire attacks ignore Damage Reduction and Indestructible on targets with Allergy (Fire)."
   },
   {
     "name": "Pistol",
@@ -850,7 +1072,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "8\", Power Die, Max 2 per figure, ignore Armour (1), can be used as Improvised Weapon"
+    "rules": "8\", Power Die, Max 2 per figure, ignore Armour (1), can be used as Improvised Weapon."
   },
   {
     "name": "Rifle",
@@ -858,7 +1080,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "30\", Skill Die, Cartridge Box to reload, ignore Armour (1), includes bayonet (Hand Weapon), 2 slots"
+    "rules": "30\", Skill Die, Cartridge Box to reload, ignore Armour (1), includes bayonet (Hand Weapon), 2 slots."
   },
   {
     "name": "Salt Bag",
@@ -866,7 +1088,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "Salt attacks ignore Damage Reduction and Indestructible on targets with Allergy (Salt)"
+    "rules": "Salt attacks ignore Damage Reduction and Indestructible on targets with Allergy (Salt)."
   },
   {
     "name": "Shot Bag",
@@ -874,7 +1096,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Reload blunderbuss"
+    "rules": "Reload blunderbuss."
   },
   {
     "name": "Silver Shot",
@@ -882,7 +1104,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 0,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "Ammo upgrade, shooting attacks ignore Damage Reduction and Indestructible on targets with Allergy (Silver), 0 slots"
+    "rules": "Ammo upgrade, shooting attacks ignore Damage Reduction and Indestructible on targets with Allergy (Silver), 0 slots."
   },
   {
     "name": "Silver Weapon",
@@ -890,7 +1112,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 0,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "Melee weapon upgrade, attacks ignore Damage Reduction and Indestructible on targets with Allergy (Silver), 0 slots"
+    "rules": "Melee weapon upgrade, attacks ignore Damage Reduction and Indestructible on targets with Allergy (Silver), 0 slots."
   },
   {
     "name": "Volley Gun",
@@ -898,7 +1120,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "14\", Power Die+1, −1 to Shoot Checks, 3 potentials targets  (with 1\" of each other, separate Check for each), ignores Armour (1), cannot be reloaded, 2 slots"
+    "rules": "14\", Power Die+1, −1 to Shoot Checks, 3 potentials targets  (with 1\" of each other, separate Check for each), ignores Armour (1), cannot be reloaded, 2 slots."
   }
 ];
 
@@ -2749,6 +2971,200 @@ export const soldiers: SeedSoldier[] = [
 
 export const monsters: SeedMonster[] = [
   {
+    "name": "Anglo-Saxon Zombie",
+    "sourceCode": "britain",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 5,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Damage Reduction - Projectiles Only (4)",
+      "Indefatigable",
+      "Reanimate"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Anglo-Saxon Zombie Thegn",
+    "sourceCode": "britain",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 5,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Damage Reduction (4)",
+      "Indefatigable",
+      "Reanimate",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bandit",
+    "sourceCode": "core",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Black Dog",
+    "sourceCode": "core",
+    "experience": 2,
+    "stats": {
+      "speed": 8,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 6,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Enchanted Weapons)",
+      "Chilling Touch",
+      "Ethereal",
+      "Indefatigable",
+      "Indestructible",
+      "Soul Shear"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Brigante Chief",
+    "sourceCode": "italy",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 1,
+      "health": 10
+    },
+    "equipmentMode": "choice",
+    "description": null,
+    "fixedAttributes": [
+      "Indefatigable",
+      "Master of Cover",
+      "Nimble"
+    ],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Blunderbuss, Shot Bag",
+        "order": 1,
+        "items": [
+          {
+            "name": "Blunderbuss",
+            "qty": 1
+          },
+          {
+            "name": "Shot Bag",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Hand Weapon, Pistol ×2",
+        "order": 2,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Brigante/Brigantessa",
     "sourceCode": "italy",
     "experience": 0,
@@ -2812,6 +3228,198 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Changeling",
+    "sourceCode": "core",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 4,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Cold Iron)",
+      "Allergy (Enchanted Weapons)",
+      "Damage Reduction (4)",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Civilian",
+    "sourceCode": "britain",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 11,
+      "courage": -2,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cultist",
+    "sourceCode": "core",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 4,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Indefatigable"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Danish Draugr",
+    "sourceCode": "britain",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 5,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Damage Reduction (4)",
+      "Indefatigable",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Danish Draugr Berserker",
+    "sourceCode": "britain",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 11,
+      "courage": 8,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Damage Reduction (4)",
+      "Frenzy",
+      "Indefatigable",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Danish Draugr Wizard",
+    "sourceCode": "britain",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 11,
+      "courage": 5,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Damage Reduction (4)",
+      "Indefatigable",
+      "Strong",
+      "Weather Control"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Dark Wolf",
     "sourceCode": "core",
     "experience": 0,
@@ -2827,5 +3435,982 @@ export const monsters: SeedMonster[] = [
     "description": null,
     "fixedAttributes": [],
     "loadouts": []
+  },
+  {
+    "name": "Demon",
+    "sourceCode": "core",
+    "experience": 3,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 10,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Salt)",
+      "Damage Reduction (5)",
+      "Demonic Fire",
+      "Flying",
+      "Soul Shear",
+      "Strong",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Ghost",
+    "sourceCode": "core",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 10,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Salt)",
+      "Chilling Touch",
+      "Ethereal",
+      "Indefatigable",
+      "Indestructible",
+      "Soul Shear"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Ghoul",
+    "sourceCode": "core",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 4,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Goblin",
+    "sourceCode": "core",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 15,
+      "courage": 5,
+      "health": 8
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Cold Iron)",
+      "Damage Reduction (4)",
+      "Hypnotic",
+      "Inimical to Technology",
+      "Master of Cover",
+      "Nimble",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Grave Golem",
+    "sourceCode": "italy",
+    "experience": 2,
+    "stats": {
+      "speed": 4,
+      "melee": 3,
+      "accuracy": 1,
+      "defence": 14,
+      "courage": 0,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Salt)",
+      "Damage Reduction (4)",
+      "Hard to Put Down",
+      "Large"
+    ],
+    "loadouts": [
+      {
+        "label": "Heavy Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Heavy Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Hobgoblin",
+    "sourceCode": "core",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 5,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Damage Reduction (1)",
+      "Indefatigable",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Heavy Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Heavy Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Il Negromonte",
+    "sourceCode": "italy",
+    "experience": 3,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 15,
+      "courage": 10,
+      "health": 15
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Chilling Touch",
+      "Damage Reduction (4)",
+      "Dark Gift",
+      "Ethereal",
+      "Hard to Put Down",
+      "Quick Healing",
+      "Raise the Dead",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Lindworm",
+    "sourceCode": "britain",
+    "experience": 3,
+    "stats": {
+      "speed": 8,
+      "melee": 4,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 10,
+      "health": 20
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Cold Iron)",
+      "Allergy (Enchanted Weapons)",
+      "Chaotic",
+      "Indefatigable",
+      "Indestructible",
+      "Induce Terror",
+      "Large",
+      "Nimble",
+      "Powerful Jaws",
+      "Very Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Living Armour",
+    "sourceCode": "core",
+    "experience": 2,
+    "stats": {
+      "speed": 5,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 0,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Enchanted Weapons)",
+      "Indefatigable",
+      "Indestructible"
+    ],
+    "loadouts": [
+      {
+        "label": "Heavy Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Heavy Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Living Scarecrow",
+    "sourceCode": "core",
+    "experience": 1,
+    "stats": {
+      "speed": 5,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Damage Reduction (8)"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Necromancer Acolyte",
+    "sourceCode": "italy",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 5,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Dark Gift",
+      "Quick Heal",
+      "Raise the Dead"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Nightmare Witch (La Janara",
+    "sourceCode": "italy",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Cold Iron)",
+      "Curse of the Evil Eye",
+      "Damage Reduction (2)",
+      "Paralyse",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Norman Ghost Knight",
+    "sourceCode": "britain",
+    "experience": 2,
+    "stats": {
+      "speed": 8,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 8,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Salt)",
+      "Chilling Touch",
+      "Ethereal Cavalry",
+      "Indefatigable",
+      "Indestructible",
+      "Soul Shear"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Norman Ghost Warrior",
+    "sourceCode": "britain",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 11,
+      "courage": 2,
+      "health": 6
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Salt)",
+      "Chilling Touch",
+      "Damage Reduction (7)",
+      "Ethereal",
+      "Indefatigable"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Norwegian Aptrganga",
+    "sourceCode": "britain",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 5,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Silver)",
+      "Damage Reduction (4)",
+      "Indefatigable",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Norwegian Aptrganga Skin-Changer",
+    "sourceCode": "britain",
+    "experience": 2,
+    "stats": {
+      "speed": 7,
+      "melee": 4,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 5,
+      "health": 16
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Silver)",
+      "Indefatigable",
+      "Indestructible",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Pixie",
+    "sourceCode": "core",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 18,
+      "courage": 0,
+      "health": 1
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Flying",
+      "Inimical to Technology",
+      "Irritant"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Possessed",
+    "sourceCode": "core",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 3,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Damage Reduction (2)",
+      "Demonic Fire",
+      "Strong",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Heavy Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Heavy Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Possessed Boar",
+    "sourceCode": "italy",
+    "experience": 1,
+    "stats": {
+      "speed": 8,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 10,
+      "courage": 0,
+      "health": 8
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Fire)",
+      "Damage Reduction (5)",
+      "Strong",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Revenant",
+    "sourceCode": "core",
+    "experience": 0,
+    "stats": {
+      "speed": 4,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 5,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Damage Reduction - Projectiles Only (4)",
+      "Indefatigable"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Scoti Slaugh",
+    "sourceCode": "britain",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 11,
+      "courage": 2,
+      "health": 6
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Cold Iron)",
+      "Damage Reduction (7)",
+      "Ethereal",
+      "Flitting Movement",
+      "Indefatigable"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Scoti Slaugh Head-Taker",
+    "sourceCode": "britain",
+    "experience": 2,
+    "stats": {
+      "speed": 7,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 8,
+      "health": 16
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Cold Iron)",
+      "Ethereal",
+      "Flitting Movement",
+      "Head-Taker",
+      "Indefatigable",
+      "Indestructible",
+      "Soul Shear"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Skeletal Roman Centurion",
+    "sourceCode": "britain",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Command Skeletal Roman Legionary",
+      "Damage Reduction - Projectiles Only (8)",
+      "Damage Reduction (4)",
+      "Indefatigable"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Skeletal Roman Legionary",
+    "sourceCode": "britain",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 1
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Damage Reduction - Projectiles Only (8)",
+      "Indefatigable"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Skeletal Soldier",
+    "sourceCode": "italy",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 10,
+      "courage": 0,
+      "health": 5
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Enchanted Weapons)",
+      "Brittle",
+      "Damage Reduction - Projectiles Only (4)",
+      "Indefatigable",
+      "Rusted Weapon",
+      "Skeleton"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Spectral Soldier",
+    "sourceCode": "italy",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 12,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Salt)",
+      "Chilling Touch",
+      "Ethereal",
+      "Ethereal Firearms",
+      "Indestructible"
+    ],
+    "loadouts": [
+      {
+        "label": "Musket",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Troll",
+    "sourceCode": "core",
+    "experience": 2,
+    "stats": {
+      "speed": 5,
+      "melee": 3,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 3,
+      "health": 20
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Damage Reduction (4)",
+      "Large",
+      "Rock Hurler",
+      "Very Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Vampire",
+    "sourceCode": "core",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 15,
+      "courage": 8,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Silver)",
+      "Ethereal",
+      "Hypnotic",
+      "Indefatigable",
+      "Indestructible",
+      "Soul Shear",
+      "Strong",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Vampire Bat",
+    "sourceCode": "core",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 1,
+      "health": 6
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Flying"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Werewolf",
+    "sourceCode": "core",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 3,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Allergy (Silver)",
+      "Damage Reduction (5)",
+      "Indefatigable",
+      "Master of Cover",
+      "Nimble",
+      "Quick Healing",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
   }
 ];

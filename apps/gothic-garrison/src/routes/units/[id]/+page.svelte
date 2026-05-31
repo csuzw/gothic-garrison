@@ -12,6 +12,9 @@
     unitBudget,
     unitSpent,
     officerSpecialMax,
+    soldierSpecialMax,
+    memberSpecialPicks,
+    normalizeUnitDoc,
     officerStats,
     OFFICER_BASE_STATS,
     MAX_SOLDIERS,
@@ -39,7 +42,7 @@
   onMount(async () => {
     try {
       const found = await getUnitStore(signedIn).get(id);
-      if (found) doc = found;
+      if (found) doc = normalizeUnitDoc(found);
       else notFound = true;
     } catch (e) {
       error = (e as Error).message;
@@ -83,11 +86,10 @@
   function snapshotItems(items: EquipmentSnapshot[]): EquipmentSnapshot[] {
     return items.map((it) => ({ ...it }));
   }
-  function setMemberSpecial(m: UnitDoc['members'][number], item: { id: string; name: string; slotCost: number; isSpecial: boolean }) {
-    m.specialEquipment = { itemId: item.id, name: item.name, slotCost: item.slotCost, isSpecial: true, quantity: 1 };
-  }
-  function clearMemberSpecial(m: UnitDoc['members'][number]) {
-    m.specialEquipment = null;
+  function toggleMemberSpecial(m: UnitDoc['members'][number], item: { id: string; name: string; slotCost: number; isSpecial: boolean }, max: number) {
+    const i = m.specialEquipment.findIndex((e) => e.itemId === item.id);
+    if (i >= 0) m.specialEquipment.splice(i, 1);
+    else if (m.specialEquipment.length < max) m.specialEquipment.push({ itemId: item.id, name: item.name, slotCost: item.slotCost, isSpecial: true, quantity: 1 });
   }
 
   function selectLoadout(m: UnitDoc['members'][number], loadoutId: string) {
@@ -109,7 +111,7 @@
       stats: s.stats,
       attributes: [] as AttributeSnapshot[],
       equipment: [] as EquipmentSnapshot[],
-      specialEquipment: null as EquipmentSnapshot | null,
+      specialEquipment: [] as EquipmentSnapshot[],
       loadoutId: null as string | null,
     };
     const first = s.loadouts[0];
@@ -356,7 +358,7 @@
                           catalog={data.reference.equipment}
                           items={m.equipment}
                           slots={ref.equipmentSlots ?? OFFICER_EQUIPMENT_SLOTS}
-                          specialMax={ref.specialSlots ?? 2}
+                          specialMax={soldierSpecialMax(m, ref.specialSlots ?? 2, ref.fixedAttributes)}
                           onChange={(newItems) => { m.equipment = newItems; }}
                         />
                       {:else if ref.equipmentMode === 'choice'}
@@ -374,17 +376,18 @@
                       {/if}
 
                       {#if ref.equipmentMode === 'fixed' || ref.equipmentMode === 'choice'}
+                        {@const spMax = memberSpecialPicks(m, ref.fixedAttributes)}
                         <div class="mt-2">
-                          <span class="mb-1 block text-xs opacity-60">Special item (pick 1)</span>
+                          <span class="mb-1 block text-xs opacity-60">Special item (pick {spMax})</span>
                           <div class="flex flex-wrap gap-1">
                             {#each specialCatalog as item (item.id)}
-                              {@const isSel = m.specialEquipment?.itemId === item.id}
+                              {@const isSel = m.specialEquipment.some((e) => e.itemId === item.id)}
                               <button
                                 type="button"
                                 class="btn btn-xs {isSel ? 'btn-primary' : 'btn-outline'}"
                                 title={item.rules || item.name}
-                                disabled={!isSel && m.specialEquipment != null}
-                                onclick={() => isSel ? clearMemberSpecial(m) : setMemberSpecial(m, item)}
+                                disabled={!isSel && m.specialEquipment.length >= spMax}
+                                onclick={() => toggleMemberSpecial(m, item, spMax)}
                               >{item.name}</button>
                             {/each}
                           </div>

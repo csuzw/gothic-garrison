@@ -85,7 +85,7 @@
   const sourceCode = (id: unknown) => sources.find((s) => s.id === id)?.code ?? '?';
 
   async function loadAll(preserveState = false) {
-    loading = true;
+    if (!preserveState) loading = true;
     loadError = null;
     if (!preserveState) {
       sourceFilter = '';
@@ -160,7 +160,7 @@
   <div class="alert alert-error">Unknown Codex entity: <code>{slug}</code></div>
 {:else}
   <div class="space-y-3">
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2" class:sticky={!readonly} class:top-0={!readonly} class:z-10={!readonly} class:bg-base-100={!readonly} class:py-2={!readonly}>
       <h2 class="text-lg font-semibold">{entity?.label ?? (isSoldierTypes ? 'Soldiers' : 'Monsters')}</h2>
       <span class="badge badge-ghost badge-sm">{filteredRows.length}</span>
       <div class="ml-auto flex items-center gap-2">
@@ -216,7 +216,7 @@
               <th class="cursor-pointer select-none" onclick={() => sortToggle('health')}>HP{si('health')}</th>
               <th class="cursor-pointer select-none" onclick={() => sortToggle('recruitmentCost')}>Cost{si('recruitmentCost')}</th>
               <th>Attributes</th>
-              <th>Equipment</th>
+              <th class="min-w-[8rem]">Equipment</th>
               <th>Nations</th>
               {#if !readonly}<th class="text-right">Actions</th>{/if}
             </tr>
@@ -244,7 +244,7 @@
                 <td>{st.health ?? '—'}</td>
                 <td>{row.recruitmentCost}</td>
                 <td>
-                  <div class="flex flex-wrap gap-1">
+                  <div class="flex max-w-xs flex-wrap gap-1">
                     {#each attrIds as aid (aid)}
                       {@const attr = allAttributes.find((a) => a.id === aid)}
                       {#if attr}<span class="badge badge-outline badge-xs" title={attr.rules ?? attr.name}>{attr.name}</span>{/if}
@@ -308,7 +308,7 @@
               <th class="cursor-pointer select-none" onclick={() => sortToggle('courage')}>Cou{si('courage')}</th>
               <th class="cursor-pointer select-none" onclick={() => sortToggle('health')}>HP{si('health')}</th>
               <th>Attributes</th>
-              <th>Equipment</th>
+              <th class="min-w-[8rem]">Equipment</th>
               {#if !readonly}<th class="text-right">Actions</th>{/if}
             </tr>
           </thead>
@@ -333,7 +333,7 @@
                 <td>{st.courage ?? '—'}</td>
                 <td>{st.health ?? '—'}</td>
                 <td>
-                  <div class="flex flex-wrap gap-1">
+                  <div class="flex max-w-xs flex-wrap gap-1">
                     {#each attrIds as aid (aid)}
                       {@const attr = allAttributes.find((a) => a.id === aid)}
                       {#if attr}<span class="badge badge-outline badge-xs" title={attr.rules ?? attr.name}>{attr.name}</span>{/if}
