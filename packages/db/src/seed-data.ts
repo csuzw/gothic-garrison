@@ -1,4 +1,4 @@
-﻿// AUTO-GENERATED — do not edit by hand.
+// AUTO-GENERATED — do not edit by hand.
 // Exported from the database by `pnpm db:export-seed` (src/export-seed-data.ts).
 // This is the canonical, git-committed reference data seeded into every
 // environment via `pnpm db:seed`. To change it, edit reference rows in the
@@ -754,7 +754,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "8\", Power Die+1, −1 Shoot, 2 targets @1\""
+    "rules": "8\", Power Die+1, −1 to Shoot Checks, 2 potential targets (with 1\" of each other, separate Check for each), ignore Armour (1), Shot Bag to reload, can be used as Improvised Weapon"
   },
   {
     "name": "Breastplate",
@@ -762,7 +762,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Armour (1), −1 Speed; firearms ignore it"
+    "rules": "Armour (1) - firearms ignore it, Speed -1"
   },
   {
     "name": "Cartridge Box",
@@ -778,7 +778,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 0,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "0 slots. Ammo upgrade; shooting attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron)."
+    "rules": "Ammo upgrade, shooting attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron), 0 slots"
   },
   {
     "name": "Cold Iron Weapon",
@@ -786,7 +786,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 0,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "0 slots. Melee weapon upgrade; attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron)."
+    "rules": "Melee weapon upgrade, attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron), 0 slots"
   },
   {
     "name": "Fencing Weapon",
@@ -794,7 +794,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Melee, Skill Die dmg"
+    "rules": "Melee, Skill Die"
   },
   {
     "name": "Hand Weapon",
@@ -802,7 +802,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Melee, Power Die dmg"
+    "rules": "Melee, Power Die"
   },
   {
     "name": "Heavy Weapon",
@@ -810,7 +810,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "Melee, Power Die+1 (2 slots)"
+    "rules": "Melee, Power Die+1, 2 slots"
   },
   {
     "name": "Holy Symbol",
@@ -818,7 +818,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "0 slots. Figures with Weakened by Faith suffer -3 to Melee attack rolls when in combat against the carrier."
+    "rules": "Figures with Weakened by Faith suffer -3 to Melee attack rolls when in combat against the carrier"
   },
   {
     "name": "Improvised Weapon",
@@ -834,7 +834,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "24\", Power Die dmg, bayonet"
+    "rules": "24\", Power Die, Cartridge Box to reload, ignore Armour (1), includes bayonet (Hand Weapon), 2 slots"
   },
   {
     "name": "Oil and Torches",
@@ -842,7 +842,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "1 slot. Spend action to light; counts as improvised weapon while lit, may not use weapons of 2+ slots. Fire attacks ignore Damage Reduction and Indestructible on targets with Allergy (Fire)."
+    "rules": "Counts as Improvised Weapon but cannot use weapons that take up 2 or more slots, spend action to light, fire attacks ignore Damage Reduction and Indestructible on targets with Allergy (Fire)"
   },
   {
     "name": "Pistol",
@@ -850,7 +850,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "8\", Power Die; max 2/figure"
+    "rules": "8\", Power Die, Max 2 per figure, ignore Armour (1), can be used as Improvised Weapon"
   },
   {
     "name": "Rifle",
@@ -858,7 +858,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "30\", Skill Die dmg (not Power!)"
+    "rules": "30\", Skill Die, Cartridge Box to reload, ignore Armour (1), includes bayonet (Hand Weapon), 2 slots"
   },
   {
     "name": "Salt Bag",
@@ -866,7 +866,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "1 slot. Salt attacks ignore Damage Reduction and Indestructible on targets with Allergy (Salt)."
+    "rules": "Salt attacks ignore Damage Reduction and Indestructible on targets with Allergy (Salt)"
   },
   {
     "name": "Shot Bag",
@@ -882,7 +882,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 0,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "0 slots. Ammo upgrade; shooting attacks ignore Damage Reduction and Indestructible on targets with Allergy (Silver)."
+    "rules": "Ammo upgrade, shooting attacks ignore Damage Reduction and Indestructible on targets with Allergy (Silver), 0 slots"
   },
   {
     "name": "Silver Weapon",
@@ -890,7 +890,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 0,
     "isSpecial": true,
     "sourceCode": "core",
-    "rules": "0 slots. Melee weapon upgrade; attacks ignore Damage Reduction and Indestructible on targets with Allergy (Silver)."
+    "rules": "Melee weapon upgrade, attacks ignore Damage Reduction and Indestructible on targets with Allergy (Silver), 0 slots"
   },
   {
     "name": "Volley Gun",
@@ -898,7 +898,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "14\", Power Die+1, −1 Shoot, 3 targets"
+    "rules": "14\", Power Die+1, −1 to Shoot Checks, 3 potentials targets  (with 1\" of each other, separate Check for each), ignores Armour (1), cannot be reloaded, 2 slots"
   }
 ];
 
@@ -2747,4 +2747,85 @@ export const soldiers: SeedSoldier[] = [
   }
 ];
 
-export const monsters: SeedMonster[] = [];
+export const monsters: SeedMonster[] = [
+  {
+    "name": "Brigante/Brigantessa",
+    "sourceCode": "italy",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "choice",
+    "description": null,
+    "fixedAttributes": [
+      "Master of Cover",
+      "Nimble"
+    ],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Blunderbuss, Shot Bag",
+        "order": 1,
+        "items": [
+          {
+            "name": "Blunderbuss",
+            "qty": 1
+          },
+          {
+            "name": "Shot Bag",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Hand Weapon, Pistol ×2",
+        "order": 2,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Dark Wolf",
+    "sourceCode": "core",
+    "experience": 0,
+    "stats": {
+      "speed": 8,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 8
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [],
+    "loadouts": []
+  }
+];

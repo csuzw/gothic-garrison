@@ -90,12 +90,14 @@
   const sourceName = (id: unknown) => sources.find((s) => s.id === id)?.name ?? '—';
   const sourceCode = (id: unknown) => sources.find((s) => s.id === id)?.code ?? '?';
 
-  async function loadAll() {
+  async function loadAll(preserveState = false) {
     loading = true;
     loadError = null;
-    sourceFilter = '';
-    sortKey = '';
-    sortDir = 'asc';
+    if (!preserveState) {
+      sourceFilter = '';
+      sortKey = '';
+      sortDir = 'asc';
+    }
     formMode = 'closed';
     stFormMode = 'closed';
     mtFormMode = 'closed';
@@ -172,7 +174,7 @@
         return;
       }
       formMode = 'closed';
-      await loadAll();
+      await loadAll(true);
     } catch {
       formError = 'Save failed — could not reach the API.';
     } finally {
@@ -214,7 +216,7 @@
         actionError = (await res.json().catch(() => ({})))?.message ?? 'Delete failed';
         return;
       }
-      await loadAll();
+      await loadAll(true);
     } catch {
       actionError = 'Delete failed — could not reach the API.';
     }
@@ -252,7 +254,7 @@
         return;
       }
       stFormMode = 'closed';
-      await loadAll();
+      await loadAll(true);
     } catch {
       stFormError = 'Save failed — could not reach the API.';
     } finally {
@@ -292,7 +294,7 @@
         return;
       }
       mtFormMode = 'closed';
-      await loadAll();
+      await loadAll(true);
     } catch {
       mtFormError = 'Save failed — could not reach the API.';
     } finally {
@@ -510,7 +512,7 @@
       </div>
     {:else if entity}
       <div class="overflow-x-auto">
-        <table class="table table-zebra table-sm">
+        <table class="table table-zebra table-sm [&_td]:align-top">
           <thead>
             <tr>
               {#each entity.columns as col (col)}
@@ -538,7 +540,7 @@
                     {:else if field?.type === 'source'}
                       {sourceName(row[col])}
                     {:else if field?.type === 'textarea'}
-                      <span class="block max-w-sm truncate opacity-80">{row[col] ?? '—'}</span>
+                      <span class="block max-w-sm opacity-80">{row[col] ?? '—'}</span>
                     {:else}
                       <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
                         <span class:capitalize={field?.capitalize}>{row[col] ?? '—'}</span>

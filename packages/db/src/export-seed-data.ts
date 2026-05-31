@@ -387,10 +387,11 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       `\nexport const monsters: SeedMonster[] = ${JSON.stringify(monsters, null, 2)};\n`;
     fs.writeFileSync(SEED_PATH, SEED_HEADER + body);
 
-    // Append a changelog entry only when something changed — keeps re-export of
-    // an unchanged DB a no-op (and the changelog free of noise).
+    // Temporarily disabled while base data is being entered.
+    // Re-enable WRITE_CHANGELOG when the reference data is stable.
+    const WRITE_CHANGELOG = false;
     let note: string | null = null;
-    if (changes.length > 0) {
+    if (WRITE_CHANGELOG && changes.length > 0) {
       note = opts.note?.trim() || summarize(changes);
       const prevLog = readExportedArray<ReferenceChangelogEntry>(CHANGELOG_PATH, 'referenceChangelog');
       const entries = [{ date: new Date().toISOString(), note, changes }, ...prevLog];
