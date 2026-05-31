@@ -14,7 +14,7 @@
     specialMax,
     onChange,
   }: {
-    catalog: { id: string; name: string; slotCost: number; isSpecial: boolean }[];
+    catalog: { id: string; name: string; slotCost: number; isSpecial: boolean; rules: string | null }[];
     items: EquipmentSnapshot[];
     slots: number;
     specialMax: number;
@@ -106,14 +106,14 @@
             {#if normalCatalog.length}
               <optgroup label="Equipment">
                 {#each normalCatalog as c (c.id)}
-                  <option value={c.id}>{c.name}{c.slotCost === 2 ? ' (2 slots)' : ''}</option>
+                  <option value={c.id} title={c.rules || c.name}>{c.name}{c.slotCost === 2 ? ' (2 slots)' : ''}</option>
                 {/each}
               </optgroup>
             {/if}
             {#if specialCatalog.length}
               <optgroup label="Special Armoury">
                 {#each specialCatalog as c (c.id)}
-                  <option value={c.id}>{c.name}{c.slotCost === 2 ? ' (2 slots)' : ''}</option>
+                  <option value={c.id} title={c.rules || c.name}>{c.name}{c.slotCost === 2 ? ' (2 slots)' : ''}</option>
                 {/each}
               </optgroup>
             {/if}

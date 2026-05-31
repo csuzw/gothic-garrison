@@ -14,7 +14,7 @@ import type { PageServerLoad } from './$types';
 
 export interface BestiaryLoadout {
   label: string;
-  items: { name: string; quantity: number }[];
+  items: { name: string; quantity: number; rules: string | null }[];
 }
 
 export interface BestiaryMonster {
@@ -24,7 +24,7 @@ export interface BestiaryMonster {
   stats: SoldierStats;
   equipmentMode: 'fixed' | 'choice';
   description: string | null;
-  attributes: string[];
+  attributes: { name: string; rules: string | null }[];
   loadouts: BestiaryLoadout[];
 }
 
@@ -45,7 +45,7 @@ export const load: PageServerLoad = async () => {
         .innerJoin(sources, eq(sources.id, monsterTypes.sourceId))
         .orderBy(asc(monsterTypes.name)),
       db
-        .select({ monsterTypeId: monsterTypeFixedAttributes.monsterTypeId, name: attributes.name })
+        .select({ monsterTypeId: monsterTypeFixedAttributes.monsterTypeId, name: attributes.name, rules: attributes.rules })
         .from(monsterTypeFixedAttributes)
         .innerJoin(attributes, eq(attributes.id, monsterTypeFixedAttributes.attributeId)),
       db
@@ -62,23 +62,25 @@ export const load: PageServerLoad = async () => {
           loadoutId: monsterLoadoutItems.loadoutId,
           name: equipmentItems.name,
           quantity: monsterLoadoutItems.quantity,
+          rules: equipmentItems.rules,
         })
         .from(monsterLoadoutItems)
         .innerJoin(equipmentItems, eq(equipmentItems.id, monsterLoadoutItems.equipmentItemId))
         .orderBy(asc(monsterLoadoutItems.displayOrder)),
     ]);
 
-    const attrsByMonster = new Map<string, string[]>();
+    const attrsByMonster = new Map<string, { name: string; rules: string | null }[]>();
     for (const r of fixedRows) {
       const list = attrsByMonster.get(r.monsterTypeId);
-      if (list) list.push(r.name);
-      else attrsByMonster.set(r.monsterTypeId, [r.name]);
+      const entry = { name: r.name, rules: r.rules };
+      if (list) list.push(entry);
+      else attrsByMonster.set(r.monsterTypeId, [entry]);
     }
 
-    const itemsByLoadout = new Map<string, { name: string; quantity: number }[]>();
+    const itemsByLoadout = new Map<string, { name: string; quantity: number; rules: string | null }[]>();
     for (const r of loadoutItemRows) {
       const list = itemsByLoadout.get(r.loadoutId);
-      const entry = { name: r.name, quantity: r.quantity };
+      const entry = { name: r.name, quantity: r.quantity, rules: r.rules };
       if (list) list.push(entry);
       else itemsByLoadout.set(r.loadoutId, [entry]);
     }
@@ -98,7 +100,7 @@ export const load: PageServerLoad = async () => {
       stats: m.stats as SoldierStats,
       equipmentMode: m.equipmentMode as 'fixed' | 'choice',
       description: m.description,
-      attributes: (attrsByMonster.get(m.id) ?? []).sort((a, b) => a.localeCompare(b)),
+      attributes: (attrsByMonster.get(m.id) ?? []).sort((a, b) => a.name.localeCompare(b.name)),
       loadouts: loadoutsByMonster.get(m.id) ?? [],
     }));
 

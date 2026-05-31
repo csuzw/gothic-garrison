@@ -8,10 +8,10 @@
     fixed = [],
     onToggle,
   }: {
-    pool: { id: string; name: string }[];
+    pool: { id: string; name: string; rules: string | null }[];
     selected: AttributeSnapshot[];
     max: number;
-    fixed?: string[];
+    fixed?: { name: string; rules: string | null }[];
     onToggle: (id: string, name: string) => void;
   } = $props();
 
@@ -23,7 +23,7 @@
   {#if fixed.length}
     <div class="flex flex-wrap items-center gap-1">
       <span class="text-xs opacity-60">Has:</span>
-      {#each fixed as f}<span class="badge badge-sm badge-ghost">{f}</span>{/each}
+      {#each fixed as f}<span class="badge badge-sm badge-ghost" title={f.rules || f.name}>{f.name}</span>{/each}
     </div>
   {/if}
 
@@ -34,6 +34,7 @@
       <button
         type="button"
         class="btn btn-xs {isSel ? 'btn-primary' : 'btn-outline'}"
+        title={a.rules || a.name}
         disabled={!isSel && atMax}
         onclick={() => onToggle(a.id, a.name)}
       >

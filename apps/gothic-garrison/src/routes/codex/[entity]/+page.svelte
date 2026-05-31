@@ -15,8 +15,8 @@
   let rows = $state<Row[]>([]);
   let sources = $state<{ id: string; name: string; code: string }[]>([]);
   let nations = $state<{ id: string; name: string; flag: string | null }[]>([]);
-  let allAttributes = $state<{ id: string; name: string; isOfficer: boolean }[]>([]);
-  let allEquipment = $state<{ id: string; name: string; slotCost: number; isSpecial: boolean }[]>([]);
+  let allAttributes = $state<{ id: string; name: string; isOfficer: boolean; rules: string | null }[]>([]);
+  let allEquipment = $state<{ id: string; name: string; slotCost: number; isSpecial: boolean; rules: string | null }[]>([]);
   let loading = $state(true);
   let loadError = $state<string | null>(null);
 
@@ -27,6 +27,44 @@
   );
   const filteredRows = $derived(
     sourceFilter ? rows.filter((r) => r.sourceId === sourceFilter) : rows
+  );
+
+  // Sorting
+  let sortKey = $state('');
+  let sortDir = $state<'asc' | 'desc'>('asc');
+
+  const STAT_KEYS = ['speed', 'melee', 'accuracy', 'defence', 'courage', 'health'];
+
+  function sortVal(row: Row, key: string): string | number {
+    if (STAT_KEYS.includes(key)) {
+      return Number(((row.stats ?? {}) as Record<string, number>)[key] ?? 0);
+    }
+    const v = row[key];
+    if (v == null) return '';
+    if (typeof v === 'number') return v;
+    if (typeof v === 'boolean') return v ? 1 : 0;
+    if (key === 'sourceId') return sourceName(v).toLowerCase();
+    return String(v).toLowerCase();
+  }
+
+  function sortToggle(key: string) {
+    if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortKey = key; sortDir = 'asc'; }
+  }
+
+  const si = (key: string) => sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
+
+  const sortedFilteredRows = $derived(
+    sortKey
+      ? [...filteredRows].sort((a, b) => {
+          const va = sortVal(a, sortKey);
+          const vb = sortVal(b, sortKey);
+          const cmp = typeof va === 'number' && typeof vb === 'number'
+            ? va - vb
+            : String(va).localeCompare(String(vb));
+          return sortDir === 'asc' ? cmp : -cmp;
+        })
+      : filteredRows
   );
 
   // Flat-entity form state
@@ -56,6 +94,8 @@
     loading = true;
     loadError = null;
     sourceFilter = '';
+    sortKey = '';
+    sortDir = 'asc';
     formMode = 'closed';
     stFormMode = 'closed';
     mtFormMode = 'closed';
@@ -103,6 +143,7 @@
 
   function startNew(e: CodexEntity) {
     draft = blankRow(e);
+    if (sourceFilter) draft['sourceId'] = sourceFilter;
     editingId = null;
     formMode = 'new';
     formError = null;
@@ -182,7 +223,7 @@
   // ── Soldier-type CRUD ─────────────────────────────────────────────────────────
 
   function startNewSoldier() {
-    stEditingRow = null;
+    stEditingRow = sourceFilter ? ({ sourceId: sourceFilter } as unknown as Row) : null;
     stFormMode = 'new';
     stFormError = null;
   }
@@ -222,7 +263,7 @@
   // ── Monster-type CRUD ─────────────────────────────────────────────────────────
 
   function startNewMonster() {
-    mtEditingRow = null;
+    mtEditingRow = sourceFilter ? ({ sourceId: sourceFilter } as unknown as Row) : null;
     mtFormMode = 'new';
     mtFormError = null;
   }
@@ -307,18 +348,18 @@
     {:else if filteredRows.length === 0}
       <p class="py-6 text-sm opacity-60">No rows match that source.</p>
     {:else if isSoldierTypes}
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto overflow-y-clip">
         <table class="table table-zebra table-sm [&_td]:align-top">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Spd</th>
-              <th>Mel</th>
-              <th>Acc</th>
-              <th>Def</th>
-              <th>Cou</th>
-              <th>HP</th>
-              <th>Cost</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('name')}>Name{si('name')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('speed')}>Spd{si('speed')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('melee')}>Mel{si('melee')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('accuracy')}>Acc{si('accuracy')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('defence')}>Def{si('defence')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('courage')}>Cou{si('courage')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('health')}>HP{si('health')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('recruitmentCost')}>Cost{si('recruitmentCost')}</th>
               <th>Attributes</th>
               <th>Equipment</th>
               <th>Nations</th>
@@ -326,7 +367,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each filteredRows as row (row.id)}
+            {#each sortedFilteredRows as row (row.id)}
               {@const st = (row.stats ?? {}) as Record<string, number>}
               {@const attrIds = (row.fixedAttributeIds ?? []) as string[]}
               {@const los = (row.loadouts ?? []) as Array<{ items: Array<{ equipmentItemId: string; quantity: number }> }>}
@@ -351,7 +392,7 @@
                   <div class="flex flex-wrap gap-1">
                     {#each attrIds as aid (aid)}
                       {@const attr = allAttributes.find((a) => a.id === aid)}
-                      {#if attr}<span class="badge badge-outline badge-xs">{attr.name}</span>{/if}
+                      {#if attr}<span class="badge badge-outline badge-xs" title={attr.rules ?? attr.name}>{attr.name}</span>{/if}
                     {/each}
                     {#if (row.attributePicks as number) > 0}
                       <span class="badge badge-outline badge-xs opacity-60">Officer ({row.attributePicks})</span>
@@ -369,7 +410,7 @@
                           {#each lo.items as item (item.equipmentItemId)}
                             {@const eq = allEquipment.find((e) => e.id === item.equipmentItemId)}
                             {#if eq}
-                              <span class="badge badge-outline badge-xs"
+                              <span class="badge badge-outline badge-xs" title={eq.rules || eq.name}
                                 >{eq.name}{item.quantity > 1 ? ` ×${item.quantity}` : ''}</span>
                             {/if}
                           {/each}
@@ -398,24 +439,24 @@
         </table>
       </div>
     {:else if isMonsterTypes}
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto overflow-y-clip">
         <table class="table table-zebra table-sm [&_td]:align-top">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Spd</th>
-              <th>Mel</th>
-              <th>Acc</th>
-              <th>Def</th>
-              <th>Cou</th>
-              <th>HP</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('name')}>Name{si('name')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('speed')}>Spd{si('speed')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('melee')}>Mel{si('melee')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('accuracy')}>Acc{si('accuracy')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('defence')}>Def{si('defence')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('courage')}>Cou{si('courage')}</th>
+              <th class="cursor-pointer select-none" onclick={() => sortToggle('health')}>HP{si('health')}</th>
               <th>Attributes</th>
               <th>Equipment</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {#each filteredRows as row (row.id)}
+            {#each sortedFilteredRows as row (row.id)}
               {@const st = (row.stats ?? {}) as Record<string, number>}
               {@const attrIds = (row.fixedAttributeIds ?? []) as string[]}
               {@const los = (row.loadouts ?? []) as Array<{ items: Array<{ equipmentItemId: string; quantity: number }> }>}
@@ -438,7 +479,7 @@
                   <div class="flex flex-wrap gap-1">
                     {#each attrIds as aid (aid)}
                       {@const attr = allAttributes.find((a) => a.id === aid)}
-                      {#if attr}<span class="badge badge-outline badge-xs">{attr.name}</span>{/if}
+                      {#if attr}<span class="badge badge-outline badge-xs" title={attr.rules ?? attr.name}>{attr.name}</span>{/if}
                     {/each}
                   </div>
                 </td>
@@ -450,7 +491,7 @@
                         {#each lo.items as item (item.equipmentItemId)}
                           {@const eq = allEquipment.find((e) => e.id === item.equipmentItemId)}
                           {#if eq}
-                            <span class="badge badge-outline badge-xs"
+                            <span class="badge badge-outline badge-xs" title={eq.rules || eq.name}
                               >{eq.name}{item.quantity > 1 ? ` ×${item.quantity}` : ''}</span>
                           {/if}
                         {/each}
@@ -473,13 +514,19 @@
           <thead>
             <tr>
               {#each entity.columns as col (col)}
-                <th>{entity.fields.find((f) => f.key === col)?.label ?? col}</th>
+                {@const field = entity.fields.find((f) => f.key === col)}
+                {@const sortable = field?.type !== 'textarea' && field?.type !== 'flag'}
+                <th
+                  class:cursor-pointer={sortable}
+                  class:select-none={sortable}
+                  onclick={sortable ? () => sortToggle(col) : undefined}
+                >{field?.label ?? col}{sortable ? si(col) : ''}</th>
               {/each}
               <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {#each filteredRows as row (row.id)}
+            {#each sortedFilteredRows as row (row.id)}
               <tr>
                 {#each entity.columns as col (col)}
                   {@const field = entity.fields.find((f) => f.key === col)}

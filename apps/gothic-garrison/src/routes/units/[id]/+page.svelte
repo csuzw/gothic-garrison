@@ -345,7 +345,7 @@
                       />
                     {:else if ref.fixedAttributes.length}
                       <div class="flex flex-wrap gap-1">
-                        {#each ref.fixedAttributes as a}<span class="badge badge-xs badge-ghost">{a}</span>{/each}
+                        {#each ref.fixedAttributes as a}<span class="badge badge-xs badge-ghost" title={a.rules || a.name}>{a.name}</span>{/each}
                       </div>
                     {/if}
 
@@ -368,7 +368,7 @@
                       {:else}
                         <div class="flex flex-wrap gap-1">
                           {#each m.equipment as it (it.itemId)}
-                            <span class="badge badge-sm">{it.quantity > 1 ? `${it.quantity}× ` : ''}{it.name}</span>
+                            <span class="badge badge-sm" title={equipById.get(it.itemId)?.rules || it.name}>{it.quantity > 1 ? `${it.quantity}× ` : ''}{it.name}</span>
                           {/each}
                         </div>
                       {/if}
@@ -382,6 +382,7 @@
                               <button
                                 type="button"
                                 class="btn btn-xs {isSel ? 'btn-primary' : 'btn-outline'}"
+                                title={item.rules || item.name}
                                 disabled={!isSel && m.specialEquipment != null}
                                 onclick={() => isSel ? clearMemberSpecial(m) : setMemberSpecial(m, item)}
                               >{item.name}</button>

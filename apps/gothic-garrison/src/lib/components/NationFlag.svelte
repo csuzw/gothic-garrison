@@ -6,8 +6,8 @@
 
 {#if flag}
   {#if isImage}
-    <img src={flag} alt="{name} flag" class="{imgClass} inline-block shrink-0 object-contain" />
+    <img src={flag} alt="{name} flag" title={name || undefined} class="{imgClass} inline-block shrink-0 object-contain" />
   {:else}
-    <span class="shrink-0 leading-none" aria-label="{name} flag">{flag}</span>
+    <span class="shrink-0 leading-none" aria-label="{name} flag" title={name || undefined}>{flag}</span>
   {/if}
 {/if}

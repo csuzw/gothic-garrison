@@ -14,8 +14,8 @@
     mode: 'new' | 'edit';
     row?: Record<string, any>;
     sources: { id: string; name: string }[];
-    allAttributes: { id: string; name: string; isOfficer: boolean }[];
-    allEquipment: { id: string; name: string; slotCost: number; isSpecial: boolean }[];
+    allAttributes: { id: string; name: string; isOfficer: boolean; rules: string | null }[];
+    allEquipment: { id: string; name: string; slotCost: number; isSpecial: boolean; rules: string | null }[];
     saving: boolean;
     error: string | null;
     onsave: (body: unknown) => void;
@@ -25,7 +25,7 @@
   let { mode, row, sources, allAttributes, allEquipment, saving, error, onsave, oncancel }: Props =
     $props();
 
-  const r: Record<string, any> = untrack(() => (mode === 'edit' ? (row ?? {}) : {}));
+  const r: Record<string, any> = untrack(() => row ?? {});
 
   function initLoadouts(): DraftLoadout[] {
     const raw: any[] = r.loadouts ?? [];

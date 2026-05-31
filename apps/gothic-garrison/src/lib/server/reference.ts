@@ -25,6 +25,7 @@ export interface RefAttribute {
   id: string;
   name: string;
   isOfficer: boolean;
+  rules: string | null;
 }
 
 export interface RefEquipment {
@@ -33,6 +34,7 @@ export interface RefEquipment {
   slotCost: number;
   isSpecial: boolean;
   category: string;
+  rules: string | null;
 }
 
 export interface RefLoadoutItem {
@@ -59,7 +61,7 @@ export interface RefSoldier {
   equipmentSlots: number | null;
   specialSlots: number | null;
   attributePicks: number;
-  fixedAttributes: string[];
+  fixedAttributes: { name: string; rules: string | null }[];
   nationIds: string[];
   loadouts: RefLoadout[];
 }
@@ -91,7 +93,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
       .innerJoin(sources, eq(nations.sourceId, sources.id))
       .orderBy(asc(nations.name)),
     db
-      .select({ id: attributes.id, name: attributes.name, isOfficer: attributes.isOfficer })
+      .select({ id: attributes.id, name: attributes.name, isOfficer: attributes.isOfficer, rules: attributes.rules })
       .from(attributes)
       .orderBy(asc(attributes.name)),
     db
@@ -101,6 +103,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
         slotCost: equipmentItems.slotCost,
         isSpecial: equipmentItems.isSpecial,
         category: equipmentItems.category,
+        rules: equipmentItems.rules,
       })
       .from(equipmentItems)
       .orderBy(asc(equipmentItems.name)),
@@ -109,7 +112,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
       .select({ nationId: nationSoldierTypes.nationId, soldierTypeId: nationSoldierTypes.soldierTypeId })
       .from(nationSoldierTypes),
     db
-      .select({ soldierTypeId: soldierTypeFixedAttributes.soldierTypeId, name: attributes.name })
+      .select({ soldierTypeId: soldierTypeFixedAttributes.soldierTypeId, name: attributes.name, rules: attributes.rules })
       .from(soldierTypeFixedAttributes)
       .innerJoin(attributes, eq(attributes.id, soldierTypeFixedAttributes.attributeId)),
     db.select().from(soldierLoadouts).orderBy(asc(soldierLoadouts.displayOrder)),
@@ -131,8 +134,8 @@ export async function getReferenceData(): Promise<ReferenceData> {
   const nationsBySoldier = new Map<string, string[]>();
   for (const l of links) (nationsBySoldier.get(l.soldierTypeId) ?? nationsBySoldier.set(l.soldierTypeId, []).get(l.soldierTypeId)!).push(l.nationId);
 
-  const fixedBySoldier = new Map<string, string[]>();
-  for (const f of fixed) (fixedBySoldier.get(f.soldierTypeId) ?? fixedBySoldier.set(f.soldierTypeId, []).get(f.soldierTypeId)!).push(f.name);
+  const fixedBySoldier = new Map<string, { name: string; rules: string | null }[]>();
+  for (const f of fixed) (fixedBySoldier.get(f.soldierTypeId) ?? fixedBySoldier.set(f.soldierTypeId, []).get(f.soldierTypeId)!).push({ name: f.name, rules: f.rules });
 
   const itemsByLoadout = new Map<string, RefLoadoutItem[]>();
   for (const it of loadoutItems)

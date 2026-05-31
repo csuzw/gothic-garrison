@@ -39,8 +39,8 @@
               <p class="text-xs font-semibold">Attributes</p>
               {#if monster.attributes.length > 0}
                 <div class="flex flex-wrap gap-1">
-                  {#each monster.attributes as attr (attr)}
-                    <span class="badge badge-outline badge-sm">{attr}</span>
+                  {#each monster.attributes as attr (attr.name)}
+                    <span class="badge badge-outline badge-sm" title={attr.rules || attr.name}>{attr.name}</span>
                   {/each}
                 </div>
               {:else}
@@ -58,7 +58,7 @@
                 {#if items.length > 0}
                   <div class="flex flex-wrap gap-1">
                     {#each items as item (item.name)}
-                      <span class="badge badge-outline badge-sm">
+                      <span class="badge badge-outline badge-sm" title={item.rules || item.name}>
                         {item.quantity > 1 ? `${item.name} ×${item.quantity}` : item.name}
                       </span>
                     {/each}
@@ -71,7 +71,7 @@
                   <div class="flex flex-wrap items-center gap-1">
                     <span class="text-xs opacity-50 shrink-0">Option {i + 1}:</span>
                     {#each lo.items as item (item.name)}
-                      <span class="badge badge-outline badge-sm">
+                      <span class="badge badge-outline badge-sm" title={item.rules || item.name}>
                         {item.quantity > 1 ? `${item.name} ×${item.quantity}` : item.name}
                       </span>
                     {/each}
