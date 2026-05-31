@@ -16,6 +16,12 @@ export interface CodexField {
   max?: number;
   placeholder?: string;
   help?: string;
+  /** Render a source-code badge inline with this cell's value. */
+  sourceBadge?: boolean;
+  /** Override the default widget for this field type (e.g. 'tag-group' for enums). */
+  widget?: 'tag-group';
+  /** Capitalize the first letter when displaying the value in the table and form. */
+  capitalize?: boolean;
 }
 
 export interface CodexEntity {
@@ -47,11 +53,11 @@ export const CODEX_ENTITIES: CodexEntity[] = [
     slug: 'nations',
     label: 'Nations',
     singular: 'nation',
-    columns: ['flag', 'name', 'sourceId', 'notes'],
+    columns: ['flag', 'name', 'notes'],
     fields: [
-      { key: 'name', label: 'Name', type: 'text', required: true },
+      { key: 'name', label: 'Name', type: 'text', required: true, sourceBadge: true },
       { key: 'sourceId', label: 'Source', type: 'source', required: true },
-      { key: 'notes', label: 'Notes', type: 'textarea' },
+      { key: 'notes', label: 'Description', type: 'textarea' },
       { key: 'flag', label: 'Flag', type: 'flag' },
     ],
   },
@@ -59,10 +65,10 @@ export const CODEX_ENTITIES: CodexEntity[] = [
     slug: 'attributes',
     label: 'Attributes',
     singular: 'attribute',
-    columns: ['name', 'isOfficer', 'sourceId'],
+    columns: ['name', 'description', 'isOfficer'],
     fields: [
-      { key: 'name', label: 'Name', type: 'text', required: true },
-      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'name', label: 'Name', type: 'text', required: true, sourceBadge: true },
+      { key: 'description', label: 'Rules', type: 'textarea', required: true },
       { key: 'isOfficer', label: 'Officer-selectable', type: 'boolean', help: 'In the officer attribute pool.' },
       { key: 'sourceId', label: 'Source', type: 'source', required: true },
     ],
@@ -71,26 +77,14 @@ export const CODEX_ENTITIES: CodexEntity[] = [
     slug: 'equipment',
     label: 'Equipment',
     singular: 'equipment item',
-    columns: ['name', 'category', 'slotCost', 'isSpecial', 'sourceId'],
+    columns: ['name', 'notes', 'slotCost', 'isSpecial', 'category'],
     fields: [
-      { key: 'name', label: 'Name', type: 'text', required: true },
-      { key: 'category', label: 'Category', type: 'text', required: true, placeholder: 'weapon' },
-      { key: 'slotCost', label: 'Slot cost', type: 'number', min: 0, max: 10, required: true },
+      { key: 'name', label: 'Name', type: 'text', required: true, sourceBadge: true },
+      { key: 'category', label: 'Category', type: 'enum', options: ['weapon', 'armour', 'gear', 'upgrade'], required: true, widget: 'tag-group', capitalize: true },
+      { key: 'slotCost', label: 'Slots', type: 'number', min: 0, max: 10, required: true },
       { key: 'isSpecial', label: 'Special armoury', type: 'boolean' },
       { key: 'sourceId', label: 'Source', type: 'source', required: true },
-      { key: 'notes', label: 'Notes', type: 'textarea' },
-    ],
-  },
-  {
-    slug: 'optional-rules',
-    label: 'Optional rules',
-    singular: 'optional rule',
-    columns: ['code', 'name', 'sourceId'],
-    fields: [
-      { key: 'code', label: 'Code', type: 'text', required: true },
-      { key: 'name', label: 'Name', type: 'text', required: true },
-      { key: 'description', label: 'Description', type: 'textarea', required: true },
-      { key: 'sourceId', label: 'Source', type: 'source', required: true },
+      { key: 'notes', label: 'Rules', type: 'textarea' },
     ],
   },
 ];
@@ -106,7 +100,6 @@ export const CODEX_NAV: { slug: string; label: string }[] = [
   { slug: MONSTER_TYPES_SLUG, label: 'Monsters' },
   { slug: 'attributes', label: 'Attributes' },
   { slug: 'equipment', label: 'Equipment' },
-  { slug: 'optional-rules', label: 'Optional rules' },
 ];
 
 export function codexEntity(slug: string | undefined): CodexEntity | undefined {

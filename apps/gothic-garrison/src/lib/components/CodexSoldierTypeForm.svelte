@@ -45,7 +45,7 @@
   let sourceId = $state<string>(r.sourceId ?? untrack(() => sources[0]?.id) ?? '');
   let recruitmentCost = $state<number>(Number(r.recruitmentCost ?? 0));
   let maxPerUnit = $state<number | null>(r.maxPerUnit ?? null);
-  let notes = $state<string>(r.notes ?? '');
+  let description = $state<string>(r.description ?? '');
   let stats = $state<SoldierStats>(
     STAT_META.reduce<SoldierStats>((acc, { key: k }) => {
       acc[k] = Number((r.stats ?? {})[k] ?? 0);
@@ -134,7 +134,7 @@
       equipmentSlots: equipmentMode === 'pool' ? equipmentSlots : null,
       specialSlots: equipmentMode === 'pool' ? specialSlots : null,
       attributePicks,
-      notes: notes || null,
+      description: description || null,
       nationIds,
       fixedAttributeIds,
       loadouts:
@@ -204,8 +204,8 @@
         </div>
 
         <details>
-          <summary class="cursor-pointer text-sm font-medium opacity-60 select-none">Notes</summary>
-          <textarea bind:value={notes} class="textarea w-full mt-2" rows="2"></textarea>
+          <summary class="cursor-pointer text-sm font-medium opacity-60 select-none">Description</summary>
+          <textarea bind:value={description} class="textarea w-full mt-2" rows="2"></textarea>
         </details>
       </div>
 

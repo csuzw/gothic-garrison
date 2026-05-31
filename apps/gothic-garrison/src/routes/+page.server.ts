@@ -9,10 +9,10 @@ export const load = async () => {
         name: n.name,
         flag: n.flag,
         sourceCode: n.sourceCode,
-        notes: n.notes,
+        description: n.description,
       })),
     };
   } catch {
-    return { nations: [] as { id: string; name: string; flag: string | null; sourceCode: string; notes: string | null }[] };
+    return { nations: [] as { id: string; name: string; flag: string | null; sourceCode: string; description: string | null }[] };
   }
 };

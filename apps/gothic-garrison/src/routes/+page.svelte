@@ -106,8 +106,8 @@
                   <span class="font-semibold">{n.name}</span>
                   <span class="badge badge-outline badge-sm ml-auto font-mono">{n.sourceCode}</span>
                 </div>
-                {#if n.notes}
-                  <p class="hidden text-xs leading-relaxed opacity-60 sm:block">{n.notes}</p>
+                {#if n.description}
+                  <p class="hidden text-xs leading-relaxed opacity-60 sm:block">{n.description}</p>
                 {/if}
               </div>
             </button>

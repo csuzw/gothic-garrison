@@ -115,6 +115,7 @@ export function assertUuid(value: string, label = 'id'): string {
 
 export const SOURCE_KINDS = ['core', 'supplement'] as const;
 export const EQUIPMENT_MODES = ['fixed', 'choice', 'pool'] as const;
+export const EQUIPMENT_CATEGORIES = ['weapon', 'armour', 'gear', 'upgrade'] as const;
 const STAT_KEYS = ['speed', 'melee', 'accuracy', 'defence', 'courage', 'health'] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -129,24 +130,24 @@ export interface SourceInput {
 export interface NationInput {
   name: string;
   sourceId: string;
-  notes: string | null;
+  description: string | null;
   flag: string | null;
 }
 
 export interface AttributeInput {
   name: string;
-  description: string;
+  rules: string;
   isOfficer: boolean;
   sourceId: string;
 }
 
 export interface EquipmentInput {
   name: string;
-  category: string;
+  category: (typeof EQUIPMENT_CATEGORIES)[number];
   slotCost: number;
   isSpecial: boolean;
   sourceId: string;
-  notes: string | null;
+  rules: string | null;
 }
 
 export interface OptionalRuleInput {
@@ -178,7 +179,7 @@ export interface MonsterTypeInput {
   experience: number;
   stats: SoldierStatsInput;
   equipmentMode: (typeof MONSTER_EQUIPMENT_MODES)[number];
-  notes: string | null;
+  description: string | null;
   fixedAttributeIds: string[];
   loadouts: LoadoutInput[];
 }
@@ -193,7 +194,7 @@ export interface SoldierTypeInput {
   equipmentSlots: number | null;
   specialSlots: number | null;
   attributePicks: number;
-  notes: string | null;
+  description: string | null;
   nationIds: string[];
   fixedAttributeIds: string[];
   loadouts: LoadoutInput[];
@@ -218,14 +219,14 @@ export function validateSource(body: unknown): SourceInput {
 
 export function validateNation(body: unknown): NationInput {
   const o = obj(body);
-  return { name: reqStr(o, 'name'), sourceId: uuid(o, 'sourceId'), notes: optStr(o, 'notes'), flag: optStr(o, 'flag') };
+  return { name: reqStr(o, 'name'), sourceId: uuid(o, 'sourceId'), description: optStr(o, 'description'), flag: optStr(o, 'flag') };
 }
 
 export function validateAttribute(body: unknown): AttributeInput {
   const o = obj(body);
   return {
     name: reqStr(o, 'name'),
-    description: reqStr(o, 'description'),
+    rules: reqStr(o, 'rules'),
     isOfficer: bool(o, 'isOfficer'),
     sourceId: uuid(o, 'sourceId'),
   };
@@ -235,11 +236,11 @@ export function validateEquipment(body: unknown): EquipmentInput {
   const o = obj(body);
   return {
     name: reqStr(o, 'name'),
-    category: reqStr(o, 'category'),
+    category: enumOf(o, 'category', EQUIPMENT_CATEGORIES),
     slotCost: int(o, 'slotCost', { min: 0, max: 10 }),
     isSpecial: bool(o, 'isSpecial'),
     sourceId: uuid(o, 'sourceId'),
-    notes: optStr(o, 'notes'),
+    rules: optStr(o, 'rules'),
   };
 }
 
@@ -279,7 +280,7 @@ export function validateMonsterType(body: unknown): MonsterTypeInput {
     experience,
     stats: validateStats(o.stats),
     equipmentMode,
-    notes: optStr(o, 'notes'),
+    description: optStr(o, 'description'),
     fixedAttributeIds: uuidArray(o, 'fixedAttributeIds'),
     loadouts,
   };
@@ -358,7 +359,7 @@ export function validateSoldierType(body: unknown): SoldierTypeInput {
     equipmentSlots,
     specialSlots,
     attributePicks: nullableInt(o, 'attributePicks', { min: 0, max: 10 }) ?? 0,
-    notes: optStr(o, 'notes'),
+    description: optStr(o, 'description'),
     nationIds: uuidArray(o, 'nationIds'),
     fixedAttributeIds: uuidArray(o, 'fixedAttributeIds'),
     loadouts,

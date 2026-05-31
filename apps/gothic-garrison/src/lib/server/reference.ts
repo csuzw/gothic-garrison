@@ -17,7 +17,7 @@ export interface RefNation {
   id: string;
   name: string;
   flag: string | null;
-  notes: string | null;
+  description: string | null;
   sourceCode: string;
 }
 
@@ -86,7 +86,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
   const db = getDb();
   const [nats, attrs, equip, sols, links, fixed, loadouts, loadoutItems] = await Promise.all([
     db
-      .select({ id: nations.id, name: nations.name, flag: nations.flag, notes: nations.notes, sourceCode: sources.code })
+      .select({ id: nations.id, name: nations.name, flag: nations.flag, description: nations.description, sourceCode: sources.code })
       .from(nations)
       .innerJoin(sources, eq(nations.sourceId, sources.id))
       .orderBy(asc(nations.name)),

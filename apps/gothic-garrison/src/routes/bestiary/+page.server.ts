@@ -23,7 +23,7 @@ export interface BestiaryMonster {
   sourceCode: string;
   stats: SoldierStats;
   equipmentMode: 'fixed' | 'choice';
-  notes: string | null;
+  description: string | null;
   attributes: string[];
   loadouts: BestiaryLoadout[];
 }
@@ -39,7 +39,7 @@ export const load: PageServerLoad = async () => {
           sourceCode: sources.code,
           stats: monsterTypes.stats,
           equipmentMode: monsterTypes.equipmentMode,
-          notes: monsterTypes.notes,
+          description: monsterTypes.description,
         })
         .from(monsterTypes)
         .innerJoin(sources, eq(sources.id, monsterTypes.sourceId))
@@ -97,7 +97,7 @@ export const load: PageServerLoad = async () => {
       sourceCode: m.sourceCode,
       stats: m.stats as SoldierStats,
       equipmentMode: m.equipmentMode as 'fixed' | 'choice',
-      notes: m.notes,
+      description: m.description,
       attributes: (attrsByMonster.get(m.id) ?? []).sort((a, b) => a.localeCompare(b)),
       loadouts: loadoutsByMonster.get(m.id) ?? [],
     }));

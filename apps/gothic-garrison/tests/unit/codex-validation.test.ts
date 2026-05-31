@@ -51,8 +51,8 @@ describe('validateSource', () => {
 });
 
 describe('validateNation', () => {
-  it('parses name + sourceId and nulls absent notes', () => {
-    expect(validateNation({ name: 'Britain', sourceId: SRC })).toEqual({ name: 'Britain', sourceId: SRC, notes: null, flag: null });
+  it('parses name + sourceId and nulls absent description', () => {
+    expect(validateNation({ name: 'Britain', sourceId: SRC })).toEqual({ name: 'Britain', sourceId: SRC, description: null, flag: null });
   });
   it('rejects a non-UUID sourceId', () => {
     expect(() => validateNation({ name: 'Britain', sourceId: 'x' })).toThrow(/sourceId/);
@@ -61,10 +61,10 @@ describe('validateNation', () => {
 
 describe('validateAttribute', () => {
   it('requires a boolean isOfficer', () => {
-    expect(() => validateAttribute({ name: 'Tough', description: 'd', isOfficer: 'yes', sourceId: SRC })).toThrow(/isOfficer/);
+    expect(() => validateAttribute({ name: 'Tough', rules: 'd', isOfficer: 'yes', sourceId: SRC })).toThrow(/isOfficer/);
   });
   it('parses a valid attribute', () => {
-    expect(validateAttribute({ name: 'Tough', description: 'd', isOfficer: true, sourceId: SRC }).isOfficer).toBe(true);
+    expect(validateAttribute({ name: 'Tough', rules: 'd', isOfficer: true, sourceId: SRC }).isOfficer).toBe(true);
   });
 });
 
@@ -72,7 +72,7 @@ describe('validateEquipment', () => {
   it('parses a valid item', () => {
     const v = validateEquipment({ name: 'Musket', category: 'weapon', slotCost: 2, isSpecial: false, sourceId: SRC });
     expect(v.slotCost).toBe(2);
-    expect(v.notes).toBeNull();
+    expect(v.rules).toBeNull();
   });
   it('rejects a negative slot cost', () => {
     expect(() => validateEquipment({ name: 'Musket', category: 'weapon', slotCost: -1, isSpecial: false, sourceId: SRC })).toThrow(/slotCost/);

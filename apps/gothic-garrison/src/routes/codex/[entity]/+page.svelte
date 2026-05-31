@@ -13,12 +13,21 @@
   const isMonsterTypes = $derived(slug === MONSTER_TYPES_SLUG);
 
   let rows = $state<Row[]>([]);
-  let sources = $state<{ id: string; name: string }[]>([]);
-  let nations = $state<{ id: string; name: string }[]>([]);
+  let sources = $state<{ id: string; name: string; code: string }[]>([]);
+  let nations = $state<{ id: string; name: string; flag: string | null }[]>([]);
   let allAttributes = $state<{ id: string; name: string; isOfficer: boolean }[]>([]);
   let allEquipment = $state<{ id: string; name: string; slotCost: number; isSpecial: boolean }[]>([]);
   let loading = $state(true);
   let loadError = $state<string | null>(null);
+
+  // Source filter
+  let sourceFilter = $state('');
+  const hasSourceFilter = $derived(
+    isSoldierTypes || isMonsterTypes || (entity?.fields.some((f) => f.type === 'source') ?? false)
+  );
+  const filteredRows = $derived(
+    sourceFilter ? rows.filter((r) => r.sourceId === sourceFilter) : rows
+  );
 
   // Flat-entity form state
   let formMode = $state<'closed' | 'new' | 'edit'>('closed');
@@ -41,10 +50,12 @@
   let mtFormError = $state<string | null>(null);
 
   const sourceName = (id: unknown) => sources.find((s) => s.id === id)?.name ?? '—';
+  const sourceCode = (id: unknown) => sources.find((s) => s.id === id)?.code ?? '?';
 
   async function loadAll() {
     loading = true;
     loadError = null;
+    sourceFilter = '';
     formMode = 'closed';
     stFormMode = 'closed';
     mtFormMode = 'closed';
@@ -257,14 +268,30 @@
   <div class="space-y-3">
     <div class="flex items-center gap-2">
       <h2 class="text-lg font-semibold">{entity?.label ?? (isSoldierTypes ? 'Soldiers' : 'Monsters')}</h2>
-      <span class="badge badge-ghost badge-sm">{rows.length}</span>
-      {#if entity}
-        <button class="btn btn-sm btn-primary ml-auto" onclick={() => startNew(entity)}>New {entity.singular}</button>
-      {:else if isSoldierTypes}
-        <button class="btn btn-sm btn-primary ml-auto" onclick={startNewSoldier}>New soldier</button>
-      {:else if isMonsterTypes}
-        <button class="btn btn-sm btn-primary ml-auto" onclick={startNewMonster}>New monster</button>
-      {/if}
+      <span class="badge badge-ghost badge-sm">{filteredRows.length}</span>
+      <div class="ml-auto flex items-center gap-2">
+        {#if hasSourceFilter && sources.length > 1}
+          <div class="join">
+            <button
+              class="btn btn-xs join-item {sourceFilter === '' ? 'btn-neutral' : 'btn-ghost'}"
+              onclick={() => (sourceFilter = '')}
+            >all</button>
+            {#each sources as s (s.id)}
+              <button
+                class="btn btn-xs join-item font-mono {sourceFilter === s.id ? 'btn-neutral' : 'btn-ghost'}"
+                onclick={() => (sourceFilter = sourceFilter === s.id ? '' : s.id)}
+              >{s.code}</button>
+            {/each}
+          </div>
+        {/if}
+        {#if entity}
+          <button class="btn btn-sm btn-primary" onclick={() => startNew(entity)}>New {entity.singular}</button>
+        {:else if isSoldierTypes}
+          <button class="btn btn-sm btn-primary" onclick={startNewSoldier}>New soldier</button>
+        {:else if isMonsterTypes}
+          <button class="btn btn-sm btn-primary" onclick={startNewMonster}>New monster</button>
+        {/if}
+      </div>
     </div>
 
     {#if actionError}
@@ -277,28 +304,90 @@
       <div class="alert alert-error text-sm">{loadError}</div>
     {:else if rows.length === 0}
       <p class="py-6 text-sm opacity-60">None yet.</p>
+    {:else if filteredRows.length === 0}
+      <p class="py-6 text-sm opacity-60">No rows match that source.</p>
     {:else if isSoldierTypes}
       <div class="overflow-x-auto">
-        <table class="table table-zebra table-sm">
+        <table class="table table-zebra table-sm [&_td]:align-top">
           <thead>
             <tr>
               <th>Name</th>
-              <th>Source</th>
+              <th>Spd</th>
+              <th>Mel</th>
+              <th>Acc</th>
+              <th>Def</th>
+              <th>Cou</th>
+              <th>HP</th>
               <th>Cost</th>
-              <th>Mode</th>
+              <th>Attributes</th>
+              <th>Equipment</th>
               <th>Nations</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {#each rows as row (row.id)}
-              {@const nations_count = (row.nationIds as string[])?.length ?? 0}
+            {#each filteredRows as row (row.id)}
+              {@const st = (row.stats ?? {}) as Record<string, number>}
+              {@const attrIds = (row.fixedAttributeIds ?? []) as string[]}
+              {@const los = (row.loadouts ?? []) as Array<{ items: Array<{ equipmentItemId: string; quantity: number }> }>}
+              {@const nationIds = (row.nationIds ?? []) as string[]}
               <tr>
-                <td class="font-medium">{row.name}</td>
-                <td>{sourceName(row.sourceId)}</td>
+                <td class="whitespace-nowrap font-medium">
+                  <span class="inline-flex items-center gap-1.5">
+                    {row.name}
+                    {#if row.sourceId}
+                      <span class="badge badge-outline badge-xs font-mono">{sourceCode(row.sourceId)}</span>
+                    {/if}
+                  </span>
+                </td>
+                <td>{st.speed ?? '—'}</td>
+                <td>{st.melee ?? '—'}</td>
+                <td>{st.accuracy ?? '—'}</td>
+                <td>{st.defence ?? '—'}</td>
+                <td>{st.courage ?? '—'}</td>
+                <td>{st.health ?? '—'}</td>
                 <td>{row.recruitmentCost}</td>
-                <td><span class="badge badge-ghost badge-sm">{row.equipmentMode}</span></td>
-                <td class="opacity-60">{nations_count}</td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    {#each attrIds as aid (aid)}
+                      {@const attr = allAttributes.find((a) => a.id === aid)}
+                      {#if attr}<span class="badge badge-outline badge-xs">{attr.name}</span>{/if}
+                    {/each}
+                    {#if (row.attributePicks as number) > 0}
+                      <span class="badge badge-outline badge-xs opacity-60">Officer ({row.attributePicks})</span>
+                    {/if}
+                  </div>
+                </td>
+                <td>
+                  {#if row.equipmentMode === 'pool'}
+                    <span class="badge badge-outline badge-xs opacity-60">Officer</span>
+                  {:else}
+                    <div class="flex flex-col gap-1">
+                      {#each los as lo}
+                        <div class="flex flex-wrap items-center gap-1">
+                          {#if los.length > 1}<span class="shrink-0 opacity-40">·</span>{/if}
+                          {#each lo.items as item (item.equipmentItemId)}
+                            {@const eq = allEquipment.find((e) => e.id === item.equipmentItemId)}
+                            {#if eq}
+                              <span class="badge badge-outline badge-xs"
+                                >{eq.name}{item.quantity > 1 ? ` ×${item.quantity}` : ''}</span>
+                            {/if}
+                          {/each}
+                        </div>
+                      {/each}
+                    </div>
+                  {/if}
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    {#each nationIds as nid (nid)}
+                      {@const nation = nations.find((n) => n.id === nid)}
+                      {#if nation}
+                        <NationFlag flag={nation.flag} name={nation.name} size="sm" />
+                      {/if}
+                    {/each}
+                  </div>
+                </td>
                 <td class="whitespace-nowrap text-right">
                   <button class="btn btn-ghost btn-xs" onclick={() => startEditSoldier(row)}>Edit</button>
                   <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
@@ -310,26 +399,65 @@
       </div>
     {:else if isMonsterTypes}
       <div class="overflow-x-auto">
-        <table class="table table-zebra table-sm">
+        <table class="table table-zebra table-sm [&_td]:align-top">
           <thead>
             <tr>
               <th>Name</th>
-              <th>Source</th>
-              <th>XP</th>
-              <th>Mode</th>
+              <th>Spd</th>
+              <th>Mel</th>
+              <th>Acc</th>
+              <th>Def</th>
+              <th>Cou</th>
+              <th>HP</th>
               <th>Attributes</th>
+              <th>Equipment</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {#each rows as row (row.id)}
-              {@const attr_count = (row.fixedAttributeIds as string[])?.length ?? 0}
+            {#each filteredRows as row (row.id)}
+              {@const st = (row.stats ?? {}) as Record<string, number>}
+              {@const attrIds = (row.fixedAttributeIds ?? []) as string[]}
+              {@const los = (row.loadouts ?? []) as Array<{ items: Array<{ equipmentItemId: string; quantity: number }> }>}
               <tr>
-                <td class="font-medium">{row.name}</td>
-                <td>{sourceName(row.sourceId)}</td>
-                <td>{row.experience}</td>
-                <td><span class="badge badge-ghost badge-sm">{row.equipmentMode}</span></td>
-                <td class="opacity-60">{attr_count}</td>
+                <td class="whitespace-nowrap font-medium">
+                  <span class="inline-flex items-center gap-1.5">
+                    {row.name}
+                    {#if row.sourceId}
+                      <span class="badge badge-outline badge-xs font-mono">{sourceCode(row.sourceId)}</span>
+                    {/if}
+                  </span>
+                </td>
+                <td>{st.speed ?? '—'}</td>
+                <td>{st.melee ?? '—'}</td>
+                <td>{st.accuracy ?? '—'}</td>
+                <td>{st.defence ?? '—'}</td>
+                <td>{st.courage ?? '—'}</td>
+                <td>{st.health ?? '—'}</td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    {#each attrIds as aid (aid)}
+                      {@const attr = allAttributes.find((a) => a.id === aid)}
+                      {#if attr}<span class="badge badge-outline badge-xs">{attr.name}</span>{/if}
+                    {/each}
+                  </div>
+                </td>
+                <td>
+                  <div class="flex flex-col gap-1">
+                    {#each los as lo}
+                      <div class="flex flex-wrap items-center gap-1">
+                        {#if los.length > 1}<span class="shrink-0 opacity-40">·</span>{/if}
+                        {#each lo.items as item (item.equipmentItemId)}
+                          {@const eq = allEquipment.find((e) => e.id === item.equipmentItemId)}
+                          {#if eq}
+                            <span class="badge badge-outline badge-xs"
+                              >{eq.name}{item.quantity > 1 ? ` ×${item.quantity}` : ''}</span>
+                          {/if}
+                        {/each}
+                      </div>
+                    {/each}
+                  </div>
+                </td>
                 <td class="whitespace-nowrap text-right">
                   <button class="btn btn-ghost btn-xs" onclick={() => startEditMonster(row)}>Edit</button>
                   <button class="btn btn-ghost btn-xs text-error" onclick={() => remove(row)}>Delete</button>
@@ -351,7 +479,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each rows as row (row.id)}
+            {#each filteredRows as row (row.id)}
               <tr>
                 {#each entity.columns as col (col)}
                   {@const field = entity.fields.find((f) => f.key === col)}
@@ -359,13 +487,18 @@
                     {#if field?.type === 'flag'}
                       <NationFlag flag={row[col] as string | null} />
                     {:else if field?.type === 'boolean'}
-                      {row[col] ? '✓' : '—'}
+                      {row[col] ? '✓' : ''}
                     {:else if field?.type === 'source'}
                       {sourceName(row[col])}
                     {:else if field?.type === 'textarea'}
-                      <span class="block max-w-xs truncate opacity-80">{row[col] ?? '—'}</span>
+                      <span class="block max-w-sm truncate opacity-80">{row[col] ?? '—'}</span>
                     {:else}
-                      {row[col] ?? '—'}
+                      <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+                        <span class:capitalize={field?.capitalize}>{row[col] ?? '—'}</span>
+                        {#if field?.sourceBadge && row.sourceId}
+                          <span class="badge badge-outline badge-xs font-mono">{sourceCode(row.sourceId)}</span>
+                        {/if}
+                      </span>
                     {/if}
                   </td>
                 {/each}
@@ -405,9 +538,22 @@
               {:else if field.type === 'date'}
                 <input type="date" bind:value={draft[field.key]} required={field.required} class="input w-full" />
               {:else if field.type === 'enum'}
-                <select bind:value={draft[field.key]} class="select w-full">
-                  {#each field.options ?? [] as opt (opt)}<option value={opt}>{opt}</option>{/each}
-                </select>
+                {#if field.widget === 'tag-group'}
+                  <div class="join flex-wrap">
+                    {#each field.options ?? [] as opt (opt)}
+                      <button
+                        type="button"
+                        class="btn btn-sm join-item {draft[field.key] === opt ? 'btn-primary' : 'btn-ghost'}"
+                        class:capitalize={field.capitalize}
+                        onclick={() => (draft[field.key] = opt)}
+                      >{opt}</button>
+                    {/each}
+                  </div>
+                {:else}
+                  <select bind:value={draft[field.key]} class="select w-full">
+                    {#each field.options ?? [] as opt (opt)}<option value={opt}>{opt}</option>{/each}
+                  </select>
+                {/if}
               {:else if field.type === 'source'}
                 <select bind:value={draft[field.key]} required={field.required} class="select w-full">
                   <option value="" disabled>Choose a source…</option>

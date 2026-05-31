@@ -47,7 +47,7 @@ export const nations = pgTable('nations', {
   sourceId: uuid('source_id')
     .notNull()
     .references(() => sources.id, { onDelete: 'restrict' }),
-  notes: text('notes'),
+  description: text('description'),
   flag: text('flag'),
 });
 
@@ -58,7 +58,7 @@ export const nations = pgTable('nations', {
 export const attributes = pgTable('attributes', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull().unique(),
-  description: text('description').notNull(),
+  rules: text('rules').notNull(),
   isOfficer: boolean('is_officer').notNull().default(false),
   sourceId: uuid('source_id')
     .notNull()
@@ -74,7 +74,7 @@ export const equipmentItems = pgTable('equipment_items', {
   sourceId: uuid('source_id')
     .notNull()
     .references(() => sources.id, { onDelete: 'restrict' }),
-  notes: text('notes'),
+  rules: text('rules'),
 });
 
 export const soldierTypes = pgTable(
@@ -97,7 +97,7 @@ export const soldierTypes = pgTable(
     // Attribute policy
     attributePicks: integer('attribute_picks').notNull().default(0),
 
-    notes: text('notes'),
+    description: text('description'),
   },
   (t) => ({
     sourceIdx: index('soldier_types_source_idx').on(t.sourceId),
@@ -191,7 +191,7 @@ export const monsterTypes = pgTable(
     experience: integer('experience').notNull(),
     stats: jsonb('stats').notNull(),
     equipmentMode: equipmentModeEnum('equipment_mode').notNull().default('fixed'),
-    notes: text('notes'),
+    description: text('description'),
   },
   (t) => ({
     sourceIdx: index('monster_types_source_idx').on(t.sourceId),

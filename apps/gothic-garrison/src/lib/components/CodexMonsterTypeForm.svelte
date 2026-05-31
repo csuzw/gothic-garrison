@@ -42,7 +42,7 @@
   let name = $state<string>(r.name ?? '');
   let sourceId = $state<string>(r.sourceId ?? untrack(() => sources[0]?.id) ?? '');
   let experience = $state<number>(Number(r.experience ?? 0));
-  let notes = $state<string>(r.notes ?? '');
+  let description = $state<string>(r.description ?? '');
   let stats = $state<SoldierStats>(
     STAT_META.reduce<SoldierStats>((acc, { key: k }) => {
       acc[k] = Number((r.stats ?? {})[k] ?? 0);
@@ -118,7 +118,7 @@
       experience,
       stats: { ...stats },
       equipmentMode,
-      notes: notes || null,
+      description: description || null,
       fixedAttributeIds,
       loadouts: loadouts.map((lo, i) => ({
         label: computeLabel(lo.items),
@@ -167,8 +167,8 @@
         </div>
 
         <details>
-          <summary class="cursor-pointer text-sm font-medium opacity-60 select-none">Notes</summary>
-          <textarea bind:value={notes} class="textarea w-full mt-2" rows="2"></textarea>
+          <summary class="cursor-pointer text-sm font-medium opacity-60 select-none">Description</summary>
+          <textarea bind:value={description} class="textarea w-full mt-2" rows="2"></textarea>
         </details>
       </div>
 

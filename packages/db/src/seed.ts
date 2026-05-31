@@ -40,27 +40,27 @@ const srcId = (code: string) => {
 // ── nations ───────────────────────────────────────────────────────────────────
 await db
   .insert(t.nations)
-  .values(nationData.map((n) => ({ name: n.name, sourceId: srcId(n.sourceCode), notes: n.notes, flag: n.flag })))
-  .onConflictDoUpdate({ target: t.nations.name, set: { sourceId: sql`excluded.source_id`, notes: sql`excluded.notes`, flag: sql`excluded.flag` } });
+  .values(nationData.map((n) => ({ name: n.name, sourceId: srcId(n.sourceCode), description: n.description, flag: n.flag })))
+  .onConflictDoUpdate({ target: t.nations.name, set: { sourceId: sql`excluded.source_id`, description: sql`excluded.description`, flag: sql`excluded.flag` } });
 const nationByName = new Map((await db.select({ id: t.nations.id, name: t.nations.name }).from(t.nations)).map((r) => [r.name, r.id]));
 
 // ── attributes (officer-flagged + extras) ──────────────────────────────────────
 await db
   .insert(t.attributes)
-  .values(attributeData.map((a) => ({ name: a.name, description: a.note || a.name, isOfficer: a.isOfficer, sourceId: srcId(a.sourceCode) })))
+  .values(attributeData.map((a) => ({ name: a.name, rules: a.rules || a.name, isOfficer: a.isOfficer, sourceId: srcId(a.sourceCode) })))
   .onConflictDoUpdate({
     target: t.attributes.name,
-    set: { description: sql`excluded.description`, isOfficer: sql`excluded.is_officer`, sourceId: sql`excluded.source_id` },
+    set: { rules: sql`excluded.rules`, isOfficer: sql`excluded.is_officer`, sourceId: sql`excluded.source_id` },
   });
 const attrByName = new Map((await db.select({ id: t.attributes.id, name: t.attributes.name }).from(t.attributes)).map((r) => [r.name, r.id]));
 
 // ── equipment (all from the core rulebook) ──────────────────────────────────────
 await db
   .insert(t.equipmentItems)
-  .values(equipmentData.map((e) => ({ name: e.name, category: e.category, slotCost: e.slotCost, isSpecial: e.isSpecial, sourceId: srcId(e.sourceCode), notes: e.note || null })))
+  .values(equipmentData.map((e) => ({ name: e.name, category: e.category, slotCost: e.slotCost, isSpecial: e.isSpecial, sourceId: srcId(e.sourceCode), rules: e.rules || null })))
   .onConflictDoUpdate({
     target: t.equipmentItems.name,
-    set: { category: sql`excluded.category`, slotCost: sql`excluded.slot_cost`, isSpecial: sql`excluded.is_special`, sourceId: sql`excluded.source_id`, notes: sql`excluded.notes` },
+    set: { category: sql`excluded.category`, slotCost: sql`excluded.slot_cost`, isSpecial: sql`excluded.is_special`, sourceId: sql`excluded.source_id`, rules: sql`excluded.rules` },
   });
 const equipByName = new Map((await db.select({ id: t.equipmentItems.id, name: t.equipmentItems.name }).from(t.equipmentItems)).map((r) => [r.name, r.id]));
 
@@ -78,7 +78,7 @@ await db
       equipmentSlots: s.equipmentSlots,
       specialSlots: s.specialSlots,
       attributePicks: s.attributePicks,
-      notes: s.notes,
+      description: s.description,
     })),
   )
   .onConflictDoUpdate({
@@ -87,7 +87,7 @@ await db
       sourceId: sql`excluded.source_id`, recruitmentCost: sql`excluded.recruitment_cost`, stats: sql`excluded.stats`,
       maxPerUnit: sql`excluded.max_per_unit`, equipmentMode: sql`excluded.equipment_mode`,
       equipmentSlots: sql`excluded.equipment_slots`, specialSlots: sql`excluded.special_slots`, attributePicks: sql`excluded.attribute_picks`,
-      notes: sql`excluded.notes`,
+      description: sql`excluded.description`,
     },
   });
 const soldierByName = new Map((await db.select({ id: t.soldierTypes.id, name: t.soldierTypes.name }).from(t.soldierTypes)).map((r) => [r.name, r.id]));
@@ -151,7 +151,7 @@ if (monsterData.length) {
         experience: m.experience,
         stats: m.stats,
         equipmentMode: m.equipmentMode,
-        notes: m.notes,
+        description: m.description,
       })),
     )
     .onConflictDoUpdate({
@@ -161,7 +161,7 @@ if (monsterData.length) {
         experience: sql`excluded.experience`,
         stats: sql`excluded.stats`,
         equipmentMode: sql`excluded.equipment_mode`,
-        notes: sql`excluded.notes`,
+        description: sql`excluded.description`,
       },
     });
 }

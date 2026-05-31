@@ -168,7 +168,7 @@ function soldierTypeRow(v: SoldierTypeInput) {
     equipmentSlots: v.equipmentSlots,
     specialSlots: v.specialSlots,
     attributePicks: v.attributePicks,
-    notes: v.notes,
+    description: v.description,
   };
 }
 
@@ -288,7 +288,7 @@ function monsterTypeRow(v: MonsterTypeInput) {
     experience: v.experience,
     stats: v.stats,
     equipmentMode: v.equipmentMode,
-    notes: v.notes,
+    description: v.description,
   };
 }
 

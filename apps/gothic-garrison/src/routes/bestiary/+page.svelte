@@ -27,8 +27,8 @@
             </div>
 
             <!-- Notes -->
-            {#if monster.notes}
-              <p class="text-sm opacity-70">{monster.notes}</p>
+            {#if monster.description}
+              <p class="text-sm opacity-70">{monster.description}</p>
             {/if}
 
             <!-- Stats -->

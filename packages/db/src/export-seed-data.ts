@@ -122,9 +122,9 @@ export type EquipmentMode = 'fixed' | 'choice' | 'pool';
 export type SourceKind = 'core' | 'supplement';
 
 export interface SeedSource { code: string; name: string; kind: SourceKind; publishedDate: string; author: string; }
-export interface SeedNation { name: string; sourceCode: string; notes: string | null; flag: string | null; soldiers: string[]; }
-export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; note: string; }
-export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; note: string; }
+export interface SeedNation { name: string; sourceCode: string; description: string | null; flag: string | null; soldiers: string[]; }
+export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; rules: string; }
+export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; rules: string; }
 export interface SeedOptionalRule { code: string; name: string; description: string; sourceCode: string; }
 export interface SeedLoadoutItem { name: string; qty: number; }
 export interface SeedLoadout { label: string; order: number; items: SeedLoadoutItem[]; }
@@ -138,7 +138,7 @@ export interface SeedSoldier {
   equipmentSlots: number | null;
   specialSlots: number | null;
   attributePicks: number;
-  notes: string | null;
+  description: string | null;
   fixedAttributes: string[];
   loadouts: SeedLoadout[];
 }
@@ -148,7 +148,7 @@ export interface SeedMonster {
   experience: number;
   stats: { speed: number; melee: number; accuracy: number; defence: number; courage: number; health: number };
   equipmentMode: 'fixed' | 'choice';
-  notes: string | null;
+  description: string | null;
   fixedAttributes: string[];
   loadouts: SeedLoadout[];
 }
@@ -277,14 +277,14 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       .map((n) => ({
         name: n.name,
         sourceCode: srcCode(n.sourceId),
-        notes: n.notes,
+        description: n.description,
         flag: n.flag,
         soldiers: (soldiersByNation.get(n.id) ?? []).slice().sort((a, b) => a.localeCompare(b)),
       }))
       .sort(byName);
 
     const attributes = attributeRows
-      .map((a) => ({ name: a.name, isOfficer: a.isOfficer, sourceCode: srcCode(a.sourceId), note: a.description }))
+      .map((a) => ({ name: a.name, isOfficer: a.isOfficer, sourceCode: srcCode(a.sourceId), rules: a.rules }))
       .sort(byName);
 
     const equipment = equipmentRows
@@ -294,7 +294,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
         slotCost: e.slotCost,
         isSpecial: e.isSpecial,
         sourceCode: srcCode(e.sourceId),
-        note: e.notes ?? '',
+        rules: e.rules ?? '',
       }))
       .sort(byName);
 
@@ -315,7 +315,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
           equipmentSlots: s.equipmentSlots,
           specialSlots: s.specialSlots,
           attributePicks: s.attributePicks,
-          notes: s.notes,
+          description: s.description,
           fixedAttributes: (fixedAttrsBySoldier.get(s.id) ?? []).slice().sort((a, b) => a.localeCompare(b)),
           loadouts: (loadoutsBySoldier.get(s.id) ?? []).slice().sort((a, b) => a.order - b.order || a.label.localeCompare(b.label)),
         };
@@ -359,7 +359,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
           experience: m.experience,
           stats: { speed: st.speed, melee: st.melee, accuracy: st.accuracy, defence: st.defence, courage: st.courage, health: st.health },
           equipmentMode: m.equipmentMode as 'fixed' | 'choice',
-          notes: m.notes,
+          description: m.description,
           fixedAttributes: (fixedAttrsByMonster.get(m.id) ?? []).slice().sort((a, b) => a.localeCompare(b)),
           loadouts: (mLoadoutsByMonster.get(m.id) ?? []).slice().sort((a, b) => a.order - b.order || a.label.localeCompare(b.label)),
         };
