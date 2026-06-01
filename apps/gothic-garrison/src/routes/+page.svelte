@@ -16,6 +16,7 @@
   let loading = $state(true);
   let error = $state<string | null>(null);
   let creating = $state(false);
+  let pendingDeleteId = $state<string | null>(null);
 
   let pickerOpen = $state(false);
   let selectedNation = $state<{ id: string; name: string } | null>(null);
@@ -56,10 +57,20 @@
     if (!pickerOpen) selectedNation = null;
   }
 
+  function memberTypeCounts(members: { soldierTypeId: string | null; name: string }[]) {
+    return [...members.reduce((map, m) => {
+      const key = m.soldierTypeId ?? m.name;
+      const existing = map.get(key);
+      if (existing) existing.count++;
+      else map.set(key, { name: m.name, count: 1 });
+      return map;
+    }, new Map<string, { name: string; count: number }>()).values()];
+  }
+
   async function remove(id: string) {
-    if (!confirm('Delete this unit? This cannot be undone.')) return;
     try {
       await getUnitStore(signedIn).remove(id);
+      pendingDeleteId = null;
       await load();
     } catch (e) {
       error = (e as Error).message;
@@ -153,14 +164,40 @@
               <span class="block text-xs opacity-60">
                 Updated {dateFmt.format(new Date(u.updatedAt))}
               </span>
+              {#if u.members.length > 0}
+                {@const counts = memberTypeCounts(u.members)}
+                <div class="mt-1 flex flex-wrap gap-1">
+                  {#each counts as t}
+                    <span class="badge badge-sm">{t.count > 1 ? `${t.count}× ` : ''}{t.name}</span>
+                  {/each}
+                </div>
+              {/if}
             </a>
             <button
-              class="btn btn-ghost btn-sm text-error"
-              onclick={() => remove(u.id)}
-              aria-label="Delete {u.name}"
+              class="btn btn-ghost btn-sm btn-square shrink-0"
+              onclick={() => goto(`/units/${u.id}/print`)}
+              aria-label="Print {u.name}"
             >
-              Delete
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                <path fill-rule="evenodd" d="M5 2.75C5 1.784 5.784 1 6.75 1h6.5c.966 0 1.75.784 1.75 1.75v3.552c.377.046.752.097 1.126.153A2.212 2.212 0 0 1 18 8.653v4.097A2.25 2.25 0 0 1 15.75 15h-.241l.305 1.984A1.75 1.75 0 0 1 14.084 19H5.915a1.75 1.75 0 0 1-1.73-2.016L4.492 15H4.25A2.25 2.25 0 0 1 2 12.75V8.653c0-1.082.775-2.034 1.874-2.198.374-.056.749-.107 1.126-.153V2.75Zm8.5 3.397a41.533 41.533 0 0 0-7 0V2.75a.25.25 0 0 1 .25-.25h6.5a.25.25 0 0 1 .25.25v3.397ZM6.608 12.5a.25.25 0 0 0-.247.212l-.419 2.716a.25.25 0 0 0 .247.287h7.822a.25.25 0 0 0 .247-.287l-.419-2.716a.25.25 0 0 0-.247-.212H6.608Z" clip-rule="evenodd" />
+              </svg>
             </button>
+            {#if pendingDeleteId === u.id}
+              <div class="flex shrink-0 items-center gap-1">
+                <button class="btn btn-error btn-xs" onclick={() => remove(u.id)}>Delete</button>
+                <button class="btn btn-ghost btn-xs" onclick={() => (pendingDeleteId = null)}>Cancel</button>
+              </div>
+            {:else}
+              <button
+                class="btn btn-ghost btn-sm btn-square text-error shrink-0"
+                onclick={() => (pendingDeleteId = u.id)}
+                aria-label="Delete {u.name}"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                  <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            {/if}
           </div>
         </li>
       {/each}

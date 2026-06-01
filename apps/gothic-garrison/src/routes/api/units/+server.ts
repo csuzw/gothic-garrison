@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ locals }) => {
   if (!locals.user) return json({ message: 'Sign in required' }, { status: 401 });
 
   const rows = await getDb()
-    .select({ id: units.id, name: units.name, nationId: units.nationId, updatedAt: units.updatedAt })
+    .select({ id: units.id, name: units.name, nationId: units.nationId, updatedAt: units.updatedAt, data: units.data })
     .from(units)
     .where(eq(units.userId, locals.user.id))
     .orderBy(desc(units.updatedAt));
@@ -19,6 +19,10 @@ export const GET: RequestHandler = async ({ locals }) => {
     name: r.name,
     nationId: r.nationId ?? null,
     updatedAt: r.updatedAt.toISOString(),
+    members: ((r.data as any)?.members ?? []).map((m: any) => ({
+      soldierTypeId: m.soldierTypeId ?? null,
+      name: m.name as string,
+    })),
   }));
   return json({ units: summaries });
 };

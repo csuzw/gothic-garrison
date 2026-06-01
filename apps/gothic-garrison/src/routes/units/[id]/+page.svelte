@@ -4,8 +4,9 @@
   import { page } from '$app/state';
   import type { PageProps } from './$types';
   import AttributePicker from '$lib/components/AttributePicker.svelte';
-  import EquipmentBuilder from '$lib/components/EquipmentBuilder.svelte';
+  import EquipmentBrowser from '$lib/components/EquipmentBrowser.svelte';
   import NationFlag from '$lib/components/NationFlag.svelte';
+  import SoldierStatPopover from '$lib/components/SoldierStatPopover.svelte';
   import StatLine from '$lib/components/StatLine.svelte';
   import { getUnitStore } from '$lib/unit/store';
   import {
@@ -14,6 +15,7 @@
     officerSpecialMax,
     soldierSpecialMax,
     memberSpecialPicks,
+    specialUsed,
     normalizeUnitDoc,
     officerStats,
     OFFICER_BASE_STATS,
@@ -37,13 +39,16 @@
   let saving = $state(false);
   let saved = $state(false);
   let error = $state<string | null>(null);
-  let selectedSoldierId = $state('');
+  let printConfirming = $state(false);
+  let savedSnapshot = '';
 
   onMount(async () => {
     try {
       const found = await getUnitStore(signedIn).get(id);
-      if (found) doc = normalizeUnitDoc(found);
-      else notFound = true;
+      if (found) {
+        doc = normalizeUnitDoc(found);
+        savedSnapshot = JSON.stringify(doc);
+      } else notFound = true;
     } catch (e) {
       error = (e as Error).message;
     } finally {
@@ -59,6 +64,25 @@
   const nationId = $derived(doc?.nationId ?? null);
   const members = $derived(doc?.members ?? []);
   const rosterFull = $derived(members.length >= MAX_SOLDIERS);
+
+  let soldierPickerCollapsed = $state(false);
+  let _soldierPickerAutoInit = false;
+  $effect(() => {
+    if (!_soldierPickerAutoInit && doc !== null) {
+      _soldierPickerAutoInit = true;
+      soldierPickerCollapsed = members.length > 0;
+    }
+  });
+
+  const memberTypeCounts = $derived(
+    [...members.reduce((map, m) => {
+      const key = m.soldierTypeId ?? m.id;
+      const existing = map.get(key);
+      if (existing) existing.count++;
+      else map.set(key, { name: m.name, count: 1 });
+      return map;
+    }, new Map<string, { name: string; count: number }>()).values()]
+  );
 
   const officerPool = $derived(data.reference.attributes.filter((a) => a.isOfficer));
   const equipById = $derived(new Map(data.reference.equipment.map((e) => [e.id, e])));
@@ -99,10 +123,8 @@
     m.equipment = lo ? snapshotItems(lo.items) : [];
   }
 
-  function addSelected() {
-    if (!doc || !selectedSoldierId || rosterFull) return;
-    const s = data.reference.soldiers.find((x) => x.id === selectedSoldierId);
-    if (!s) return;
+  function addSoldierInline(s: (typeof available)[number]) {
+    if (!doc || rosterFull) return;
     const member = {
       id: crypto.randomUUID(),
       soldierTypeId: s.id,
@@ -121,7 +143,12 @@
       member.equipment = snapshotItems(first.items);
     }
     doc.members.push(member);
-    selectedSoldierId = '';
+  }
+
+  function removeSoldierFromTile(typeId: string) {
+    if (!doc) return;
+    const member = doc.members.findLast((m) => m.soldierTypeId === typeId);
+    if (member) removeMember(member.id);
   }
 
   function removeMember(memberId: string) {
@@ -129,12 +156,40 @@
     doc.members = doc.members.filter((m) => m.id !== memberId);
   }
 
+  function validateBeforeSave(d: UnitDoc): string | null {
+    const offMax = officerSpecialMax(d.officer);
+    if (specialUsed(d.officer.equipment) > offMax) {
+      return `Officer has more special equipment than allowed (max ${offMax}). Add Supernatural Veteran or unequip a special item.`;
+    }
+    for (const m of d.members) {
+      const ref = soldierRef(m.soldierTypeId);
+      if (!ref) continue;
+      const max = ref.equipmentMode === 'pool'
+        ? soldierSpecialMax(m, ref.specialSlots ?? 2, ref.fixedAttributes)
+        : memberSpecialPicks(m, ref.fixedAttributes);
+      const used = ref.equipmentMode === 'pool'
+        ? specialUsed(m.equipment)
+        : m.specialEquipment.length;
+      if (used > max) {
+        const who = m.customName ? `${m.name} (${m.customName})` : m.name;
+        return `${who} has more special equipment than allowed (max ${max}). Add Supernatural Veteran or unequip a special item.`;
+      }
+    }
+    return null;
+  }
+
   async function save() {
     if (!doc) return;
+    const validationError = validateBeforeSave(doc);
+    if (validationError) {
+      error = validationError;
+      return;
+    }
     saving = true;
     error = null;
     try {
       doc = await getUnitStore(signedIn).save(doc);
+      savedSnapshot = JSON.stringify(doc);
       saved = true;
       setTimeout(() => (saved = false), 2000);
     } catch (e) {
@@ -142,6 +197,45 @@
     } finally {
       saving = false;
     }
+  }
+
+  async function handlePrint() {
+    if (!doc) return;
+    if (JSON.stringify(doc) !== savedSnapshot) {
+      printConfirming = true;
+      return;
+    }
+    await goto(`/units/${id}/print`);
+  }
+
+  async function saveAndPrint() {
+    if (!doc) return;
+    const validationError = validateBeforeSave(doc);
+    if (validationError) {
+      error = validationError;
+      printConfirming = false;
+      return;
+    }
+    saving = true;
+    error = null;
+    try {
+      doc = await getUnitStore(signedIn).save(doc);
+      savedSnapshot = JSON.stringify(doc);
+      saved = true;
+      setTimeout(() => (saved = false), 2000);
+      printConfirming = false;
+      await goto(`/units/${id}/print`);
+    } catch (e) {
+      error = (e as Error).message;
+      printConfirming = false;
+    } finally {
+      saving = false;
+    }
+  }
+
+  function discardAndPrint() {
+    printConfirming = false;
+    goto(`/units/${id}/print`);
   }
 
   async function remove() {
@@ -166,14 +260,20 @@
   </div>
 {:else if doc}
   <section class="mx-auto max-w-2xl space-y-6">
-    <div class="flex items-center justify-between gap-3">
+    <div class="sticky top-0 z-20 flex items-center justify-between gap-3 bg-base-100 py-3 shadow-sm">
       <a href="/" class="link link-hover text-sm opacity-70">← Units</a>
+      {#if !soldierPickerCollapsed}
+        <span class="text-xs tabular-nums opacity-60" class:text-error={overBudget}>
+          {members.length}/{MAX_SOLDIERS} · {budget - spent} pts left
+        </span>
+      {/if}
       <div class="flex items-center gap-2">
         {#if saved}<span class="text-success text-sm">Saved ✓</span>{/if}
         <button class="btn btn-primary btn-sm" onclick={save} disabled={saving}>
           {#if saving}<span class="loading loading-spinner loading-xs"></span>{/if}
           Save
         </button>
+        <button class="btn btn-ghost btn-sm" onclick={handlePrint}>Print</button>
       </div>
     </div>
 
@@ -268,7 +368,7 @@
         </div>
         <div>
           <span class="mb-1 block text-sm font-medium">Equipment</span>
-          <EquipmentBuilder
+          <EquipmentBrowser
             catalog={data.reference.equipment}
             items={doc.officer.equipment}
             slots={OFFICER_EQUIPMENT_SLOTS}
@@ -289,15 +389,63 @@
         {#if !doc.nationId}
           <p class="text-sm opacity-60">Pick a nation to choose soldiers.</p>
         {:else}
-          <div class="flex gap-2">
-            <select class="select select-sm flex-1" bind:value={selectedSoldierId} disabled={rosterFull}>
-              <option value="">{rosterFull ? 'Roster full (7)' : 'Add a soldier…'}</option>
-              {#each addable as s (s.id)}
-                <option value={s.id}>{s.name} · {s.recruitmentCost} pts</option>
+          {#snippet soldierTags()}
+            {#each memberTypeCounts as t (t.name)}
+              <span class="badge badge-sm">{t.count > 1 ? `${t.count}× ` : ''}{t.name}</span>
+            {/each}
+          {/snippet}
+
+          {#if soldierPickerCollapsed}
+            <div class="flex items-start gap-2">
+              <div class="flex min-w-0 flex-1 flex-wrap gap-1">
+                {#if members.length > 0}
+                  {@render soldierTags()}
+                {:else}
+                  <span class="text-xs opacity-40">No soldiers yet</span>
+                {/if}
+              </div>
+              <button class="btn btn-ghost btn-xs shrink-0" onclick={() => (soldierPickerCollapsed = false)}>Edit</button>
+            </div>
+          {:else}
+            <div class="space-y-1">
+              {#each available as s (s.id)}
+                {@const count = members.filter((m) => m.soldierTypeId === s.id).length}
+                {@const atCap = s.maxPerUnit != null && count >= s.maxPerUnit}
+                {@const cantAdd = rosterFull || atCap || spent + s.recruitmentCost > budget}
+                <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2">
+                  <div class="min-w-0 flex-1">
+                    <span class="text-sm font-medium">{s.name}</span>
+                    {#if s.maxPerUnit != null}
+                      <span class="ml-1 text-xs opacity-40">max {s.maxPerUnit}</span>
+                    {/if}
+                  </div>
+                  <SoldierStatPopover soldier={s} />
+                  <span class="badge badge-ghost badge-sm w-14 shrink-0 justify-center tabular-nums">{s.recruitmentCost} pts</span>
+                  {#if count > 0}
+                    <button
+                      class="btn btn-ghost btn-xs shrink-0"
+                      onclick={() => removeSoldierFromTile(s.id)}
+                      aria-label="Remove one {s.name}"
+                    >−</button>
+                    <span class="w-4 text-center text-sm font-medium tabular-nums">{count}</span>
+                  {:else}
+                    <span class="w-12"></span>
+                  {/if}
+                  <button
+                    class="btn btn-xs shrink-0 {count > 0 ? 'btn-primary' : 'btn-outline'}"
+                    onclick={() => addSoldierInline(s)}
+                    disabled={cantAdd}
+                    aria-label="Add {s.name}"
+                  >+</button>
+                </div>
               {/each}
-            </select>
-            <button class="btn btn-sm" onclick={addSelected} disabled={!selectedSoldierId || rosterFull}>Add</button>
-          </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-1 border-t border-base-300 pt-2">
+              {@render soldierTags()}
+              {#if members.length === 0}<span class="text-xs opacity-40">No soldiers yet</span>{/if}
+              <button class="btn btn-ghost btn-xs ml-auto shrink-0" onclick={() => (soldierPickerCollapsed = true)}>Done</button>
+            </div>
+          {/if}
 
           {#if members.length === 0}
             <p class="text-sm opacity-60">No soldiers yet. The Officer leads them for free.</p>
@@ -354,7 +502,7 @@
                     <div>
                       <span class="mb-1 block text-xs font-medium opacity-70">Equipment</span>
                       {#if ref.equipmentMode === 'pool'}
-                        <EquipmentBuilder
+                        <EquipmentBrowser
                           catalog={data.reference.equipment}
                           items={m.equipment}
                           slots={ref.equipmentSlots ?? OFFICER_EQUIPMENT_SLOTS}
@@ -362,11 +510,15 @@
                           onChange={(newItems) => { m.equipment = newItems; }}
                         />
                       {:else if ref.equipmentMode === 'choice'}
-                        <select class="select select-xs w-full" onchange={(e) => selectLoadout(m, e.currentTarget.value)}>
+                        <div class="join flex-wrap gap-y-1">
                           {#each ref.loadouts as lo (lo.id)}
-                            <option value={lo.id} selected={lo.id === m.loadoutId}>{lo.label}</option>
+                            <button
+                              type="button"
+                              class="btn btn-xs join-item {lo.id === m.loadoutId ? 'btn-primary' : 'btn-outline'}"
+                              onclick={() => selectLoadout(m, lo.id)}
+                            >{lo.label}</button>
                           {/each}
-                        </select>
+                        </div>
                       {:else}
                         <div class="flex flex-wrap gap-1">
                           {#each m.equipment as it (it.itemId)}
@@ -403,9 +555,23 @@
       </div>
     </div>
 
-    <div class="flex justify-end">
-      <button class="btn btn-ghost btn-sm text-error" onclick={remove}>Delete unit</button>
-    </div>
   </section>
+
+  {#if printConfirming}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-base-100 rounded-box w-full max-w-sm p-6 shadow-xl">
+        <h3 class="mb-1 font-semibold">Unsaved changes</h3>
+        <p class="mb-4 text-sm opacity-70">Save before printing, or discard changes?</p>
+        <div class="flex flex-wrap justify-end gap-2">
+          <button class="btn btn-ghost btn-sm" onclick={() => (printConfirming = false)}>Cancel</button>
+          <button class="btn btn-outline btn-sm" onclick={discardAndPrint}>Discard & Print</button>
+          <button class="btn btn-primary btn-sm" onclick={saveAndPrint} disabled={saving}>
+            {#if saving}<span class="loading loading-spinner loading-xs"></span>{/if}
+            Save & Print
+          </button>
+        </div>
+      </div>
+    </div>
+  {/if}
 
 {/if}

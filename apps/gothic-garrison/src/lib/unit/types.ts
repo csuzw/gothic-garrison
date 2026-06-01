@@ -181,6 +181,7 @@ export interface UnitSummary {
   name: string;
   nationId: string | null;
   updatedAt: string;
+  members: { soldierTypeId: string | null; name: string }[];
 }
 
 export function createUnitDoc(name = 'New unit'): UnitDoc {
@@ -213,5 +214,11 @@ export function unitSpent(doc: UnitDoc): number {
 }
 
 export function toSummary(doc: UnitDoc): UnitSummary {
-  return { id: doc.id, name: doc.name, nationId: doc.nationId, updatedAt: doc.updatedAt };
+  return {
+    id: doc.id,
+    name: doc.name,
+    nationId: doc.nationId,
+    updatedAt: doc.updatedAt,
+    members: doc.members.map((m) => ({ soldierTypeId: m.soldierTypeId, name: m.name })),
+  };
 }

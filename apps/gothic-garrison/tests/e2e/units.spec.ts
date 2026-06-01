@@ -1,13 +1,27 @@
-import { expect, test } from '@playwright/test';
+import { type Page, expect, test } from '@playwright/test';
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+/** Open the new-unit nation picker, pick a nation, click Create. */
+async function createUnit(page: Page, nation = 'France') {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New unit' }).click();
+  await page.locator('button.card').filter({ hasText: nation }).click();
+  await page.getByRole('button', { name: 'Create' }).click();
+  await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
+}
+
+/** Expand the soldier picker tile list if it is currently collapsed. */
+async function expandSoldierPicker(soldiersCard: ReturnType<Page['locator']>) {
+  const editBtn = soldiersCard.getByRole('button', { name: 'Edit' });
+  if (await editBtn.isVisible()) await editBtn.click();
+}
+
+// ── tests ────────────────────────────────────────────────────────────────────
 
 test.describe('units', () => {
   test('anonymous: build, persist to IndexedDB, reload, delete', async ({ page }, testInfo) => {
-    await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Your units/i })).toBeVisible();
-    await expect(page.getByText(/Stored on this device/i)).toBeVisible();
-
-    await page.getByRole('button', { name: 'New unit' }).click();
-    await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
+    await createUnit(page);
 
     // Budget starts at the base 100
     await expect(page.getByText('0 / 100')).toBeVisible();
@@ -39,39 +53,24 @@ test.describe('units', () => {
     await page.goto('/');
     await expect(page.getByText('The Night Watch')).toBeVisible();
 
-    // Delete it
-    page.on('dialog', (d) => d.accept());
+    // Delete with inline confirmation (no browser dialog — pendingDeleteId pattern)
     await page.getByRole('button', { name: /Delete The Night Watch/i }).click();
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
     await expect(page.getByText(/No units yet/i)).toBeVisible();
   });
 
   test('anonymous: nation picker + soldier roster persists', async ({ page }, testInfo) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
-    await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
+    await createUnit(page, 'France');
 
-    // No nation yet → roster prompts to pick one
-    await expect(page.getByText(/Pick a nation to choose soldiers/i)).toBeVisible();
+    // Nation is shown read-only in the builder
+    await expect(page.getByText('France')).toBeVisible();
 
-    // Pick a nation (scoped by its placeholder, not position)
-    const nationSelect = page.locator('select').filter({
-      has: page.locator('option', { hasText: 'Choose a nation' }),
-    });
-    const franceValue = await nationSelect.locator('option', { hasText: 'France' }).getAttribute('value');
-    await nationSelect.selectOption(franceValue!);
+    const soldiersCard = page.locator('.card', { hasText: /^Soldiers/ });
 
-    // Add two Infantrymen via the soldier <select>
-    const soldierSelect = page.locator('select').filter({
-      has: page.locator('option', { hasText: 'Add a soldier' }),
-    });
-    const infantryValue = await soldierSelect
-      .locator('option', { hasText: 'Infantryman' })
-      .first()
-      .getAttribute('value');
-    const soldiersCard = page.locator('.card', { hasText: 'Soldiers' });
+    // Soldier picker opens automatically for a new unit (no members yet)
+    // Add two Infantrymen via the tile + button
     for (let i = 0; i < 2; i++) {
-      await soldierSelect.selectOption(infantryValue!);
-      await soldiersCard.getByRole('button', { name: 'Add', exact: true }).click();
+      await soldiersCard.getByRole('button', { name: 'Add Infantryman' }).click();
     }
 
     await expect(page.getByText('2 / 7')).toBeVisible();
@@ -86,40 +85,30 @@ test.describe('units', () => {
       contentType: 'image/png',
     });
 
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Saved ✓')).toBeVisible();
 
     // Reload → nation + roster survive (IndexedDB)
     await page.reload();
     await expect(page.getByText('2 / 7')).toBeVisible();
     await expect(page.getByText('20 / 100')).toBeVisible();
-    await expect(nationSelect).toHaveValue(/.+/);
+    await expect(page.getByText('France')).toBeVisible();
 
-    // Remove one → count + budget update
+    // Remove one via the member card Remove button
     await page.getByRole('button', { name: /Remove Infantryman/i }).first().click();
     await expect(page.getByText('1 / 7')).toBeVisible();
     await expect(page.getByText('10 / 100')).toBeVisible();
 
-    // A max-1 soldier (Junior Officer) drops out of the add list once taken
-    const joValue = await soldierSelect
-      .locator('option', { hasText: 'Junior Officer' })
-      .first()
-      .getAttribute('value');
-    await soldierSelect.selectOption(joValue!);
-    await soldiersCard.getByRole('button', { name: 'Add', exact: true }).click();
-    await expect(soldierSelect.locator('option', { hasText: 'Junior Officer' })).toHaveCount(0);
+    // A max-1 soldier (Junior Officer): after adding, its + tile button becomes disabled
+    await expandSoldierPicker(soldiersCard);
+    await soldiersCard.getByRole('button', { name: 'Add Junior Officer' }).click();
+    await expect(soldiersCard.getByRole('button', { name: 'Add Junior Officer' })).toBeDisabled();
   });
 
   test('anonymous: officer attributes + equipment, soldier pool equipment', async ({
     page,
   }, testInfo) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
-    await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
-
-    const nationSel = page.locator('select').filter({ has: page.locator('option', { hasText: 'Choose a nation' }) });
-    const franceVal = await nationSel.locator('option', { hasText: 'France' }).getAttribute('value');
-    await nationSel.selectOption(franceVal!);
+    await createUnit(page, 'France');
 
     const officerCard = page.locator('.card', { hasText: 'Leader · free' });
 
@@ -129,28 +118,18 @@ test.describe('units', () => {
     await expect(officerCard.getByText('2 / 2')).toBeVisible();
     await expect(officerCard.getByRole('button', { name: 'Nimble', exact: true })).toBeDisabled();
 
-    // Officer: add a Musket (2 slots) via the row-based equipment builder
-    await officerCard.getByRole('button', { name: '+ Add item' }).click();
-    // A row appeared; change its select to Musket
-    const musketValue = await officerCard.locator('option', { hasText: 'Musket' }).first().getAttribute('value');
-    await officerCard.locator('ul li select').selectOption(musketValue!);
-    await expect(officerCard.getByText(/Slots 2 \/ 6/)).toBeVisible();
+    // Officer: equipment browser opens expanded for a new unit — add a Musket (2 slots)
+    await officerCard.getByRole('button', { name: 'Add Musket' }).click();
+    await expect(officerCard.getByText('2 / 6')).toBeVisible();
 
-    // Add a Veteran Hunter (pool mode → its own equipment builder + attribute pick)
-    const soldiersCard = page.locator('.card', { hasText: 'Soldiers' });
-    const addSoldier = soldiersCard
-      .locator('select')
-      .filter({ has: page.locator('option', { hasText: 'Add a soldier' }) });
-    const vhValue = await addSoldier
-      .locator('option', { hasText: 'Veteran Hunter' })
-      .first()
-      .getAttribute('value');
-    await addSoldier.selectOption(vhValue!);
-    await soldiersCard.getByRole('button', { name: 'Add', exact: true }).click();
+    // Add a Veteran Hunter (pool mode → its own equipment browser + attribute pick)
+    const soldiersCard = page.locator('.card', { hasText: /^Soldiers/ });
+    await soldiersCard.getByRole('button', { name: 'Add Veteran Hunter' }).click();
 
     const vhCard = page.locator('li').filter({ has: page.locator('[aria-label="Remove Veteran Hunter"]') });
     await expect(vhCard.getByText(/Pick 1 attribute/)).toBeVisible();
-    await expect(vhCard.getByText(/Slots 0 \/ 6/)).toBeVisible();
+    // VH equipment browser is open (no pool items yet) — shows Slots 0 / 6
+    await expect(vhCard.getByText('0 / 6')).toBeVisible();
 
     await testInfo.attach('builder-full', {
       body: await page.screenshot({
@@ -164,8 +143,15 @@ test.describe('units', () => {
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Saved ✓')).toBeVisible();
     await page.reload();
+
+    // Officer attributes still selected (2/2)
     await expect(officerCard.getByText('2 / 2')).toBeVisible();
-    await expect(officerCard.getByText(/Slots 2 \/ 6/)).toBeVisible();
+
+    // Officer equipment browser is collapsed after reload (has items) — expand to verify slots
+    await officerCard.getByRole('button', { name: 'Edit' }).click();
+    await expect(officerCard.getByText('2 / 6')).toBeVisible();
+
+    // VH still in roster
     await expect(page.locator('li').filter({ has: page.locator('[aria-label="Remove Veteran Hunter"]') })).toBeVisible();
   });
 
@@ -185,6 +171,8 @@ test.describe('units', () => {
 
     await expect(page.getByText(/Synced to your account/i)).toBeVisible();
     await page.getByRole('button', { name: 'New unit' }).click();
+    await page.locator('button.card').filter({ hasText: 'France' }).click();
+    await page.getByRole('button', { name: 'Create' }).click();
     await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
 
     await page.getByPlaceholder('The Night Watch').fill('Server Unit');
@@ -206,8 +194,9 @@ test.describe('units', () => {
     );
 
     // Build a unit while anonymous (lands in IndexedDB)
-    await page.goto('/');
     await page.getByRole('button', { name: 'New unit' }).click();
+    await page.locator('button.card').filter({ hasText: 'France' }).click();
+    await page.getByRole('button', { name: 'Create' }).click();
     await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
     await page.getByPlaceholder('The Night Watch').fill('Migrated Band');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
@@ -244,32 +233,19 @@ test.describe('units', () => {
   test('anonymous: nation + special equipment persist on navigate-away and back', async ({
     page,
   }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
-    await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
+    await createUnit(page, 'France');
 
     await page.getByPlaceholder('The Night Watch').fill('Persist Test');
 
-    // Pick France
-    const nationSelect = page.locator('select').filter({
-      has: page.locator('option', { hasText: 'Choose a nation' }),
-    });
-    const frVal = await nationSelect.locator('option', { hasText: 'France' }).getAttribute('value');
-    await nationSelect.selectOption(frVal!);
+    // Nation is shown in the builder (read-only, set from home page picker)
+    await expect(page.getByText('France')).toBeVisible();
 
-    // Add an Infantryman
-    const soldiersCard = page.locator('.card', { hasText: 'Soldiers' });
-    const soldierSelect = page.locator('select').filter({
-      has: page.locator('option', { hasText: 'Add a soldier' }),
-    });
-    const infantryValue = await soldierSelect
-      .locator('option', { hasText: 'Infantryman' })
-      .first()
-      .getAttribute('value');
-    await soldierSelect.selectOption(infantryValue!);
-    await soldiersCard.getByRole('button', { name: 'Add', exact: true }).click();
+    const soldiersCard = page.locator('.card', { hasText: /^Soldiers/ });
 
-    // Pick a special item for the Infantryman
+    // Add an Infantryman via tile + button (picker starts open for new unit)
+    await soldiersCard.getByRole('button', { name: 'Add Infantryman' }).click();
+
+    // Pick a special item for the Infantryman (button-toggle in the member card)
     const soldierItem = page.locator('li').filter({ has: page.locator('[aria-label="Remove Infantryman"]') });
     await soldierItem.getByRole('button', { name: 'Salt Bag' }).click();
     await expect(soldierItem.getByRole('button', { name: 'Salt Bag' })).toHaveClass(/btn-primary/);
@@ -287,8 +263,8 @@ test.describe('units', () => {
     // Wait for doc to load
     await expect(page.getByPlaceholder('The Night Watch')).toHaveValue('Persist Test');
 
-    // Nation should still be France (the bug: select was blank after navigate-back)
-    await expect(nationSelect).toHaveValue(/.+/);
+    // Nation still shows France
+    await expect(page.getByText('France')).toBeVisible();
     // Infantryman still in roster
     await expect(page.locator('li').filter({ has: page.locator('[aria-label="Remove Infantryman"]') })).toBeVisible();
     // Salt Bag special item should still be selected
