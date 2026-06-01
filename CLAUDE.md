@@ -133,8 +133,8 @@ Renders unit cards in a table layout matching the physical Silver Bayonet card f
 Seeded: 13 nations, 44 soldier types, 37 attributes (incl. non-officer), 19 equipment items. `pnpm db:seed` is idempotent; `pnpm db:export-seed` round-trips byte-identically. **Do not hand-edit `seed-data.ts`** — it is regenerated from the DB.
 
 ### Still not done
-- Campaign tools (Tier, XP tracking) — Bestiary content
-- Protected/guarded routes
+- Campaign tools (Tier, XP tracking, campaign manager) — auth-gated routes will be needed when this lands
+- Bestiary content (read-only monster list; data entered via the Reference editor)
 - "+8 pts outside-nation soldier" optional rule in the builder
 - Per-attribute cost deltas
 - `optional-rules` editor and display (entity exists in DB/seed but has no UI)
