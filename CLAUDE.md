@@ -113,7 +113,7 @@ This is intentional. **Do not** change units to reference reference-data rows by
 Email/password sign-in/up, sign-out, session in `locals`, password reset, email verification (sent on sign-up; resend banner for unverified users) are all built. `requireEmailVerification` is **off** — encouraged, not enforced. Still missing: protected/guarded routes.
 
 ### Navigation
-`src/routes/+layout.svelte` — responsive nav collapses to a hamburger on phones. Active pages: **Units** (`/`) · **Cheat Sheet** (`/cheat-sheet`) · **Reference** (`/reference`) · **About** (`/about`). Disabled/stub: **Campaigns** (not built), **Bestiary** (stub route exists, no content). "Warband" was renamed to "unit" everywhere.
+`src/routes/+layout.svelte` — responsive nav collapses to a hamburger on phones. Active pages: **Units** (`/`) · **Cheat Sheet** (`/cheat-sheet`) · **Reference** (`/reference`) · **About** (`/about`). Disabled/stub: **Campaigns** (not built). "Warband" was renamed to "unit" everywhere.
 
 ### Reference editor (`/reference`)
 Accessible in production as a **read-only** reference browser; full editor (writes enabled) in dev only — controlled by `{ readonly: !dev }` from `src/routes/reference/+layout.server.ts`. Write API endpoints enforce the same gate server-side via `runCodex()` in `src/lib/server/codex.ts`. Full CRUD for flat entities (sources, nations, attributes, equipment) and structured entities (soldier-types, monster-types — both include nested loadout/attribute editors) is built. `optional-rules` entity is **not yet implemented** in the editor or displayed anywhere in the app. Export-to-repo (`pnpm db:export-seed`) regenerates `seed-data.ts` deterministically; a changelog entry is prepended to `reference-changelog.ts` when anything changed. The About page renders that changelog statically.
@@ -134,7 +134,6 @@ Seeded: 13 nations, 44 soldier types, 37 attributes (incl. non-officer), 19 equi
 
 ### Still not done
 - Campaign tools (Tier, XP tracking, campaign manager) — auth-gated routes will be needed when this lands
-- Bestiary content (read-only monster list; data entered via the Reference editor)
 - "+8 pts outside-nation soldier" optional rule in the builder
 - Per-attribute cost deltas
 - `optional-rules` editor and display (entity exists in DB/seed but has no UI)
