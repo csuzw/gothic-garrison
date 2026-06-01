@@ -39,7 +39,7 @@ docker compose logs -f petite-poste # tail mock-mailer logs
 pnpm db:generate                    # regenerate migrations after schema edits
 pnpm db:migrate                     # apply migrations
 pnpm db:seed                        # seed reference data from seed-data.ts (idempotent)
-pnpm db:export-seed                 # regenerate seed-data.ts from the DB (Codex "save to repo")
+pnpm db:export-seed                 # regenerate seed-data.ts from the DB (Reference editor "save to repo")
 pnpm db:studio                      # Drizzle Studio at https://local.drizzle.studio
 
 # app
@@ -50,11 +50,11 @@ pnpm dev:mailer                     # petite-poste inbox at http://localhost:802
 pnpm -r check                       # svelte-check / tsc across the workspace
 pnpm test                           # vitest unit tests
 pnpm test:e2e                       # playwright (first run: pnpm exec playwright install)
-pnpm --filter gothic-garrison test:e2e:codex  # Codex UI tests only (dev server; needs Postgres)
+pnpm --filter gothic-garrison test:e2e:codex  # Reference editor UI tests only (dev server; needs Postgres)
 pnpm --filter gothic-garrison build # production build
 ```
 
-Playwright runs two surfaces (`playwright.config.ts`): the **production build** (`pnpm preview`, :4173) for everything incl. the Codex prod-gate checks, and the **dev server** (`pnpm dev`, :5173) for the dev-only Codex UI (the `codex-dev` project, `codex-ui.spec.ts`). The Codex UI tests need Postgres (`docker compose up -d` + `pnpm db:seed`) and skip themselves if the dev API isn't reachable.
+Playwright runs two surfaces (`playwright.config.ts`): the **production build** (`pnpm preview`, :4173) for everything incl. the Reference editor readonly-gate checks, and the **dev server** (`pnpm dev`, :5173) for the dev-only Reference editor write UI (the `codex-dev` project, `codex-ui.spec.ts` — script names kept for historical reasons). The Reference editor UI tests need Postgres (`docker compose up -d` + `pnpm db:seed`) and skip themselves if the dev API isn't reachable.
 
 A single unit test or e2e test:
 ```bash
@@ -115,8 +115,8 @@ Email/password sign-in/up, sign-out, session in `locals`, password reset, email 
 ### Navigation
 `src/routes/+layout.svelte` — responsive nav collapses to a hamburger on phones. Active pages: **Units** (`/`) · **Cheat Sheet** (`/cheat-sheet`) · **Reference** (`/reference`) · **About** (`/about`). Disabled/stub: **Campaigns** (not built), **Bestiary** (stub route exists, no content). "Warband" was renamed to "unit" everywhere.
 
-### Reference editor (local dev only)
-`/codex` is gated by `dev` from `$app/environment` and 404s in production. Full CRUD for flat entities (sources, nations, attributes, equipment) and structured entities (soldier-types, monster-types — both include nested loadout/attribute editors) is built. `optional-rules` entity is **not yet implemented** in the editor or displayed anywhere in the app. Export-to-repo (`pnpm db:export-seed`) regenerates `seed-data.ts` deterministically; a changelog entry is prepended to `reference-changelog.ts` when anything changed. The About page renders that changelog statically.
+### Reference editor (`/reference`)
+Accessible in production as a **read-only** reference browser; full editor (writes enabled) in dev only — controlled by `{ readonly: !dev }` from `src/routes/reference/+layout.server.ts`. Write API endpoints enforce the same gate server-side via `runCodex()` in `src/lib/server/codex.ts`. Full CRUD for flat entities (sources, nations, attributes, equipment) and structured entities (soldier-types, monster-types — both include nested loadout/attribute editors) is built. `optional-rules` entity is **not yet implemented** in the editor or displayed anywhere in the app. Export-to-repo (`pnpm db:export-seed`) regenerates `seed-data.ts` deterministically; a changelog entry is prepended to `reference-changelog.ts` when anything changed. The About page renders that changelog statically.
 
 ### Unit builder (`/units/[id]`)
 **Built:** Nation is set from the home page nation picker when creating a unit (read-only in the builder). Soldier picker is a tile list (browse all nation soldiers, +/− inline stepper, disabled when over budget or at per-type cap, collapsible with tag summary when collapsed). Equipment uses `EquipmentBrowser` (catalog-style browser with +/− steppers, collapsible) for the officer and pool-mode soldiers; fixed/choice soldiers show read-only badges or a loadout button group. Officer/soldier stat info cards (`SoldierStatPopover`, `RulesPopover`). Save-time validation blocks saving when special equipment exceeds the allowed max (e.g. after removing Supernatural Veteran). Unsaved-changes detection gates the Print navigation.
