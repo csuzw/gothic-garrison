@@ -115,8 +115,8 @@ Email/password sign-in/up, sign-out, session in `locals`, password reset, email 
 ### Navigation
 `src/routes/+layout.svelte` — responsive nav collapses to a hamburger on phones. Active pages: **Units** (`/`) · **Cheat Sheet** (`/cheat-sheet`) · **Reference** (`/reference`) · **About** (`/about`). Disabled/stub: **Campaigns** (not built), **Bestiary** (stub route exists, no content). "Warband" was renamed to "unit" everywhere.
 
-### Codex (local dev only)
-`/codex` is gated by `dev` from `$app/environment` and 404s in production. Full CRUD for flat entities (sources, nations, attributes, equipment, optional-rules) is built. Soldier-type editor is **read-only** — the nested loadout/attribute editor is the remaining work. Export-to-repo (`pnpm db:export-seed`) regenerates `seed-data.ts` deterministically; a changelog entry is prepended to `reference-changelog.ts` when anything changed. The About page renders that changelog statically.
+### Reference editor (local dev only)
+`/codex` is gated by `dev` from `$app/environment` and 404s in production. Full CRUD for all entities — flat (sources, nations, attributes, equipment, optional-rules) and soldier-types (including the nested loadout/attribute editor) — is built. Export-to-repo (`pnpm db:export-seed`) regenerates `seed-data.ts` deterministically; a changelog entry is prepended to `reference-changelog.ts` when anything changed. The About page renders that changelog statically.
 
 ### Unit builder (`/units/[id]`)
 **Built:** Nation is set from the home page nation picker when creating a unit (read-only in the builder). Soldier picker is a tile list (browse all nation soldiers, +/− inline stepper, disabled when over budget or at per-type cap, collapsible with tag summary when collapsed). Equipment uses `EquipmentBrowser` (catalog-style browser with +/− steppers, collapsible) for the officer and pool-mode soldiers; fixed/choice soldiers show read-only badges or a loadout button group. Officer/soldier stat info cards (`SoldierStatPopover`, `RulesPopover`). Save-time validation blocks saving when special equipment exceeds the allowed max (e.g. after removing Supernatural Veteran). Unsaved-changes detection gates the Print navigation.
@@ -137,6 +137,5 @@ Seeded: 13 nations, 44 soldier types, 37 attributes (incl. non-officer), 19 equi
 - Protected/guarded routes
 - "+8 pts outside-nation soldier" optional rule in the builder
 - Per-attribute cost deltas
-- Soldier-type editor in the Codex
 - PWA offline strategy (default Workbox preset only — no IndexedDB sync)
 - Production Dockerfile for `apps/gothic-garrison` (hosting deferred)
