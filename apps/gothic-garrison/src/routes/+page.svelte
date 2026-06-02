@@ -20,6 +20,8 @@
 
   let pickerOpen = $state(false);
   let selectedNation = $state<{ id: string; name: string } | null>(null);
+  let optionsOpen = $state(false);
+  let infoNationId = $state<string | null>(null);
 
   const supplementSources = $derived(data.sources.filter((s) => s.kind === 'supplement'));
   let enabledSupplementCodes = $state<string[]>(
@@ -33,6 +35,8 @@
   const filteredNations = $derived(
     data.nations.filter((n) => n.sourceCode === 'core' || enabledSupplementCodes.includes(n.sourceCode)),
   );
+  const optionsCustomised = $derived(!allSupplementsEnabled || !allowOutsideNation);
+  const infoNation = $derived(infoNationId ? filteredNations.find((n) => n.id === infoNationId) : null);
 
   $effect(() => {
     if (selectedNation && !filteredNations.some((n) => n.id === selectedNation!.id)) {
@@ -124,12 +128,27 @@
   </div>
 
   {#if pickerOpen}
-    <div class="card bg-base-200">
-      <div class="card-body gap-4 p-4">
-        <div class="flex items-center justify-between gap-3">
-          <p class="text-sm font-medium opacity-80">Select a nation to start your unit:</p>
+    <!-- Sticky action bar — sits below the site navbar (h-16 = 4rem) -->
+    <div class="sticky top-16 z-10 rounded-box bg-base-200 px-4 py-3 shadow-sm">
+      <div class="flex items-center justify-between gap-2">
+        <p class="text-sm font-medium opacity-80">Select a nation to start your unit:</p>
+        <div class="flex shrink-0 items-center gap-2">
+          <div class="relative">
+            <button
+              class="btn btn-ghost btn-sm btn-square"
+              onclick={() => (optionsOpen = true)}
+              aria-label="Build options"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                <path fill-rule="evenodd" d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .205 1.251l-1.18 2.044a1 1 0 0 1-1.186.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.113a7.047 7.047 0 0 1 0-2.228L1.821 7.773a1 1 0 0 1-.205-1.251l1.18-2.044a1 1 0 0 1 1.186-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            {#if optionsCustomised}
+              <span class="badge badge-warning badge-xs pointer-events-none absolute -right-1 -top-1"></span>
+            {/if}
+          </div>
           <button
-            class="btn btn-primary btn-sm shrink-0"
+            class="btn btn-primary btn-sm"
             onclick={createWithNation}
             disabled={!selectedNation || creating}
           >
@@ -137,64 +156,41 @@
             Create
           </button>
         </div>
-        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-          {#each filteredNations as n (n.id)}
-            {@const selected = selectedNation?.id === n.id}
-            <button
-              class="card w-full cursor-pointer text-left transition-all
-                {selected ? 'bg-primary/15 ring-2 ring-primary' : 'bg-base-100 hover:bg-base-300'}"
-              onclick={() => (selectedNation = selected ? null : { id: n.id, name: n.name })}
-            >
-              <div class="card-body gap-1.5 p-3">
-                <div class="flex flex-wrap items-center gap-2">
-                  <NationFlag flag={n.flag} name={n.name} />
-                  <span class="font-semibold">{n.name}</span>
-                  <span class="badge badge-outline badge-sm ml-auto font-mono">{n.sourceCode}</span>
-                </div>
-                {#if n.description}
-                  <p class="hidden text-xs leading-relaxed opacity-60 sm:block">{n.description}</p>
-                {/if}
-              </div>
-            </button>
-          {/each}
-        </div>
-
-        <details class="rounded-box border border-base-300">
-          <summary class="cursor-pointer select-none px-3 py-2 text-sm font-medium">
-            Build options
-            {#if !allSupplementsEnabled || !allowOutsideNation}
-              <span class="badge badge-warning badge-xs ml-1">customised</span>
-            {/if}
-          </summary>
-          <div class="space-y-4 px-3 pb-3 pt-2">
-            {#if supplementSources.length > 0}
-              <div>
-                <p class="mb-2 text-xs font-medium opacity-70">Supplements</p>
-                <div class="space-y-1.5">
-                  {#each supplementSources as src (src.code)}
-                    <label class="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="checkbox"
-                        class="checkbox checkbox-sm"
-                        checked={enabledSupplementCodes.includes(src.code)}
-                        onchange={() => toggleSupplement(src.code)}
-                      />
-                      <span class="text-sm">{src.name}</span>
-                    </label>
-                  {/each}
-                </div>
-              </div>
-            {/if}
-            <div>
-              <p class="mb-2 text-xs font-medium opacity-70">Optional rules</p>
-              <label class="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" class="checkbox checkbox-sm" bind:checked={allowOutsideNation} />
-                <span class="text-sm">Allow one outside-nation soldier (+8 pts)</span>
-              </label>
-            </div>
-          </div>
-        </details>
       </div>
+    </div>
+
+    <!-- Nation grid -->
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+      {#each filteredNations as n (n.id)}
+        {@const selected = selectedNation?.id === n.id}
+        <div
+          role="button"
+          tabindex="0"
+          class="card w-full cursor-pointer text-left transition-all
+            {selected ? 'bg-primary/15 ring-2 ring-primary' : 'bg-base-200 hover:bg-base-300'}"
+          onclick={() => (selectedNation = selected ? null : { id: n.id, name: n.name })}
+          onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectedNation = selected ? null : { id: n.id, name: n.name }; } }}
+        >
+          <div class="card-body gap-1.5 p-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <NationFlag flag={n.flag} name={n.name} />
+              <span class="font-semibold">{n.name}</span>
+              <span class="badge badge-outline badge-sm ml-auto font-mono">{n.sourceCode}</span>
+              {#if n.description}
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-xs shrink-0 p-0 opacity-40 hover:opacity-80 sm:hidden"
+                  onclick={(e) => { e.stopPropagation(); infoNationId = infoNationId === n.id ? null : n.id; }}
+                  aria-label="About {n.name}"
+                ><span class="text-base leading-none">ⓘ</span></button>
+              {/if}
+            </div>
+            {#if n.description}
+              <p class="hidden text-xs leading-relaxed opacity-60 sm:block">{n.description}</p>
+            {/if}
+          </div>
+        </div>
+      {/each}
     </div>
   {/if}
 
@@ -274,3 +270,50 @@
     </ul>
   {/if}
 </section>
+
+<!-- Build options modal -->
+{#if optionsOpen}
+  <div role="presentation" class="fixed inset-0 z-40 bg-black/50" onclick={() => (optionsOpen = false)}></div>
+  <div class="fixed left-1/2 top-1/2 z-50 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-box bg-base-100 p-5 shadow-xl">
+    <div class="mb-4 flex items-center justify-between">
+      <h3 class="font-semibold">Build options</h3>
+      <button class="btn btn-ghost btn-xs btn-square" onclick={() => (optionsOpen = false)} aria-label="Close">✕</button>
+    </div>
+    <div class="space-y-4">
+      {#if supplementSources.length > 0}
+        <div>
+          <p class="mb-2 text-xs font-medium opacity-70">Supplements</p>
+          <div class="space-y-1.5">
+            {#each supplementSources as src (src.code)}
+              <label class="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-sm"
+                  checked={enabledSupplementCodes.includes(src.code)}
+                  onchange={() => toggleSupplement(src.code)}
+                />
+                <span class="text-sm">{src.name}</span>
+              </label>
+            {/each}
+          </div>
+        </div>
+      {/if}
+      <div>
+        <p class="mb-2 text-xs font-medium opacity-70">Optional rules</p>
+        <label class="flex cursor-pointer items-center gap-2">
+          <input type="checkbox" class="checkbox checkbox-sm" bind:checked={allowOutsideNation} />
+          <span class="text-sm">Allow one outside-nation soldier (+8 pts)</span>
+        </label>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Nation description popover (mobile) -->
+{#if infoNation?.description}
+  <div role="presentation" class="fixed inset-0 z-40" onclick={() => (infoNationId = null)}></div>
+  <div class="fixed left-1/2 top-24 z-50 w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-box border border-base-300 bg-base-100 p-3 shadow-xl">
+    <p class="mb-1.5 text-sm font-semibold">{infoNation.name}</p>
+    <p class="text-xs leading-relaxed opacity-70">{infoNation.description}</p>
+  </div>
+{/if}
