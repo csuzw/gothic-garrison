@@ -122,7 +122,8 @@
   <footer class="mt-8 border-t border-primary print:hidden">
     <div class="container mx-auto space-y-2 px-4 py-6 text-center text-xs opacity-70">
       <p>
-        Gothic Garrison · An unofficial fan-made list builder for <em>The Silver Bayonet</em>.
+        Gothic Garrison · An unofficial fan-made list builder for <em>The Silver Bayonet</em>. ·
+        <a href="https://github.com/csuzw/gothic-garrison" target="_blank" rel="noopener noreferrer" class="link">GitHub</a>
       </p>
       <p>
         <em>The Silver Bayonet</em> was created by <strong>Joseph A. McCullough</strong>, with

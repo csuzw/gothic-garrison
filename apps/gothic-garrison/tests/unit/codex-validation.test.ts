@@ -34,7 +34,7 @@ describe('validateSource', () => {
   it('parses a well-formed source', () => {
     expect(
       validateSource({ code: 'core', name: 'The Silver Bayonet', kind: 'core', publishedDate: '2021-11-11', author: 'JM' }),
-    ).toEqual({ code: 'core', name: 'The Silver Bayonet', kind: 'core', publishedDate: '2021-11-11', author: 'JM' });
+    ).toEqual({ code: 'core', name: 'The Silver Bayonet', kind: 'core', publishedDate: '2021-11-11', author: 'JM', ospreyCoverUrl: null, coverImageUrl: null });
   });
   it('trims whitespace on strings', () => {
     expect(validateSource({ code: ' core ', name: ' x ', kind: 'supplement', publishedDate: '2023-01-01', author: ' a ' }).code).toBe('core');

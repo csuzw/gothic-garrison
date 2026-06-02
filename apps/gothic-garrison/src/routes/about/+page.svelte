@@ -42,13 +42,39 @@
     <ul class="grid gap-2 sm:grid-cols-2">
       {#each data.sources as source (source.id)}
         <li class="card bg-base-200 card-compact">
-          <div class="card-body">
-            <div class="flex items-center justify-between gap-3">
-              <span class="font-medium">{source.name}</span>
-              <span class="badge badge-ghost text-xs">{source.kind}</span>
-            </div>
-            <div class="mt-1 text-xs opacity-60">
-              {source.author} · {formatPublished(source.publishedDate)}
+          <div class="card-body flex-row gap-3 p-3">
+            {#if source.coverImageUrl}
+              <a
+                href={source.ospreyCoverUrl ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="shrink-0"
+                tabindex={source.ospreyCoverUrl ? 0 : -1}
+              >
+                <img
+                  src={source.coverImageUrl}
+                  alt="{source.name} cover"
+                  class="h-24 w-auto rounded object-cover shadow"
+                />
+              </a>
+            {/if}
+            <div class="flex min-w-0 flex-col justify-center gap-1">
+              <div class="flex items-center justify-between gap-2">
+                {#if source.ospreyCoverUrl}
+                  <a
+                    href={source.ospreyCoverUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="link font-medium leading-snug"
+                  >{source.name}</a>
+                {:else}
+                  <span class="font-medium leading-snug">{source.name}</span>
+                {/if}
+                <span class="badge badge-ghost shrink-0 text-xs">{source.kind}</span>
+              </div>
+              <div class="text-xs opacity-60">
+                {source.author} · {formatPublished(source.publishedDate)}
+              </div>
             </div>
           </div>
         </li>

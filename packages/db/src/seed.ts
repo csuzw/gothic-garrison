@@ -23,10 +23,10 @@ const db = drizzle(client, { casing: 'snake_case' });
 // ── sources (the published books) ────────────────────────────────────────────
 await db
   .insert(t.sources)
-  .values(sourceData.map((s) => ({ code: s.code, name: s.name, kind: s.kind, publishedDate: s.publishedDate, author: s.author })))
+  .values(sourceData.map((s) => ({ code: s.code, name: s.name, kind: s.kind, publishedDate: s.publishedDate, author: s.author, ospreyCoverUrl: s.ospreyCoverUrl ?? null, coverImageUrl: s.coverImageUrl ?? null })))
   .onConflictDoUpdate({
     target: t.sources.code,
-    set: { name: sql`excluded.name`, kind: sql`excluded.kind`, publishedDate: sql`excluded.published_date`, author: sql`excluded.author` },
+    set: { name: sql`excluded.name`, kind: sql`excluded.kind`, publishedDate: sql`excluded.published_date`, author: sql`excluded.author`, ospreyCoverUrl: sql`excluded.osprey_cover_url`, coverImageUrl: sql`excluded.cover_image_url` },
   });
 
 const sourceByCode = new Map((await db.select({ id: t.sources.id, code: t.sources.code }).from(t.sources)).map((r) => [r.code, r.id]));

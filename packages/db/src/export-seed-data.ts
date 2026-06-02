@@ -121,7 +121,7 @@ const SEED_HEADER = `// AUTO-GENERATED — do not edit by hand.
 export type EquipmentMode = 'fixed' | 'choice' | 'pool';
 export type SourceKind = 'core' | 'supplement';
 
-export interface SeedSource { code: string; name: string; kind: SourceKind; publishedDate: string; author: string; }
+export interface SeedSource { code: string; name: string; kind: SourceKind; publishedDate: string; author: string; ospreyCoverUrl: string | null; coverImageUrl: string | null; }
 export interface SeedNation { name: string; sourceCode: string; description: string | null; flag: string | null; soldiers: string[]; }
 export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; rules: string; }
 export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; rules: string; }
@@ -267,7 +267,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
 
     // build the seed collections (fixed key order, stable sort)
     const sources = sourceRows
-      .map((s) => ({ code: s.code, name: s.name, kind: s.kind, publishedDate: s.publishedDate, author: s.author }))
+      .map((s) => ({ code: s.code, name: s.name, kind: s.kind, publishedDate: s.publishedDate, author: s.author, ospreyCoverUrl: s.ospreyCoverUrl ?? null, coverImageUrl: s.coverImageUrl ?? null }))
       .sort(byCode);
 
     const nations = nationRows

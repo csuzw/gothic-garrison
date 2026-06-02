@@ -47,6 +47,8 @@ export const CODEX_ENTITIES: CodexEntity[] = [
       { key: 'kind', label: 'Kind', type: 'enum', options: ['core', 'supplement'], required: true },
       { key: 'publishedDate', label: 'Published', type: 'date', required: true },
       { key: 'author', label: 'Author', type: 'text', required: true },
+      { key: 'ospreyCoverUrl', label: 'Osprey URL', type: 'text', placeholder: 'https://ospreypublishing.com/store/…' },
+      { key: 'coverImageUrl', label: 'Cover image URL', type: 'text', placeholder: 'https://…/cover.jpg' },
     ],
   },
   {

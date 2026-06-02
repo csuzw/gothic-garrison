@@ -8,7 +8,7 @@
 export type EquipmentMode = 'fixed' | 'choice' | 'pool';
 export type SourceKind = 'core' | 'supplement';
 
-export interface SeedSource { code: string; name: string; kind: SourceKind; publishedDate: string; author: string; }
+export interface SeedSource { code: string; name: string; kind: SourceKind; publishedDate: string; author: string; ospreyCoverUrl: string | null; coverImageUrl: string | null; }
 export interface SeedNation { name: string; sourceCode: string; description: string | null; flag: string | null; soldiers: string[]; }
 export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; rules: string; }
 export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; rules: string; }
@@ -45,42 +45,54 @@ export const sources: SeedSource[] = [
     "name": "Britain — Bones of Albion",
     "kind": "supplement",
     "publishedDate": "2025-09-25",
-    "author": "Joseph A. McCullough"
+    "author": "Joseph A. McCullough",
+    "ospreyCoverUrl": "https://www.ospreypublishing.com/uk/silver-bayonet-britain-bones-of-albion-9781472869357/",
+    "coverImageUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_300,c_scale/jackets/9781472869357.jpg"
   },
   {
     "code": "canada",
     "name": "Canada",
     "kind": "supplement",
     "publishedDate": "2023-11-23",
-    "author": "Ash Barker"
+    "author": "Ash Barker",
+    "ospreyCoverUrl": "https://www.ospreypublishing.com/uk/silver-bayonet-canada-9781472858870/",
+    "coverImageUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_300,c_scale/jackets/9781472858870.jpg"
   },
   {
     "code": "carpathians",
     "name": "The Carpathians — Castle Fier",
     "kind": "supplement",
     "publishedDate": "2023-05-25",
-    "author": "Joseph A. McCullough"
+    "author": "Joseph A. McCullough",
+    "ospreyCoverUrl": "https://www.ospreypublishing.com/uk/silver-bayonet-the-carpathians-castle-fier-9781472858788/",
+    "coverImageUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_300,c_scale/jackets/9781472858788.jpg"
   },
   {
     "code": "core",
     "name": "The Silver Bayonet",
     "kind": "core",
     "publishedDate": "2021-11-11",
-    "author": "Joseph A. McCullough"
+    "author": "Joseph A. McCullough",
+    "ospreyCoverUrl": "https://www.ospreypublishing.com/uk/silver-bayonet-9781472844859/",
+    "coverImageUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_300,c_scale/jackets/9781472844859.jpg"
   },
   {
     "code": "egypt",
     "name": "Egypt — Shadow of the Sphinx",
     "kind": "supplement",
     "publishedDate": "2024-05-23",
-    "author": "Joseph A. McCullough"
+    "author": "Joseph A. McCullough",
+    "ospreyCoverUrl": "https://www.ospreypublishing.com/uk/silver-bayonet-egypt-shadow-of-the-sphinx-9781472858863/",
+    "coverImageUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_300,c_scale/jackets/9781472858863.jpg"
   },
   {
     "code": "italy",
     "name": "Italy — The Shades of Calabria",
     "kind": "supplement",
     "publishedDate": "2024-11-28",
-    "author": "T.C. Stephen"
+    "author": "T.C. Stephen",
+    "ospreyCoverUrl": "https://www.ospreypublishing.com/uk/silver-bayonet-italy-the-shades-of-calabria-9781472865861/",
+    "coverImageUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_300,c_scale/jackets/9781472865861.jpg"
   }
 ];
 

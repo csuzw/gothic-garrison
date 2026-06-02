@@ -125,6 +125,8 @@ export interface SourceInput {
   kind: (typeof SOURCE_KINDS)[number];
   publishedDate: string;
   author: string;
+  ospreyCoverUrl: string | null;
+  coverImageUrl: string | null;
 }
 
 export interface NationInput {
@@ -207,6 +209,8 @@ export function validateSource(body: unknown): SourceInput {
     kind: enumOf(o, 'kind', SOURCE_KINDS),
     publishedDate,
     author: reqStr(o, 'author'),
+    ospreyCoverUrl: optStr(o, 'ospreyCoverUrl'),
+    coverImageUrl: optStr(o, 'coverImageUrl'),
   };
 }
 

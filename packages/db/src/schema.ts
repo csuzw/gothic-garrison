@@ -39,6 +39,8 @@ export const sources = pgTable('sources', {
   kind: sourceKindEnum('kind').notNull(),
   publishedDate: date('published_date').notNull(),
   author: text('author').notNull(),
+  ospreyCoverUrl: text('osprey_cover_url'),
+  coverImageUrl: text('cover_image_url'),
 });
 
 export const nations = pgTable('nations', {
