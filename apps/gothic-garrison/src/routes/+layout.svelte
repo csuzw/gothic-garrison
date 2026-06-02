@@ -1,12 +1,39 @@
 <script lang="ts">
   import '../app.css';
+  import { onMount } from 'svelte';
   import { page } from '$app/state';
   import Logo from '$lib/components/Logo.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
   import UserMenu from '$lib/components/UserMenu.svelte';
   import VerifyEmailBanner from '$lib/components/VerifyEmailBanner.svelte';
+  import { migrateAnonymousUnits } from '$lib/unit/store';
 
   let { children, data } = $props();
+
+  let isOnline = $state(true);
+
+  onMount(() => {
+    isOnline = navigator.onLine;
+
+    const handleOnline = async () => {
+      isOnline = true;
+      if (data.user) {
+        try { await migrateAnonymousUnits(); } catch {}
+      }
+    };
+    const handleOffline = () => { isOnline = false; };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Warm the Workbox runtime cache for reference data.
+    if (isOnline) fetch('/api/reference/snapshot').catch(() => {});
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  });
 
   // href === null → shown but disabled ("coming soon").
   const navLinks: { label: string; href: string | null }[] = [
@@ -81,6 +108,12 @@
   </header>
 
   <VerifyEmailBanner user={data.user} />
+
+  {#if !isOnline}
+    <div role="status" class="flex items-center justify-center gap-2 bg-warning/15 px-4 py-2 text-center text-xs text-warning-content print:hidden">
+      Offline — new units are saved locally and will sync when you reconnect.
+    </div>
+  {/if}
 
   <main class="container mx-auto flex-1 px-4 py-6">
     {@render children()}

@@ -4,7 +4,7 @@
   import { page } from '$app/state';
   import type { PageProps } from './$types';
   import NationFlag from '$lib/components/NationFlag.svelte';
-  import { getUnitStore } from '$lib/unit/store';
+  import { getUnitStore, indexedDbStore } from '$lib/unit/store';
   import { createUnitDoc, type UnitSummary } from '$lib/unit/types';
 
   let { data }: PageProps = $props();
@@ -44,7 +44,10 @@
       const doc = createUnitDoc();
       doc.nationId = selectedNation.id;
       doc.nationName = selectedNation.name;
-      await getUnitStore(signedIn).save(doc);
+      // When offline and signed in, save to IndexedDB so the unit persists
+      // locally and migrates to the server automatically on reconnect.
+      const store = signedIn && !navigator.onLine ? indexedDbStore : getUnitStore(signedIn);
+      await store.save(doc);
       await goto(`/units/${doc.id}`);
     } catch (e) {
       error = (e as Error).message;

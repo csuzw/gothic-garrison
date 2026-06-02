@@ -8,7 +8,7 @@
   import NationFlag from '$lib/components/NationFlag.svelte';
   import SoldierStatPopover from '$lib/components/SoldierStatPopover.svelte';
   import StatLine from '$lib/components/StatLine.svelte';
-  import { getUnitStore } from '$lib/unit/store';
+  import { getUnitStore, getUnitById, indexedDbStore, type UnitSource } from '$lib/unit/store';
   import {
     unitBudget,
     unitSpent,
@@ -41,20 +41,42 @@
   let error = $state<string | null>(null);
   let printConfirming = $state(false);
   let savedSnapshot = '';
+  let unitSource = $state<UnitSource>('local');
+  let isOnline = $state(true);
 
-  onMount(async () => {
-    try {
-      const found = await getUnitStore(signedIn).get(id);
-      if (found) {
-        doc = normalizeUnitDoc(found);
-        savedSnapshot = JSON.stringify(doc);
-      } else notFound = true;
-    } catch (e) {
-      error = (e as Error).message;
-    } finally {
-      loading = false;
-    }
+  onMount(() => {
+    isOnline = navigator.onLine;
+    const handleOnline = () => { isOnline = true; };
+    const handleOffline = () => { isOnline = false; };
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Load the unit asynchronously without blocking the cleanup return.
+    (async () => {
+      try {
+        const result = await getUnitById(id, signedIn);
+        unitSource = result.source;
+        if (result.doc) {
+          doc = normalizeUnitDoc(result.doc);
+          savedSnapshot = JSON.stringify(doc);
+        } else notFound = true;
+      } catch (e) {
+        error = (e as Error).message;
+      } finally {
+        loading = false;
+      }
+    })();
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   });
+
+  // Server-stored units are read-only when offline — saves would fail anyway.
+  const saveReadOnly = $derived(!isOnline && unitSource === 'server');
+  // Offline-created (local) units always use IndexedDB; server units use the server store.
+  const activeStore = $derived(unitSource === 'local' ? indexedDbStore : getUnitStore(signedIn));
 
   const budget = $derived(doc ? unitBudget(doc) : 0);
   const spent = $derived(doc ? unitSpent(doc) : 0);
@@ -179,7 +201,7 @@
   }
 
   async function save() {
-    if (!doc) return;
+    if (!doc || saveReadOnly) return;
     const validationError = validateBeforeSave(doc);
     if (validationError) {
       error = validationError;
@@ -188,7 +210,7 @@
     saving = true;
     error = null;
     try {
-      doc = await getUnitStore(signedIn).save(doc);
+      doc = await activeStore.save(doc);
       savedSnapshot = JSON.stringify(doc);
       saved = true;
       setTimeout(() => (saved = false), 2000);
@@ -209,7 +231,7 @@
   }
 
   async function saveAndPrint() {
-    if (!doc) return;
+    if (!doc || saveReadOnly) return;
     const validationError = validateBeforeSave(doc);
     if (validationError) {
       error = validationError;
@@ -219,7 +241,7 @@
     saving = true;
     error = null;
     try {
-      doc = await getUnitStore(signedIn).save(doc);
+      doc = await activeStore.save(doc);
       savedSnapshot = JSON.stringify(doc);
       saved = true;
       setTimeout(() => (saved = false), 2000);
@@ -239,9 +261,9 @@
   }
 
   async function remove() {
-    if (!doc || !confirm('Delete this unit? This cannot be undone.')) return;
+    if (!doc || saveReadOnly || !confirm('Delete this unit? This cannot be undone.')) return;
     try {
-      await getUnitStore(signedIn).remove(id);
+      await activeStore.remove(id);
       await goto('/');
     } catch (e) {
       error = (e as Error).message;
@@ -268,8 +290,12 @@
         </span>
       {/if}
       <div class="flex items-center gap-2">
-        {#if saved}<span class="text-success text-sm">Saved ✓</span>{/if}
-        <button class="btn btn-primary btn-sm" onclick={save} disabled={saving}>
+        {#if saved}
+          <span class="text-success text-sm">Saved ✓</span>
+        {:else if saveReadOnly}
+          <span class="text-xs opacity-50">Offline</span>
+        {/if}
+        <button class="btn btn-primary btn-sm" onclick={save} disabled={saving || saveReadOnly}>
           {#if saving}<span class="loading loading-spinner loading-xs"></span>{/if}
           Save
         </button>

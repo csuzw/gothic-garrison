@@ -47,7 +47,7 @@ function txDone(tx: IDBTransaction): Promise<void> {
   });
 }
 
-const indexedDbStore: UnitStore = {
+export const indexedDbStore: UnitStore = {
   async list() {
     const db = await openDb();
     const docs = await reqAsync(
@@ -117,6 +117,27 @@ const serverStore: UnitStore = {
 /** Pick the backend for the current auth state. */
 export function getUnitStore(signedIn: boolean): UnitStore {
   return signedIn ? serverStore : indexedDbStore;
+}
+
+export type UnitSource = 'server' | 'local';
+
+/**
+ * Load a unit, trying the server first then falling back to IndexedDB.
+ * The fallback handles units created offline (pending sync) and the case where
+ * the device is offline and Workbox hasn't cached the individual unit response.
+ */
+export async function getUnitById(
+  id: string,
+  signedIn: boolean,
+): Promise<{ doc: UnitDoc | null; source: UnitSource }> {
+  if (!signedIn) {
+    return { doc: await indexedDbStore.get(id), source: 'local' };
+  }
+  try {
+    const doc = await serverStore.get(id);
+    if (doc !== null) return { doc, source: 'server' };
+  } catch {}
+  return { doc: await indexedDbStore.get(id), source: 'local' };
 }
 
 /**

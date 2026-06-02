@@ -33,6 +33,26 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/',
         globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname === '/api/reference/snapshot',
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'reference-data',
+              expiration: { maxEntries: 1, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+          {
+            urlPattern: ({ url }) =>
+              url.pathname === '/api/units' || /^\/api\/units\/[^/]+$/.test(url.pathname),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'unit-data',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
+          },
+        ],
       },
       devOptions: {
         enabled: false,

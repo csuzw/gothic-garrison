@@ -132,10 +132,18 @@ Renders unit cards in a table layout matching the physical Silver Bayonet card f
 ### Reference data
 Seeded: 13 nations, 44 soldier types, 37 attributes (incl. non-officer), 19 equipment items. `pnpm db:seed` is idempotent; `pnpm db:export-seed` round-trips byte-identically. **Do not hand-edit `seed-data.ts`** — it is regenerated from the DB.
 
+### PWA offline strategy
+The app works offline after first visit. Key mechanics:
+
+- **Reference data** is served by `/api/reference/snapshot` (GET, public, `stale-while-revalidate`). Both page loaders (`src/routes/+page.ts` and `src/routes/units/[id]/+page.ts`) are **universal loaders** that `fetch('/api/reference/snapshot')` — SvelteKit intercepts this server-side for SSR, and the service worker serves it from cache offline. Workbox `runtimeCaching` handles the snapshot with `StaleWhileRevalidate` and unit API responses (`/api/units`, `/api/units/[id]`) with `NetworkFirst`.
+- **Offline banner** in `+layout.svelte` listens to `window.online`/`offline` events and shows a notice. The cache is also warmed proactively on first mount.
+- **New units while signed in + offline** go to `indexedDbStore` (same as anonymous). On reconnect the layout calls `migrateAnonymousUnits()` automatically, syncing them to the server.
+- **Existing server units offline** are read-only (the builder's Save button is disabled with an "Offline" indicator when `unitSource === 'server' && !isOnline`). Workbox's `NetworkFirst` unit cache means previously loaded units are still readable.
+- `getUnitById(id, signedIn)` in `store.ts` tries the server first, falls back to IndexedDB — covers offline-created pending-sync units.
+
 ### Still not done
 - Campaign tools (Tier, XP tracking, campaign manager) — auth-gated routes will be needed when this lands
 - "+8 pts outside-nation soldier" optional rule in the builder
 - Per-attribute cost deltas
 - `optional-rules` editor and display (entity exists in DB/seed but has no UI)
-- PWA offline strategy (default Workbox preset only — no IndexedDB sync)
 - Production Dockerfile for `apps/gothic-garrison` (hosting deferred)
