@@ -22,6 +22,8 @@
     MAX_SOLDIERS,
     OFFICER_EQUIPMENT_SLOTS,
     OFFICER_ATTRIBUTE_PICKS,
+    OUTSIDE_NATION_RULE_CODE,
+    OUTSIDE_NATION_SOLDIER_COST,
     type UnitDoc,
     type AttributeSnapshot,
     type EquipmentSnapshot,
@@ -106,19 +108,36 @@
     }, new Map<string, { name: string; count: number }>()).values()]
   );
 
-  const officerPool = $derived(data.reference.attributes.filter((a) => a.isOfficer));
-  const equipById = $derived(new Map(data.reference.equipment.map((e) => [e.id, e])));
-  const specialCatalog = $derived(data.reference.equipment.filter((e) => e.isSpecial));
+  function sourceEnabled(sourceCode: string): boolean {
+    return doc?.enabledSourceCodes == null || doc.enabledSourceCodes.includes(sourceCode);
+  }
+
+  const officerPool = $derived(data.reference.attributes.filter((a) => a.isOfficer && sourceEnabled(a.sourceCode)));
+  const equipCatalog = $derived(data.reference.equipment.filter((e) => sourceEnabled(e.sourceCode)));
+  const equipById = $derived(new Map(equipCatalog.map((e) => [e.id, e])));
+  const specialCatalog = $derived(equipCatalog.filter((e) => e.isSpecial));
   const soldierRef = (typeId: string | null) => data.reference.soldiers.find((s) => s.id === typeId);
 
   const available = $derived(
-    nationId === null ? [] : data.reference.soldiers.filter((s) => s.nationIds.includes(nationId!)),
+    nationId === null
+      ? []
+      : data.reference.soldiers.filter((s) => s.nationIds.includes(nationId!) && sourceEnabled(s.sourceCode)),
   );
   const addable = $derived(
     available.filter((s) => {
       if (s.maxPerUnit == null) return true;
       return members.filter((m) => m.soldierTypeId === s.id).length < s.maxPerUnit;
     }),
+  );
+
+  const hasOutsideNationRule = $derived(doc?.optionalRules.includes(OUTSIDE_NATION_RULE_CODE) ?? false);
+  const outsideNationMember = $derived(members.find((m) => m.isOutsideNationPick) ?? null);
+  const outsideNationAvailable = $derived(
+    hasOutsideNationRule && nationId !== null
+      ? data.reference.soldiers.filter(
+          (s) => !s.nationIds.includes(nationId!) && sourceEnabled(s.sourceCode),
+        )
+      : [],
   );
 
   // ── attributes ────────────────────────────────────────────────────────────
@@ -145,18 +164,19 @@
     m.equipment = lo ? snapshotItems(lo.items) : [];
   }
 
-  function addSoldierInline(s: (typeof available)[number]) {
+  function addSoldierInline(s: (typeof available)[number], outsideNation = false) {
     if (!doc || rosterFull) return;
-    const member = {
+    const member: MemberSnapshot = {
       id: crypto.randomUUID(),
       soldierTypeId: s.id,
       name: s.name,
-      cost: s.recruitmentCost,
+      cost: s.recruitmentCost + (outsideNation ? OUTSIDE_NATION_SOLDIER_COST : 0),
+      ...(outsideNation && { isOutsideNationPick: true }),
       stats: s.stats,
-      attributes: [] as AttributeSnapshot[],
-      equipment: [] as EquipmentSnapshot[],
-      specialEquipment: [] as EquipmentSnapshot[],
-      loadoutId: null as string | null,
+      attributes: [],
+      equipment: [],
+      specialEquipment: [],
+      loadoutId: null,
     };
     const first = s.loadouts[0];
     if (first && s.equipmentMode === 'fixed') member.equipment = snapshotItems(first.items);
@@ -316,6 +336,14 @@
       {:else}
         <div class="rounded-box bg-base-200 px-3 py-2.5 text-sm opacity-50">No nation set</div>
       {/if}
+      {#if doc.enabledSourceCodes !== null}
+        {@const activeSupplements = data.reference.sources.filter(
+          (s) => s.kind === 'supplement' && doc!.enabledSourceCodes!.includes(s.code),
+        )}
+        <p class="mt-1 text-xs opacity-50">
+          {activeSupplements.length === 0 ? 'Core only' : `Supplements: ${activeSupplements.map((s) => s.name).join(', ')}`}
+        </p>
+      {/if}
     </div>
 
     <label class="block">
@@ -395,7 +423,7 @@
         <div>
           <span class="mb-1 block text-sm font-medium">Equipment</span>
           <EquipmentBrowser
-            catalog={data.reference.equipment}
+            catalog={equipCatalog}
             items={doc.officer.equipment}
             slots={OFFICER_EQUIPMENT_SLOTS}
             specialMax={officerSpecialMax(doc.officer)}
@@ -466,6 +494,48 @@
                 </div>
               {/each}
             </div>
+            {#if hasOutsideNationRule}
+              <div class="mt-2 space-y-1">
+                <p class="text-xs font-medium opacity-60">
+                  Outside-nation recruit
+                  <span class="badge badge-xs badge-ghost">+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
+                  {#if outsideNationMember}<span class="badge badge-xs badge-warning">{outsideNationMember.name}</span>{/if}
+                </p>
+                {#if outsideNationMember}
+                  <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2 ring-1 ring-warning/30">
+                    <span class="min-w-0 flex-1 text-sm font-medium">{outsideNationMember.name}</span>
+                    <span class="badge badge-warning badge-sm shrink-0 tabular-nums">{outsideNationMember.cost} pts</span>
+                    <button
+                      class="btn btn-ghost btn-xs shrink-0"
+                      onclick={() => removeMember(outsideNationMember!.id)}
+                      aria-label="Remove outside-nation soldier"
+                    >−</button>
+                  </div>
+                {:else}
+                  {#each outsideNationAvailable as s (s.id)}
+                    {@const cantAdd = rosterFull || spent + s.recruitmentCost + OUTSIDE_NATION_SOLDIER_COST > budget}
+                    <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2">
+                      <div class="min-w-0 flex-1">
+                        <span class="text-sm font-medium">{s.name}</span>
+                        {#if s.maxPerUnit != null}
+                          <span class="ml-1 text-xs opacity-40">max {s.maxPerUnit}</span>
+                        {/if}
+                      </div>
+                      <SoldierStatPopover soldier={s} />
+                      <span class="badge badge-ghost badge-sm w-20 shrink-0 justify-center tabular-nums">{s.recruitmentCost}+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
+                      <span class="w-12"></span>
+                      <button
+                        class="btn btn-xs btn-outline shrink-0"
+                        onclick={() => addSoldierInline(s, true)}
+                        disabled={cantAdd}
+                        aria-label="Recruit {s.name} (outside nation)"
+                      >+</button>
+                    </div>
+                  {/each}
+                {/if}
+              </div>
+            {/if}
+
             <div class="flex flex-wrap items-center gap-1 border-t border-base-300 pt-2">
               {@render soldierTags()}
               {#if members.length === 0}<span class="text-xs opacity-40">No soldiers yet</span>{/if}
@@ -484,6 +554,9 @@
                     <div class="flex min-w-0 flex-1 items-center gap-2">
                       <span class="font-medium">{m.name}</span>
                       <span class="badge badge-sm shrink-0">{m.cost} pts</span>
+                      {#if m.isOutsideNationPick}
+                        <span class="badge badge-warning badge-xs shrink-0">outside nation</span>
+                      {/if}
                     </div>
                     <button class="btn btn-ghost btn-xs text-error shrink-0" onclick={() => removeMember(m.id)} aria-label="Remove {m.name}">Remove</button>
                   </div>
@@ -529,7 +602,7 @@
                       <span class="mb-1 block text-xs font-medium opacity-70">Equipment</span>
                       {#if ref.equipmentMode === 'pool'}
                         <EquipmentBrowser
-                          catalog={data.reference.equipment}
+                          catalog={equipCatalog}
                           items={m.equipment}
                           slots={ref.equipmentSlots ?? OFFICER_EQUIPMENT_SLOTS}
                           specialMax={soldierSpecialMax(m, ref.specialSlots ?? 2, ref.fixedAttributes)}

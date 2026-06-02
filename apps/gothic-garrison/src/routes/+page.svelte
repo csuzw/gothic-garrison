@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import type { PageProps } from './$types';
   import NationFlag from '$lib/components/NationFlag.svelte';
   import { getUnitStore, indexedDbStore } from '$lib/unit/store';
-  import { createUnitDoc, type UnitSummary } from '$lib/unit/types';
+  import { createUnitDoc, OUTSIDE_NATION_RULE_CODE, type UnitSummary } from '$lib/unit/types';
 
   let { data }: PageProps = $props();
 
@@ -20,6 +20,31 @@
 
   let pickerOpen = $state(false);
   let selectedNation = $state<{ id: string; name: string } | null>(null);
+
+  const supplementSources = $derived(data.sources.filter((s) => s.kind === 'supplement'));
+  let enabledSupplementCodes = $state<string[]>(
+    untrack(() => data.sources.filter((s) => s.kind === 'supplement').map((s) => s.code)),
+  );
+  let allowOutsideNation = $state(true);
+
+  const allSupplementsEnabled = $derived(
+    supplementSources.every((s) => enabledSupplementCodes.includes(s.code)),
+  );
+  const filteredNations = $derived(
+    data.nations.filter((n) => n.sourceCode === 'core' || enabledSupplementCodes.includes(n.sourceCode)),
+  );
+
+  $effect(() => {
+    if (selectedNation && !filteredNations.some((n) => n.id === selectedNation!.id)) {
+      selectedNation = null;
+    }
+  });
+
+  function toggleSupplement(code: string) {
+    const idx = enabledSupplementCodes.indexOf(code);
+    if (idx >= 0) enabledSupplementCodes.splice(idx, 1);
+    else enabledSupplementCodes.push(code);
+  }
 
   const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -44,6 +69,12 @@
       const doc = createUnitDoc();
       doc.nationId = selectedNation.id;
       doc.nationName = selectedNation.name;
+      if (!allSupplementsEnabled) {
+        doc.enabledSourceCodes = ['core', ...enabledSupplementCodes];
+      }
+      if (allowOutsideNation) {
+        doc.optionalRules = [OUTSIDE_NATION_RULE_CODE];
+      }
       // When offline and signed in, save to IndexedDB so the unit persists
       // locally and migrates to the server automatically on reconnect.
       const store = signedIn && !navigator.onLine ? indexedDbStore : getUnitStore(signedIn);
@@ -107,7 +138,7 @@
           </button>
         </div>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-          {#each data.nations as n (n.id)}
+          {#each filteredNations as n (n.id)}
             {@const selected = selectedNation?.id === n.id}
             <button
               class="card w-full cursor-pointer text-left transition-all
@@ -127,6 +158,42 @@
             </button>
           {/each}
         </div>
+
+        <details class="rounded-box border border-base-300">
+          <summary class="cursor-pointer select-none px-3 py-2 text-sm font-medium">
+            Build options
+            {#if !allSupplementsEnabled || !allowOutsideNation}
+              <span class="badge badge-warning badge-xs ml-1">customised</span>
+            {/if}
+          </summary>
+          <div class="space-y-4 px-3 pb-3 pt-2">
+            {#if supplementSources.length > 0}
+              <div>
+                <p class="mb-2 text-xs font-medium opacity-70">Supplements</p>
+                <div class="space-y-1.5">
+                  {#each supplementSources as src (src.code)}
+                    <label class="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-sm"
+                        checked={enabledSupplementCodes.includes(src.code)}
+                        onchange={() => toggleSupplement(src.code)}
+                      />
+                      <span class="text-sm">{src.name}</span>
+                    </label>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+            <div>
+              <p class="mb-2 text-xs font-medium opacity-70">Optional rules</p>
+              <label class="flex cursor-pointer items-center gap-2">
+                <input type="checkbox" class="checkbox checkbox-sm" bind:checked={allowOutsideNation} />
+                <span class="text-sm">Allow one outside-nation soldier (+8 pts)</span>
+              </label>
+            </div>
+          </div>
+        </details>
       </div>
     </div>
   {/if}

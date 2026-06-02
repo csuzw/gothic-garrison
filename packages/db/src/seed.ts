@@ -7,7 +7,6 @@ import {
   nations as nationData,
   attributes as attributeData,
   equipment as equipmentData,
-  optionalRules as optionalRuleData,
   soldiers as soldierData,
   monsters as monsterData,
 } from './seed-data.ts';
@@ -213,20 +212,9 @@ for (const m of monsterData) {
   }
 }
 
-// ── optional rules ──────────────────────────────────────────────────────────────
-if (optionalRuleData.length) {
-  await db
-    .insert(t.optionalRules)
-    .values(optionalRuleData.map((r) => ({ code: r.code, name: r.name, description: r.description, sourceId: srcId(r.sourceCode) })))
-    .onConflictDoUpdate({
-      target: t.optionalRules.code,
-      set: { name: sql`excluded.name`, description: sql`excluded.description`, sourceId: sql`excluded.source_id` },
-    });
-}
-
 console.log(
   `seeded: ${sourceData.length} sources, ${nationData.length} nations, ${attributeData.length} attributes, ` +
-    `${equipmentData.length} equipment, ${optionalRuleData.length} optional rules, ${soldierData.length} soldier types, ` +
+    `${equipmentData.length} equipment, ${soldierData.length} soldier types, ` +
     `${nstRows.length} nation-soldier links, ${fixedRows.length} fixed attributes, ${loadoutCount} loadouts (${itemCount} items), ` +
     `${monsterData.length} monster types (${monsterFixedRows.length} attributes, ${monsterLoadoutCount} loadouts, ${monsterEquipCount} items)`,
 );

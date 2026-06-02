@@ -15,7 +15,6 @@ import {
   nations,
   attributes,
   equipmentItems,
-  optionalRules,
   soldierTypes,
   nationSoldierTypes,
   soldierTypeFixedAttributes,
@@ -36,7 +35,6 @@ import {
   validateNation,
   validateAttribute,
   validateEquipment,
-  validateOptionalRule,
   validateSoldierType,
   validateMonsterType,
   type SoldierTypeInput,
@@ -396,7 +394,6 @@ const registry: Record<string, EntityHandlers> = {
   nations: flatEntity({ table: nations, orderBy: nations.name, validate: validateNation }),
   attributes: flatEntity({ table: attributes, orderBy: attributes.name, validate: validateAttribute }),
   equipment: flatEntity({ table: equipmentItems, orderBy: equipmentItems.name, validate: validateEquipment }),
-  'optional-rules': flatEntity({ table: optionalRules, orderBy: optionalRules.code, validate: validateOptionalRule }),
   'soldier-types': soldierTypeHandlers,
   'monster-types': monsterTypeHandlers,
 };

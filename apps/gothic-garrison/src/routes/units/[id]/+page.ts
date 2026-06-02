@@ -8,6 +8,6 @@ export const load: PageLoad = async ({ fetch }) => {
       return { reference: (await res.json()) as ReferenceData };
     }
   } catch {}
-  const empty: ReferenceData = { nations: [], attributes: [], equipment: [], soldiers: [] };
+  const empty: ReferenceData = { nations: [], attributes: [], equipment: [], soldiers: [], sources: [] };
   return { reference: empty };
 };

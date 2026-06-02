@@ -24,7 +24,7 @@ const SEED_PATH = path.join(here, 'seed-data.ts');
 const CHANGELOG_PATH = path.join(here, 'reference-changelog.ts');
 
 export interface ExportResult {
-  counts: { sources: number; nations: number; attributes: number; equipment: number; optionalRules: number; soldiers: number; monsters: number };
+  counts: { sources: number; nations: number; attributes: number; equipment: number; soldiers: number; monsters: number };
   changes: ReferenceChange[];
   /** The changelog note used (explicit or derived); null when nothing changed. */
   note: string | null;
@@ -125,7 +125,6 @@ export interface SeedSource { code: string; name: string; kind: SourceKind; publ
 export interface SeedNation { name: string; sourceCode: string; description: string | null; flag: string | null; soldiers: string[]; }
 export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; rules: string; }
 export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; rules: string; }
-export interface SeedOptionalRule { code: string; name: string; description: string; sourceCode: string; }
 export interface SeedLoadoutItem { name: string; qty: number; }
 export interface SeedLoadout { label: string; order: number; items: SeedLoadoutItem[]; }
 export interface SeedSoldier {
@@ -198,7 +197,6 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       nationRows,
       attributeRows,
       equipmentRows,
-      optionalRuleRows,
       soldierRows,
       nstRows,
       fixedRows,
@@ -213,7 +211,6 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       db.select().from(t.nations),
       db.select().from(t.attributes),
       db.select().from(t.equipmentItems),
-      db.select().from(t.optionalRules),
       db.select().from(t.soldierTypes),
       db.select().from(t.nationSoldierTypes),
       db.select().from(t.soldierTypeFixedAttributes),
@@ -298,10 +295,6 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       }))
       .sort(byName);
 
-    const optionalRules = optionalRuleRows
-      .map((r) => ({ code: r.code, name: r.name, description: r.description, sourceCode: srcCode(r.sourceId) }))
-      .sort(byCode);
-
     const soldiers = soldierRows
       .map((s) => {
         const st = s.stats as Record<string, number>;
@@ -372,7 +365,6 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       diffCollection('nation', readExportedArray<(typeof nations)[number]>(SEED_PATH, 'nations'), nations, (x) => x.name, (x) => x.name),
       diffCollection('attribute', readExportedArray<(typeof attributes)[number]>(SEED_PATH, 'attributes'), attributes, (x) => x.name, (x) => x.name),
       diffCollection('equipment', readExportedArray<(typeof equipment)[number]>(SEED_PATH, 'equipment'), equipment, (x) => x.name, (x) => x.name),
-      diffCollection('optional rule', readExportedArray<(typeof optionalRules)[number]>(SEED_PATH, 'optionalRules'), optionalRules, (x) => x.code, (x) => x.name),
       diffCollection('soldier type', readExportedArray<(typeof soldiers)[number]>(SEED_PATH, 'soldiers'), soldiers, (x) => x.name, (x) => x.name),
       diffCollection('monster type', readExportedArray<(typeof monsters)[number]>(SEED_PATH, 'monsters'), monsters, (x) => x.name, (x) => x.name),
     ].flat();
@@ -382,7 +374,6 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       `\nexport const nations: SeedNation[] = ${JSON.stringify(nations, null, 2)};\n` +
       `\nexport const attributes: SeedAttribute[] = ${JSON.stringify(attributes, null, 2)};\n` +
       `\nexport const equipment: SeedEquipment[] = ${JSON.stringify(equipment, null, 2)};\n` +
-      `\nexport const optionalRules: SeedOptionalRule[] = ${JSON.stringify(optionalRules, null, 2)};\n` +
       `\nexport const soldiers: SeedSoldier[] = ${JSON.stringify(soldiers, null, 2)};\n` +
       `\nexport const monsters: SeedMonster[] = ${JSON.stringify(monsters, null, 2)};\n`;
     fs.writeFileSync(SEED_PATH, SEED_HEADER + body);
@@ -407,7 +398,6 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
         nations: nations.length,
         attributes: attributes.length,
         equipment: equipment.length,
-        optionalRules: optionalRules.length,
         soldiers: soldiers.length,
         monsters: monsters.length,
       },

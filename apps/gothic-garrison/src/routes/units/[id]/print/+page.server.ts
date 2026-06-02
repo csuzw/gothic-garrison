@@ -6,7 +6,7 @@ export const load: PageServerLoad = async () => {
     return { reference: await getReferenceData() };
   } catch (err) {
     console.warn('[gothic-garrison] reference data unavailable:', err);
-    const empty: ReferenceData = { nations: [], attributes: [], equipment: [], soldiers: [] };
+    const empty: ReferenceData = { nations: [], attributes: [], equipment: [], soldiers: [], sources: [] };
     return { reference: empty };
   }
 };

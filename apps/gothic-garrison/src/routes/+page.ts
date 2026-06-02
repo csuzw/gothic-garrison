@@ -6,8 +6,8 @@ export const load: PageLoad = async ({ fetch }) => {
     const res = await fetch('/api/reference/snapshot');
     if (res.ok) {
       const ref = (await res.json()) as ReferenceData;
-      return { nations: ref.nations };
+      return { nations: ref.nations, sources: ref.sources };
     }
   } catch {}
-  return { nations: [] as ReferenceData['nations'] };
+  return { nations: [] as ReferenceData['nations'], sources: [] as ReferenceData['sources'] };
 };

@@ -150,13 +150,6 @@ export interface EquipmentInput {
   rules: string | null;
 }
 
-export interface OptionalRuleInput {
-  code: string;
-  name: string;
-  description: string;
-  sourceId: string;
-}
-
 export type SoldierStatsInput = Record<(typeof STAT_KEYS)[number], number>;
 
 export interface LoadoutItemInput {
@@ -241,16 +234,6 @@ export function validateEquipment(body: unknown): EquipmentInput {
     isSpecial: bool(o, 'isSpecial'),
     sourceId: uuid(o, 'sourceId'),
     rules: optStr(o, 'rules'),
-  };
-}
-
-export function validateOptionalRule(body: unknown): OptionalRuleInput {
-  const o = obj(body);
-  return {
-    code: reqStr(o, 'code'),
-    name: reqStr(o, 'name'),
-    description: reqStr(o, 'description'),
-    sourceId: uuid(o, 'sourceId'),
   };
 }
 

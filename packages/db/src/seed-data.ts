@@ -12,7 +12,6 @@ export interface SeedSource { code: string; name: string; kind: SourceKind; publ
 export interface SeedNation { name: string; sourceCode: string; description: string | null; flag: string | null; soldiers: string[]; }
 export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; rules: string; }
 export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; rules: string; }
-export interface SeedOptionalRule { code: string; name: string; description: string; sourceCode: string; }
 export interface SeedLoadoutItem { name: string; qty: number; }
 export interface SeedLoadout { label: string; order: number; items: SeedLoadoutItem[]; }
 export interface SeedSoldier {
@@ -1124,7 +1123,6 @@ export const equipment: SeedEquipment[] = [
   }
 ];
 
-export const optionalRules: SeedOptionalRule[] = [];
 
 export const soldiers: SeedSoldier[] = [
   {

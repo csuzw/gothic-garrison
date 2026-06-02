@@ -26,6 +26,7 @@ export interface RefAttribute {
   name: string;
   isOfficer: boolean;
   rules: string | null;
+  sourceCode: string;
 }
 
 export interface RefEquipment {
@@ -35,6 +36,7 @@ export interface RefEquipment {
   isSpecial: boolean;
   category: string;
   rules: string | null;
+  sourceCode: string;
 }
 
 export interface RefLoadoutItem {
@@ -64,6 +66,14 @@ export interface RefSoldier {
   fixedAttributes: { name: string; rules: string | null }[];
   nationIds: string[];
   loadouts: RefLoadout[];
+  sourceCode: string;
+}
+
+export interface RefSource {
+  id: string;
+  code: string;
+  name: string;
+  kind: 'core' | 'supplement';
 }
 
 export interface ReferenceData {
@@ -71,6 +81,7 @@ export interface ReferenceData {
   attributes: RefAttribute[];
   equipment: RefEquipment[];
   soldiers: RefSoldier[];
+  sources: RefSource[];
 }
 
 // Reference data is effectively static at runtime, so resolve it once.
@@ -86,15 +97,16 @@ export async function getReferenceData(): Promise<ReferenceData> {
   if (cached) return cached;
 
   const db = getDb();
-  const [nats, attrs, equip, sols, links, fixed, loadouts, loadoutItems] = await Promise.all([
+  const [nats, attrs, equip, sols, links, fixed, loadouts, loadoutItems, srcs] = await Promise.all([
     db
       .select({ id: nations.id, name: nations.name, flag: nations.flag, description: nations.description, sourceCode: sources.code })
       .from(nations)
       .innerJoin(sources, eq(nations.sourceId, sources.id))
       .orderBy(asc(nations.name)),
     db
-      .select({ id: attributes.id, name: attributes.name, isOfficer: attributes.isOfficer, rules: attributes.rules })
+      .select({ id: attributes.id, name: attributes.name, isOfficer: attributes.isOfficer, rules: attributes.rules, sourceCode: sources.code })
       .from(attributes)
+      .innerJoin(sources, eq(attributes.sourceId, sources.id))
       .orderBy(asc(attributes.name)),
     db
       .select({
@@ -104,10 +116,27 @@ export async function getReferenceData(): Promise<ReferenceData> {
         isSpecial: equipmentItems.isSpecial,
         category: equipmentItems.category,
         rules: equipmentItems.rules,
+        sourceCode: sources.code,
       })
       .from(equipmentItems)
+      .innerJoin(sources, eq(equipmentItems.sourceId, sources.id))
       .orderBy(asc(equipmentItems.name)),
-    db.select().from(soldierTypes).orderBy(asc(soldierTypes.name)),
+    db
+      .select({
+        id: soldierTypes.id,
+        name: soldierTypes.name,
+        recruitmentCost: soldierTypes.recruitmentCost,
+        stats: soldierTypes.stats,
+        maxPerUnit: soldierTypes.maxPerUnit,
+        equipmentMode: soldierTypes.equipmentMode,
+        equipmentSlots: soldierTypes.equipmentSlots,
+        specialSlots: soldierTypes.specialSlots,
+        attributePicks: soldierTypes.attributePicks,
+        sourceCode: sources.code,
+      })
+      .from(soldierTypes)
+      .innerJoin(sources, eq(soldierTypes.sourceId, sources.id))
+      .orderBy(asc(soldierTypes.name)),
     db
       .select({ nationId: nationSoldierTypes.nationId, soldierTypeId: nationSoldierTypes.soldierTypeId })
       .from(nationSoldierTypes),
@@ -129,6 +158,10 @@ export async function getReferenceData(): Promise<ReferenceData> {
       .from(soldierLoadoutItems)
       .innerJoin(equipmentItems, eq(equipmentItems.id, soldierLoadoutItems.equipmentItemId))
       .orderBy(asc(soldierLoadoutItems.displayOrder)),
+    db
+      .select({ id: sources.id, code: sources.code, name: sources.name, kind: sources.kind })
+      .from(sources)
+      .orderBy(asc(sources.name)),
   ]);
 
   const nationsBySoldier = new Map<string, string[]>();
@@ -172,7 +205,9 @@ export async function getReferenceData(): Promise<ReferenceData> {
       fixedAttributes: fixedBySoldier.get(s.id) ?? [],
       nationIds: nationsBySoldier.get(s.id) ?? [],
       loadouts: loadoutsBySoldier.get(s.id) ?? [],
+      sourceCode: s.sourceCode,
     })),
+    sources: srcs as RefSource[],
   };
   return cached;
 }

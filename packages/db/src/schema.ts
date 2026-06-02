@@ -253,17 +253,6 @@ export const monsterLoadoutItems = pgTable(
   }),
 );
 
-// Book-level opt-in rules, e.g. "take 1 soldier from outside your nation for +8 pts"
-export const optionalRules = pgTable('optional_rules', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  code: text('code').notNull().unique(),
-  name: text('name').notNull(),
-  description: text('description').notNull(),
-  sourceId: uuid('source_id')
-    .notNull()
-    .references(() => sources.id, { onDelete: 'restrict' }),
-});
-
 // ── user data ────────────────────────────────────────────────────────────────
 //
 // `userId` is null for anonymous (IndexedDB) units and FKs to better-auth's

@@ -85,7 +85,12 @@ export interface MemberSnapshot {
   specialEquipment: EquipmentSnapshot[];
   /** For `choice`-mode soldiers: which predetermined loadout is selected. */
   loadoutId: string | null;
+  /** True when this soldier was recruited via the outside-nation optional rule (+8 pts). */
+  isOutsideNationPick?: boolean;
 }
+
+export const OUTSIDE_NATION_RULE_CODE = 'outside-nation-soldier';
+export const OUTSIDE_NATION_SOLDIER_COST = 8;
 
 export const MAX_SOLDIERS = 7;
 export const OFFICER_EQUIPMENT_SLOTS = 6;
@@ -147,11 +152,12 @@ export function memberSpecialPicks(
   return hasSV(member.attributes, fixedAttributes) ? 2 : 1;
 }
 
-/** Normalize a raw stored UnitDoc to the current schema. Handles the migration from
- *  `specialEquipment: null | EquipmentSnapshot` (v1) to `specialEquipment: EquipmentSnapshot[]`. */
+/** Normalize a raw stored UnitDoc to the current schema. Handles migrations from older shapes. */
 export function normalizeUnitDoc(raw: any): UnitDoc {
   return {
     ...raw,
+    enabledSourceCodes: raw.enabledSourceCodes ?? null,
+    optionalRules: raw.optionalRules ?? [],
     members: (raw.members ?? []).map((m: any) => ({
       ...m,
       specialEquipment: Array.isArray(m.specialEquipment)
@@ -173,6 +179,8 @@ export interface UnitDoc {
   members: MemberSnapshot[];
   /** Opted-in optional-rule codes, e.g. the "+8 pts outside-nation soldier". */
   optionalRules: string[];
+  /** Source codes enabled for this unit. null = all sources. Core is always included. Set at creation, read-only after. */
+  enabledSourceCodes: string[] | null;
   updatedAt: string; // ISO timestamp
 }
 
@@ -201,6 +209,7 @@ export function createUnitDoc(name = 'New unit'): UnitDoc {
     },
     members: [],
     optionalRules: [],
+    enabledSourceCodes: null,
     updatedAt: new Date().toISOString(),
   };
 }
