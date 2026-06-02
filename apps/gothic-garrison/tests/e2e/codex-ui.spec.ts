@@ -19,6 +19,10 @@ const code = () => `e2e_${Date.now()}`;
 test.describe('codex read-only preview toggle (dev only)', () => {
   test('toggle hides write controls and the entity page responds reactively', async ({ page }, testInfo) => {
     await page.goto('/reference');
+    // Wait for network idle so Svelte has fully hydrated and onclick handlers are
+    // attached before we interact — prevents a race where the click fires before
+    // the event listener is in place.
+    await page.waitForLoadState('networkidle');
 
     // Dev defaults: write controls and the toggle button are present.
     await expect(page.getByRole('button', { name: /Export to repo/ })).toBeVisible();
@@ -27,9 +31,10 @@ test.describe('codex read-only preview toggle (dev only)', () => {
 
     // Activate preview mode.
     await page.getByRole('button', { name: 'Preview read-only' }).click();
-    await expect(page.getByRole('button', { name: /Export to repo/ })).toHaveCount(0);
+    // Confirm the toggle fired (positive indicator) before checking the negative.
     await expect(page.locator('.badge-info')).toContainText('read-only preview');
     await expect(page.getByRole('button', { name: 'Exit preview' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Export to repo/ })).toHaveCount(0);
 
     // Navigate to an entity page via the tab — SvelteKit soft-nav keeps the
     // layout mounted so readonlyOverride state is preserved. Use exact: true to

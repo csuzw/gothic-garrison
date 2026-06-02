@@ -6,7 +6,12 @@ import { type Page, expect, test } from '@playwright/test';
 async function createUnit(page: Page, nation = 'France') {
   await page.goto('/');
   await page.getByRole('button', { name: 'New unit' }).click();
-  await page.locator('button.card').filter({ hasText: nation }).click();
+  // Use the span.font-semibold inside each nation card for an exact name match so
+  // nations whose descriptions mention other nations (e.g. Spain mentioning "French")
+  // don't accidentally satisfy a plain hasText filter.
+  await page.locator('button.card')
+    .filter({ has: page.locator('span.font-semibold', { hasText: new RegExp(`^${nation}$`) }) })
+    .click();
   await page.getByRole('button', { name: 'Create' }).click();
   await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
 }
@@ -171,7 +176,9 @@ test.describe('units', () => {
 
     await expect(page.getByText(/Synced to your account/i)).toBeVisible();
     await page.getByRole('button', { name: 'New unit' }).click();
-    await page.locator('button.card').filter({ hasText: 'France' }).click();
+    await page.locator('button.card')
+      .filter({ has: page.locator('span.font-semibold', { hasText: /^France$/ }) })
+      .click();
     await page.getByRole('button', { name: 'Create' }).click();
     await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
 
@@ -194,10 +201,7 @@ test.describe('units', () => {
     );
 
     // Build a unit while anonymous (lands in IndexedDB)
-    await page.getByRole('button', { name: 'New unit' }).click();
-    await page.locator('button.card').filter({ hasText: 'France' }).click();
-    await page.getByRole('button', { name: 'Create' }).click();
-    await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
+    await createUnit(page, 'France');
     await page.getByPlaceholder('The Night Watch').fill('Migrated Band');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Saved ✓')).toBeVisible();
