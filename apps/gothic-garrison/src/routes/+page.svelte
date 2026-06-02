@@ -128,8 +128,9 @@
   </div>
 
   {#if pickerOpen}
-    <!-- Sticky action bar — sits below the site navbar (h-16 = 4rem) -->
-    <div class="sticky top-16 z-10 rounded-box bg-base-200 px-4 py-3 shadow-sm">
+  <div>
+    <!-- Sticky action bar — navbar is not fixed so top-0 is correct -->
+    <div class="sticky top-0 z-10 rounded-box bg-base-200 px-4 py-3 shadow-sm">
       <div class="flex items-center justify-between gap-2">
         <p class="text-sm font-medium opacity-80">Select a nation to start your unit:</p>
         <div class="flex shrink-0 items-center gap-2">
@@ -144,7 +145,7 @@
               </svg>
             </button>
             {#if optionsCustomised}
-              <span class="badge badge-warning badge-xs pointer-events-none absolute -right-1 -top-1"></span>
+              <span class="pointer-events-none absolute right-1 top-1 h-2 w-2 rounded-full bg-warning"></span>
             {/if}
           </div>
           <button
@@ -160,7 +161,7 @@
     </div>
 
     <!-- Nation grid -->
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+    <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
       {#each filteredNations as n (n.id)}
         {@const selected = selectedNation?.id === n.id}
         <div
@@ -192,6 +193,7 @@
         </div>
       {/each}
     </div>
+  </div>
   {/if}
 
   <p class="text-sm opacity-70">
