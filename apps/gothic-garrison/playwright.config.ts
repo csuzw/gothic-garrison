@@ -43,11 +43,12 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
-    {
+    // Dev server only started locally — CI runs the production surface only.
+    ...(!process.env.CI ? [{
       command: 'pnpm dev --port 5173',
       port: 5173,
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120_000,
-    },
+    }] : []),
   ],
 });
