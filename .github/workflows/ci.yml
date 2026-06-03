@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Check, test & build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: gothic
+          POSTGRES_PASSWORD: gothic
+          POSTGRES_DB: gothic_garrison
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://gothic:gothic@localhost:5433/gothic_garrison
+      AUTH_SECRET: ci-secret-not-used-in-tests
+      PUBLIC_APP_URL: http://localhost:5173
+      RESEND_API_KEY: dev-key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.4.0'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Migrate database
+        run: pnpm db:migrate
+
+      - name: Seed database
+        run: pnpm db:seed
+
+      - name: Type check
+        run: pnpm -r check
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Production build
+        run: pnpm --filter gothic-garrison build
