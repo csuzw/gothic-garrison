@@ -24,7 +24,8 @@ export interface RefNation {
 export interface RefAttribute {
   id: string;
   name: string;
-  isOfficer: boolean;
+  pickScope: 'none' | 'officer' | 'soldier' | 'any';
+  costDelta: number;
   rules: string | null;
   sourceCode: string;
 }
@@ -67,6 +68,7 @@ export interface RefSoldier {
   nationIds: string[];
   loadouts: RefLoadout[];
   sourceCode: string;
+  alsoInSourceCode: string | null;
 }
 
 export interface RefSource {
@@ -104,7 +106,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
       .innerJoin(sources, eq(nations.sourceId, sources.id))
       .orderBy(asc(nations.name)),
     db
-      .select({ id: attributes.id, name: attributes.name, isOfficer: attributes.isOfficer, rules: attributes.rules, sourceCode: sources.code })
+      .select({ id: attributes.id, name: attributes.name, pickScope: attributes.pickScope, costDelta: attributes.costDelta, rules: attributes.rules, sourceCode: sources.code })
       .from(attributes)
       .innerJoin(sources, eq(attributes.sourceId, sources.id))
       .orderBy(asc(attributes.name)),
@@ -133,6 +135,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
         specialSlots: soldierTypes.specialSlots,
         attributePicks: soldierTypes.attributePicks,
         sourceCode: sources.code,
+        alsoInSourceId: soldierTypes.alsoInSourceId,
       })
       .from(soldierTypes)
       .innerJoin(sources, eq(soldierTypes.sourceId, sources.id))
@@ -188,6 +191,8 @@ export async function getReferenceData(): Promise<ReferenceData> {
       items: itemsByLoadout.get(lo.id) ?? [],
     });
 
+  const sourceCodeById = new Map(srcs.map((src) => [src.id, src.code]));
+
   cached = {
     nations: nats,
     attributes: attrs,
@@ -206,6 +211,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
       nationIds: nationsBySoldier.get(s.id) ?? [],
       loadouts: loadoutsBySoldier.get(s.id) ?? [],
       sourceCode: s.sourceCode,
+      alsoInSourceCode: s.alsoInSourceId ? (sourceCodeById.get(s.alsoInSourceId) ?? null) : null,
     })),
     sources: srcs as RefSource[],
   };

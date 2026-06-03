@@ -10,13 +10,14 @@ export type SourceKind = 'core' | 'supplement';
 
 export interface SeedSource { code: string; name: string; kind: SourceKind; publishedDate: string; author: string; ospreyCoverUrl: string | null; coverImageUrl: string | null; }
 export interface SeedNation { name: string; sourceCode: string; description: string | null; flag: string | null; soldiers: string[]; }
-export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; rules: string; }
+export interface SeedAttribute { name: string; pickScope: 'none' | 'officer' | 'soldier' | 'any'; costDelta: number; sourceCode: string; rules: string; }
 export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; rules: string; }
 export interface SeedLoadoutItem { name: string; qty: number; }
 export interface SeedLoadout { label: string; order: number; items: SeedLoadoutItem[]; }
 export interface SeedSoldier {
   name: string;
   sourceCode: string;
+  alsoInSourceCode: string | null;
   recruitmentCost: number;
   stats: { speed: number; melee: number; accuracy: number; defence: number; courage: number; health: number };
   maxPerUnit: number | null;
@@ -476,505 +477,771 @@ export const nations: SeedNation[] = [
 export const attributes: SeedAttribute[] = [
   {
     "name": "Allergy (Blessed Weapons)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Indestructible and Damage Reduction are ignored for Blessed Weapon attacks against this figure."
   },
   {
     "name": "Allergy (Cold Iron)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Indestructible and Damage Reduction are ignored for Cold Iron attacks against this figure."
   },
   {
     "name": "Allergy (Enchanted Weapons)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Indestructible and Damage Reduction are ignored for Enchanted Weapon attacks against this figure."
   },
   {
     "name": "Allergy (Fire)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Indestructible and Damage Reduction are ignored for Fire attacks against this figure."
   },
   {
     "name": "Allergy (Salt)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Indestructible and Damage Reduction are ignored for Salt attacks against this figure."
   },
   {
     "name": "Allergy (Silver)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Indestructible and Damage Reduction are ignored for Silver attacks against this figure."
   },
   {
+    "name": "Amphibious",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "Never suffer penalty for being in water.  Automatically pass any checks related to swimming or movement in water.  Don't suffer damage from drowning."
+  },
+  {
     "name": "Ancient Spells",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "egypt",
     "rules": "Spend an action; Courage Check (TN10). On success, choose one: Control Creature (add 1 Monster Die if unit has none), Flaming Weapon (figure within 8\" LoS gains +1 Melee damage and Fire attacks for the game), or Viper (place a viper within 3\", min 1\" from others). Figure suffers 1 damage either way."
   },
   {
+    "name": "Aquatic",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "canada",
+    "rules": "Figure will not leave water terrain features.  Lunge attribute allows an Aquatic figure to attack figures outside of water terrain features."
+  },
+  {
     "name": "Artillerist",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "At least one figure with this attribute must be within 1\" of an artillery piece to employ it. Specific uses noted in scenarios."
   },
   {
+    "name": "Bestow Mummy's Curse",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "Any figure damaged by this figure must roll for Mummy's Curse after the battle."
+  },
+  {
     "name": "Blessed of Britain",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "Once per game, convert one Power Die to a Skill Die or vice versa; this figure regains up to 3 lost Health."
   },
   {
     "name": "Brittle",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "If struck with a Heavy Weapon, or critically hit by any weapon, remove this figure from the table."
   },
   {
+    "name": "Cause Confusion",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "carpathians",
+    "rules": "Any figure that Backs Off when fighting  this figure moves 2\" in a random direction instead of directly away."
+  },
+  {
     "name": "Chaotic",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "If a Monster Die is used to influence this figure's movement.  Roll a D10, on a 1-3 discard the Monster Die with no effect, other it works as normal."
   },
   {
     "name": "Chilling Touch",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Melee attacks ignore armour and deal +1 damage."
   },
   {
     "name": "Combat Engineer",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Skilled in construction and demolition of battlefield structures and use of gunpowder as an explosive. Specific uses noted in scenarios."
   },
   {
     "name": "Combat Rider",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "This figure is trained to fight while mounted on a horse. See Cavalry rules."
   },
   {
+    "name": "Combustion",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "When hit by a Fire Attack that does 3+ Damage, become living torch.  Take 2 Damage every activation.  Anything that touches this figure takes 1 Damage.   Put out by submerging in water , burying it, or use of magic."
+  },
+  {
     "name": "Command Skeletal Roman Legionary",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "All Skeletal Roman Legionaries gain +1 Speed, +1 Courage, and the Strong attribute while this figure is in play."
   },
   {
     "name": "Curse of the Evil Eye",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "Attack rolls of 9 or 10 against this figure, or Attack rolls of 1 or 2 made by this figure are rerolled.  Second roll stands.  Figures with Great Faith attribute or Holy Symbol are immune to this."
   },
   {
+    "name": "Cursethrower (Burning, Slowing)",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "canada",
+    "rules": "Counts as 10\" Shooting Attack. Requires reloading. Randomised effect - Burning: Power Die + 1 Damage. Roll D10 for each figure within 3\", on 7+ they take D5 damage. Slowing: No immediate Damage. Halve movement until pass Courage Check (TN11) at start of next activation."
+  },
+  {
+    "name": "Cursethrower (Wasting, Burning, Slowing)",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "canada",
+    "rules": "Counts as 10\" Shooting Attack.  Requires reloading.  Randomised effect - Wasting: No immediate Damage, figure takes 1 Damage every time it activates.  Must take injury roll at end of battle.  Burning: Power Die + 1 Damage.  Roll D10 for each figure within 3\", on 7+ they take D5 damage.  Slowing: No immediate Damage.  Halve movement until pass Courage Check (TN11) at start of next activation."
+  },
+  {
     "name": "Damage Reduction - Projectiles Only (4)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage from a projectile, reduce it by 4 (minimum 0)."
   },
   {
     "name": "Damage Reduction - Projectiles Only (8)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage from a projectile, reduce it by 8 (minimum 0)."
   },
   {
+    "name": "Damage Reduction - Projectiles Only (9)",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "core",
+    "rules": "Whenever this figure takes damage from a projectile, reduce it by 9 (minimum 0)."
+  },
+  {
     "name": "Damage Reduction (1)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage, reduce it by 1 (minimum 0)."
   },
   {
     "name": "Damage Reduction (2)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage, reduce it by 2 (minimum 0)."
   },
   {
     "name": "Damage Reduction (3)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage, reduce it by 3 (minimum 0)."
   },
   {
     "name": "Damage Reduction (4)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage, reduce it by 4 (minimum 0)."
   },
   {
     "name": "Damage Reduction (5)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage, reduce it by 5 (minimum 0)."
   },
   {
     "name": "Damage Reduction (6)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage, reduce it by 6 (minimum 0)."
   },
   {
     "name": "Damage Reduction (7)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage, reduce it by 7 (minimum 0)."
   },
   {
     "name": "Damage Reduction (8)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Whenever this figure takes damage, reduce it by 8 (minimum 0)."
   },
   {
     "name": "Dark Gift",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "On activation, make a Courage Check (TN10).  On success, heal any undead creatures within 6\" by 2.  If there are no undead creatures within 6\", heal self 2 or if at full Health, use Raise  the Dead attribute."
   },
   {
+    "name": "Deathroll",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "If this figure is in water and makes a Melee Attack that causes damage, that figure must make a Courage Check (TN10).   If failed that figure takes drowning damage equal to the amount it failed by."
+  },
+  {
     "name": "Demonic Fire",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Can make Shooting Attacks at 12\" that are enchanted and +2 damage.  Does not require reloading."
   },
   {
     "name": "Ethereal",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "See and move through terrain.  Never suffers Speed penalties for difficult ground, obstacles, or climbing."
   },
   {
     "name": "Ethereal Cavalry",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "All cavalry rules apply to Melee and Shooting for this figure but not Movement.  Counts as having Ethereal.  Cannot dismount."
   },
   {
     "name": "Ethereal Firearms",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "Acts like a musket, but does not need reloading.  Can only fire once per turn.  Ignores armour and does +1 damage.  Optionally, hard mode, ignores cover."
   },
   {
     "name": "Experience in the Desert",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "egypt",
     "rules": "The special rules Extreme Temperatures, Loose Sand, and Thirst do not apply to this figure."
   },
   {
     "name": "Expert Climber",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "This figure may climb at its normal movement rate (1\" of climbing = 1\" of movement)."
   },
   {
+    "name": "Eyeless",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "canada",
+    "rules": "Does not require LoS."
+  },
+  {
+    "name": "Fear of Fire",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "carpathians",
+    "rules": "This figure will not Move to Attack any figure with 2\" of fire or who can make a Fire attack.  Additionally ignore such figures when determining actions to make."
+  },
+  {
     "name": "Fey-Touched",
-    "isOfficer": true,
+    "pickScope": "any",
+    "costDelta": 4,
     "sourceCode": "carpathians",
     "rules": "All attacks made by this figure count as Enchanted. May be given to any soldier at +4 recruitment cost."
   },
   {
     "name": "Fire-Starter",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "carpathians",
     "rules": "May replace a Move or Shoot action to swap one carried Specialist Equipment item for Oil and Torches. Returns to normal equipment after the game."
   },
   {
     "name": "Flitting Movement",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "When activated, move 6\" in a random direction.  Moves through other figures, cannot move off the table or be within 1\" of another figure at end of movement."
   },
   {
     "name": "Flying",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Can move over  or up any terrain without movement penalty."
   },
   {
     "name": "Frenzy",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "If this figure causes damage with a Melee Attack, it's opponent must Back Off.  A Monster Die can only be used to change movement to a Movement to Attack action for this figure."
   },
   {
+    "name": "Gatecrasher",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "canada",
+    "rules": "Ignores movements penalties for low walls, obstacles, and gates.  The area it passed through is no longer an obstacle."
+  },
+  {
     "name": "Great Faith",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "This figure's weapons always count as Blessed."
   },
   {
     "name": "Hard to Put Down",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "If a Fate Die is used to negate damage to this figure, the player may roll the die twice and choose which result to take."
   },
   {
     "name": "Head-Taker",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "Any figure reduced to 0 Health by this figure suffers -1 to roll on Injury and Death table after game."
   },
   {
     "name": "Hypnotic",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Enemies that Move to Attack this figure must make a Courage Check (TN12).  If they fail, they still move but cannot make a Melee Check.  This figure can still Strike Back or Back Off."
   },
   {
+    "name": "Immune to Missile Weapons",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "carpathians",
+    "rules": "Immune to all sources of damage from missile weapons except those it has an Allergy to."
+  },
+  {
     "name": "Indefatigable",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "This figure may never have more than one fatigue token.  Any effect that would give a second is ignored."
   },
   {
     "name": "Indestructible",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Immune to all sources of damage except those it has an Allergy to."
   },
   {
     "name": "Induce Terror",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "On activation, any opponents in LoS make a Terror Check at -3 within 8\", and -1 otherwise."
   },
   {
+    "name": "Infectious",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "carpathians",
+    "rules": "If a figure is reduced to 0 Health by this figure, they must make a survival roll after the game.  A 4-6 is treated as a Slow Recovery."
+  },
+  {
     "name": "Inimical to Technology",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Cannot use technology with 6\" of this figure.  Shooting Checks for firearms or artillery will automatically miss."
   },
   {
     "name": "Inspiring",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Allied figures within 6\" and LoS receive +1 to Courage Checks (not the Inspiring figure itself). Only one Inspiring bonus applies per figure regardless of how many are in range."
   },
   {
     "name": "Irritant",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "This figure will never attack.  If it moves into contact with an enemy, give the enemy a fatigue token and move this figure 1\" back.  If attacked, this creature will always Back Off."
   },
   {
     "name": "Large",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Shooting Checks made against this figure are at +1."
   },
   {
+    "name": "Leap",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "If a player uses a Monster Die to control movement of this figure, they may choose to make it Leap.  It suffers -2 Movement but can move over terrain less than 3\" high.  If it is a Move to Attack gain +1 Melee and Strong attribute for this attack."
+  },
+  {
     "name": "Light Infantry Training",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "This figure does not suffer a -1 modifier when Moving and Shooting, but can only move at a Speed of 4 when utilising this ability."
   },
   {
     "name": "Lunge",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "canada",
     "rules": "Spend an action to fight melee against a target within 1\" without needing contact (within 2\" if this figure also has Large). May be measured vertically."
   },
   {
     "name": "Master of Cover",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "If this figure is in cover and targeted by a Shooting Attack, the cover penalty to the attacker is -2 instead of -1."
   },
   {
+    "name": "Maximum Damage (3)",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "This figure cannot do more than 3 Damage with an attack."
+  },
+  {
+    "name": "Maximum Damage (5)",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "This figure cannot do more than 5 Damage with an attack."
+  },
+  {
     "name": "Medic",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Activate within 1\" of a friendly figure without moving: spend action to heal 2 Health (cannot heal the same figure two turns in a row). If a figure is reduced to exactly 0 Health, lay it on its side — a Medic who reaches it may heal normally. Enemy contact removes a 0-Health figure."
   },
   {
     "name": "Miracles",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Spend an action; Courage Check (TN10). On success, choose one: Healing (figure within 8\" LoS regains 3 Health, not self), Courage (figure within 8\" LoS gains +1 Courage for the game), or Bless Weapon (figure within 8\" LoS has one weapon count as Blessed for the game). Figure suffers 1 damage either way."
   },
   {
     "name": "Monster Expert",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Adds 1 Monster Die to the unit's Fate Pool at the start of each game. Only one extra die regardless of how many Monster Expert figures are in the unit."
   },
   {
     "name": "Nimble",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Suffers no movement penalties for difficult ground."
   },
   {
+    "name": "Non-Aggressive",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "canada",
+    "rules": "Moves towards opposite table edge.  If a firearm is fired with 12\" or a soldier begins it's activation within 6\", it becomes aggressive and targets that figure.  If it destroys that figure, it will go back to being non-aggressive."
+  },
+  {
     "name": "Paralyse",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "If this figure damages another figure with a Melee Attack, that figure is Paralysed (see Terror Check rules)."
   },
   {
+    "name": "Poor Senses",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "Cannot detect creatures further than 10\"."
+  },
+  {
     "name": "Powerful Jaws",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "On Melee Attack use higher of Power Die and Skill Die to determine damage."
   },
   {
-    "name": "Quick Heal",
-    "isOfficer": false,
-    "sourceCode": "canada",
-    "rules": "At the start of each turn, this figure regains 1 lost Health point (up to its starting Health)."
-  },
-  {
     "name": "Quick Healing",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Gain 2 points of Health every time it activates up to it's starting value."
   },
   {
     "name": "Quick Load",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "May fire an unloaded weapon at -2 to the Shooting Attack. Critical failure on a roll of 2-4."
   },
   {
     "name": "Quick to Run",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "Any time this character receives damage to their Health, roll a Terror Check."
   },
   {
     "name": "Rage",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Make a Courage Check (TN14).  On failure must Move or Move to Attack the closest enemy.  On success can use actions normally."
   },
   {
     "name": "Raise the Dead",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "Roll D10 to summon monster with 3\" of this figure (1-5: Skeletal Soldier, 6-8: Revenant, 9: Black Dog, 10: Ghost)."
   },
   {
     "name": "Reanimate",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "If reduced to 0 Health lay on side.  At end of each turn roll D10 and on a 10 stand back up with 1 Health.  If reduced to 0 Health with Blessed or Fire attack or a figure with a Blessed of Fire Attack moves into contact while at 0 Health remove from table."
   },
   {
+    "name": "Reform over Grave",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "carpathians",
+    "rules": "Whenever this figure suffers any damage, it should immediately be moved to it's point of origin."
+  },
+  {
     "name": "Rock Hurler",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Can make Shooting Attacks at 12\" and uses the Power die for damage."
   },
   {
     "name": "Rusted Weapon",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "All this figures weapons treated as Hand Weapons regardless of type."
   },
   {
     "name": "Scourge of Britain",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "Once per game, convert one Skill Die or Fate Die to a Monster Die; this figure regains up to 3 lost Health."
   },
   {
     "name": "Skeleton",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "When reduced to 0 Health, becomes a Bone Pile (unless destroyed due to Brittle attribute).  If there are no figures with the Raise the Dead attribute in play, becomes a Bone Pile.  A figure with Raise the Dead attribute can choose, instead of rolling, to spend a Monster Die to turn a Bone Pile in LoS into a Skeletal Soldier with full health"
   },
   {
     "name": "Skinshift (Bear)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Spend an action and pass Courage Check (TN14) to change form (may also attempt free when taking damage). Bear form: +1 Melee, +2 Courage; gains Very Strong, Damage Reduction (2), and Rage. May not Investigate clue markers in bear form. Same rules to revert (no free attempt from damage)."
   },
   {
     "name": "Skinshift (Werewolf)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "Spend an action and pass Courage Check (TN14) to change form (may also attempt free when taking damage). Werewolf form: +2 Defence, +3 Health; gains Strong, Indefatigable, Quick Healing, and Hard to Put Down. May not investigate clue markers in werewolf form. Same rules to revert (no free attempt from damage)."
   },
   {
     "name": "Skinshift (Wolf)",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "canada",
     "rules": "Spend an action and pass Courage Check (TN14) to change form (may also attempt free when taking damage). Wolf form: +1 Melee, +2 Courage; gains Strong, Damage Reduction (5), Nimble, Quick, and Master of Cover. May not use firearms or investigate clue markers in wolf form. Same rules to revert (no free attempt from damage)."
   },
   {
+    "name": "Small",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "All Shooting Attacks against this figure at -2."
+  },
+  {
     "name": "Sneak",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "italy",
     "rules": "Once per scenario, move unseen by not attacking and staying more than own movement range from all enemies. Sneak persists until next activation or an enemy enters movement range. While sneaking: enemies cannot draw LoS unless (1) this figure is not in cover, or (2) the enemy is within movement range. Substantial cover maintains sneak even in melee range."
   },
   {
     "name": "Soul Shear",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "If this figure damages an enemy with a Melee Attack, the damaged figure must take a Terror Check (-Damage)."
   },
   {
+    "name": "Sow Fear (0)",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "carpathians",
+    "rules": "At the end of the turn, all figures within 6\" and LoS  of this figure must make a Terror Check (-0)."
+  },
+  {
+    "name": "Spell: Curse",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "core",
+    "rules": "Spend an action; Courage Check (TN10). On success, target in LoS must pass Courage Check (TN18) or suffer -1 to all rolls for the game; max -2. Figure suffers 1 damage either way."
+  },
+  {
     "name": "Spells",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Spend an action; Courage Check (TN10). On success, choose one: Curse (target in LoS must pass Courage Check (TN18) or suffer -1 to all rolls for the game; max -2), Manipulate (convert one Fate Pool die to any other type), or Enchant Weapon (figure within 8\" LoS has one weapon count as Enchanted for the game). Figure suffers 1 damage either way."
   },
   {
     "name": "Steady Legs",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "+2 to any Check to avoid falling. Never suffers penalties for fighting or shooting on an unsteady platform (e.g. ship deck)."
   },
   {
     "name": "Strong",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "This figure does +1 damage whenever it hits with a Melee Attack."
   },
   {
+    "name": "Submerge",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "While this figure is in water, LoS cannot be drawn to it by figures more than 6\" away."
+  },
+  {
     "name": "Supernatural Veteran",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Soldiers may select 2 items from the Special Armoury (instead of 1). Officers may select 3. Does not increase overall equipment capacity."
   },
   {
+    "name": "Suppress Combustion",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "If this figure has Combusted, when it activates and before it takes combustion damage, roll Check (TN14) and on success, they are no longer Combusted and do not take damage."
+  },
+  {
     "name": "Swimmer",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "canada",
     "rules": "Does not count water terrain as difficult ground; may count as in cover while in water. If used as cover during a game, all ranged weapons are fouled for the rest of that encounter."
   },
   {
     "name": "Tactician",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "Adds 1 Skill Die to the unit's Fate Pool at the start of each game. Only one extra die regardless of how many Tactician figures are in the unit."
   },
   {
+    "name": "Trample",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "canada",
+    "rules": "Knocks down smaller figures (Large attribute) on successful Melee Attack.  Knocked down figure forfeits Move action to stand up and suffers -2 Defence against Melee Attacks."
+  },
+  {
     "name": "Unflappable",
-    "isOfficer": true,
+    "pickScope": "officer",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "When this figure fails a Courage Check (including Terror Checks), spend any die from the Fate Pool to pass automatically (or get No Effect on a Terror Check)."
   },
   {
+    "name": "Venomous",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "egypt",
+    "rules": "A figure damaged by this figure but not reduced to 0 Health must make a Courage Check (TN14).  On failure, suffer -2 Move and -1 to all Checks.  Lasts until end of the game or until the figure receives healing that increases their current Health."
+  },
+  {
     "name": "Very Strong",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "This figure does +2 damage whenever it hits with a Melee Attack."
   },
   {
     "name": "Weakened by Faith",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "core",
     "rules": "This figure suffers -3 to Melee Attack rolls when fighting against a figure carrying a Holy Symbol."
   },
   {
     "name": "Weather Control",
-    "isOfficer": false,
+    "pickScope": "none",
+    "costDelta": 0,
     "sourceCode": "britain",
     "rules": "At end of each turn roll D10.  1-3: Wind - All Shooting Attacks -2.  4-6: Rain - All Shooting Attacks that only roll 1s and 2s are treated as Critical Failures.  7-8: Ice - All Sprint Checks -4.  If roll 0 or less fall over and lose 2 Health.  Effects last until end of scenario.  9-10: Lightning Strike - Roll Power Die.  Unit member closest to this figure takes that damage.  The player whose figure suffered damage may use a Power Die to reroll the damage."
   }
@@ -1135,11 +1402,11 @@ export const equipment: SeedEquipment[] = [
   }
 ];
 
-
 export const soldiers: SeedSoldier[] = [
   {
     "name": "Agent Provocateur",
     "sourceCode": "italy",
+    "alsoInSourceCode": null,
     "recruitmentCost": 22,
     "stats": {
       "speed": 6,
@@ -1230,6 +1497,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Artillerist",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 10,
     "stats": {
       "speed": 6,
@@ -1268,6 +1536,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Bedouin Raider",
     "sourceCode": "egypt",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -1311,6 +1580,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Bow Street Runner",
     "sourceCode": "britain",
+    "alsoInSourceCode": null,
     "recruitmentCost": 13,
     "stats": {
       "speed": 6,
@@ -1347,6 +1617,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Calabrian Clergyman",
     "sourceCode": "italy",
+    "alsoInSourceCode": null,
     "recruitmentCost": 14,
     "stats": {
       "speed": 6,
@@ -1423,6 +1694,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Champion of Faith",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 20,
     "stats": {
       "speed": 6,
@@ -1458,6 +1730,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Coachman",
     "sourceCode": "carpathians",
+    "alsoInSourceCode": null,
     "recruitmentCost": 15,
     "stats": {
       "speed": 6,
@@ -1500,6 +1773,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Conscript",
     "sourceCode": "italy",
+    "alsoInSourceCode": null,
     "recruitmentCost": 6,
     "stats": {
       "speed": 6,
@@ -1538,6 +1812,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Dhamphir",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 30,
     "stats": {
       "speed": 7,
@@ -1563,6 +1838,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Discovery Serviceman",
     "sourceCode": "canada",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -1610,6 +1886,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Doctor",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 10,
     "stats": {
       "speed": 6,
@@ -1648,6 +1925,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Egyptian Conscript",
     "sourceCode": "egypt",
+    "alsoInSourceCode": null,
     "recruitmentCost": 4,
     "stats": {
       "speed": 6,
@@ -1680,6 +1958,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Follower of the Old Gods",
     "sourceCode": "egypt",
+    "alsoInSourceCode": null,
     "recruitmentCost": 20,
     "stats": {
       "speed": 6,
@@ -1715,6 +1994,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Grenadier",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 15,
     "stats": {
       "speed": 6,
@@ -1751,6 +2031,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Guard",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -1789,6 +2070,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Heavy Cavalryman",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 23,
     "stats": {
       "speed": 5,
@@ -1831,6 +2113,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Highlander",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -1881,6 +2164,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Highwayman",
     "sourceCode": "carpathians",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -1915,6 +2199,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Infantryman",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 10,
     "stats": {
       "speed": 6,
@@ -1951,6 +2236,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Irregular",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 15,
     "stats": {
       "speed": 6,
@@ -2004,6 +2290,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Janissary",
     "sourceCode": "egypt",
+    "alsoInSourceCode": null,
     "recruitmentCost": 12,
     "stats": {
       "speed": 6,
@@ -2044,6 +2331,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Junior Officer",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 22,
     "stats": {
       "speed": 6,
@@ -2094,6 +2382,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Knight Hospitaller",
     "sourceCode": "egypt",
+    "alsoInSourceCode": null,
     "recruitmentCost": 15,
     "stats": {
       "speed": 6,
@@ -2132,6 +2421,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Light Cavalryman",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -2170,6 +2460,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Light Infantryman",
     "sourceCode": "italy",
+    "alsoInSourceCode": null,
     "recruitmentCost": 16,
     "stats": {
       "speed": 6,
@@ -2208,6 +2499,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Loup Garou",
     "sourceCode": "canada",
+    "alsoInSourceCode": null,
     "recruitmentCost": 30,
     "stats": {
       "speed": 6,
@@ -2226,12 +2518,12 @@ export const soldiers: SeedSoldier[] = [
     "fixedAttributes": [
       "Allergy (Fire)",
       "Allergy (Silver)",
-      "Quick Heal",
+      "Quick Healing",
       "Skinshift (Wolf)"
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon, Pistol",
         "order": 0,
         "items": [
           {
@@ -2249,6 +2541,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Lupo Mannaro",
     "sourceCode": "italy",
+    "alsoInSourceCode": null,
     "recruitmentCost": 30,
     "stats": {
       "speed": 6,
@@ -2283,6 +2576,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Mameluke",
     "sourceCode": "egypt",
+    "alsoInSourceCode": null,
     "recruitmentCost": 30,
     "stats": {
       "speed": 6,
@@ -2351,6 +2645,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Marine",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 12,
     "stats": {
       "speed": 6,
@@ -2389,6 +2684,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Native Scout",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -2437,6 +2733,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Occultist",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 20,
     "stats": {
       "speed": 6,
@@ -2472,6 +2769,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Provincial Soldier",
     "sourceCode": "italy",
+    "alsoInSourceCode": null,
     "recruitmentCost": 8,
     "stats": {
       "speed": 6,
@@ -2508,6 +2806,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Rifleman",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -2544,6 +2843,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Sailor",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 12,
     "stats": {
       "speed": 6,
@@ -2583,6 +2883,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Sapper",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 12,
     "stats": {
       "speed": 6,
@@ -2625,6 +2926,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Supernatural Investigator",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 22,
     "stats": {
       "speed": 6,
@@ -2678,6 +2980,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Swordsman",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 22,
     "stats": {
       "speed": 6,
@@ -2716,6 +3019,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Tactician",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 20,
     "stats": {
       "speed": 6,
@@ -2768,6 +3072,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Veteran Hunter",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 30,
     "stats": {
       "speed": 6,
@@ -2789,6 +3094,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Vivandiere",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 10,
     "stats": {
       "speed": 6,
@@ -2825,6 +3131,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Voltigeur",
     "sourceCode": "italy",
+    "alsoInSourceCode": null,
     "recruitmentCost": 18,
     "stats": {
       "speed": 6,
@@ -2864,6 +3171,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Voyageur",
     "sourceCode": "canada",
+    "alsoInSourceCode": null,
     "recruitmentCost": 20,
     "stats": {
       "speed": 6,
@@ -2907,6 +3215,7 @@ export const soldiers: SeedSoldier[] = [
   {
     "name": "Werebear",
     "sourceCode": "core",
+    "alsoInSourceCode": null,
     "recruitmentCost": 30,
     "stats": {
       "speed": 6,
@@ -2940,7 +3249,8 @@ export const soldiers: SeedSoldier[] = [
   },
   {
     "name": "Woodsman",
-    "sourceCode": "canada",
+    "sourceCode": "carpathians",
+    "alsoInSourceCode": "canada",
     "recruitmentCost": 15,
     "stats": {
       "speed": 6,
@@ -2962,7 +3272,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Rifle, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -3080,6 +3390,71 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Bat Swarm",
+    "sourceCode": "carpathians",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 2,
+      "health": 4
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Cause Confusion",
+      "Damage Reduction (6)",
+      "Immune to Missile Weapons"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Baxbaxwalanuksiwe",
+    "sourceCode": "canada",
+    "experience": 3,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 1,
+      "defence": 14,
+      "courage": 4,
+      "health": 22
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Cold Iron)",
+      "Allergy (Enchanted Weapons)",
+      "Eyeless",
+      "Gatecrasher",
+      "Large",
+      "Lunge",
+      "Rock Hurler",
+      "Very Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Black Dog",
     "sourceCode": "core",
     "experience": 2,
@@ -3101,6 +3476,34 @@ export const monsters: SeedMonster[] = [
       "Indefatigable",
       "Indestructible",
       "Soul Shear"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Bloodless Hound",
+    "sourceCode": "carpathians",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 2,
+      "health": 6
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Damage Reduction - Projectiles Only (4)",
+      "Damage Reduction (2)"
     ],
     "loadouts": [
       {
@@ -3299,6 +3702,35 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Crocodile",
+    "sourceCode": "egypt",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Amphibious",
+      "Damage Reduction (1)",
+      "Deathroll",
+      "Strong",
+      "Submerge"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Cultist",
     "sourceCode": "core",
     "experience": 0,
@@ -3479,6 +3911,131 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Dog-Head (Căpcăun)",
+    "sourceCode": "carpathians",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 2,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Damage Reduction (2)",
+      "Large",
+      "Very Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Forest Walkers",
+    "sourceCode": "carpathians",
+    "experience": 2,
+    "stats": {
+      "speed": 5,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 2,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Fire)",
+      "Damage Reduction (6)",
+      "Immune to Missile Weapons",
+      "Indefatigable",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Forest Witch (Muma Pădurii)",
+    "sourceCode": "carpathians",
+    "experience": 2,
+    "stats": {
+      "speed": 5,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 5,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Cold Iron)",
+      "Allergy (Enchanted Weapons)",
+      "Damage Reduction (4)",
+      "Master of Cover",
+      "Nimble",
+      "Sow Fear (0)",
+      "Spell: Curse"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Gargoyle",
+    "sourceCode": "carpathians",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 4,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Cold Iron)",
+      "Damage Reduction (3)",
+      "Flying"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Ghost",
     "sourceCode": "core",
     "experience": 2,
@@ -3536,6 +4093,84 @@ export const monsters: SeedMonster[] = [
             "qty": 1
           }
         ]
+      }
+    ]
+  },
+  {
+    "name": "Giant Bat",
+    "sourceCode": "carpathians",
+    "experience": 0,
+    "stats": {
+      "speed": 7,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 5
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Flying"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Giant Rat",
+    "sourceCode": "carpathians",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 4
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Fear of Fire",
+      "Infectious"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Giant Scorpion",
+    "sourceCode": "egypt",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 2,
+      "health": 15
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Damage Reduction (2)",
+      "Strong",
+      "Venomous"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
       }
     ]
   },
@@ -3602,6 +4237,98 @@ export const monsters: SeedMonster[] = [
         "items": [
           {
             "name": "Heavy Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Grizzly Bear",
+    "sourceCode": "canada",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 2,
+      "health": 16
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Large",
+      "Lunge",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Harvestman Agent",
+    "sourceCode": "canada",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 2,
+      "defence": 13,
+      "courage": 2,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Cursethrower (Wasting, Burning, Slowing)"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Harvestman Assassin",
+    "sourceCode": "canada",
+    "experience": 3,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 2,
+      "defence": 14,
+      "courage": 3,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Cursethrower (Burning, Slowing)"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
             "qty": 1
           }
         ]
@@ -3778,6 +4505,109 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Marcea Lupul",
+    "sourceCode": "carpathians",
+    "experience": 3,
+    "stats": {
+      "speed": 7,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 15,
+      "courage": 10,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Silver)",
+      "Ethereal",
+      "Hard to Put Down",
+      "Indefatigable",
+      "Indestructible",
+      "Soul Shear",
+      "Strong",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Moose",
+    "sourceCode": "canada",
+    "experience": 2,
+    "stats": {
+      "speed": 7,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 1,
+      "health": 20
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Large",
+      "Non-Aggressive",
+      "Strong",
+      "Trample"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Mummy",
+    "sourceCode": "egypt",
+    "experience": 2,
+    "stats": {
+      "speed": 5,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 2,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Fire)",
+      "Combustion",
+      "Indefatigable",
+      "Indestructible",
+      "Poor Senses",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Necromancer Acolyte",
     "sourceCode": "italy",
     "experience": 2,
@@ -3793,7 +4623,7 @@ export const monsters: SeedMonster[] = [
     "description": null,
     "fixedAttributes": [
       "Dark Gift",
-      "Quick Heal",
+      "Quick Healing",
       "Raise the Dead"
     ],
     "loadouts": [
@@ -3975,6 +4805,39 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Pharaonic Mummy",
+    "sourceCode": "egypt",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 6,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Fire)",
+      "Bestow Mummy's Curse",
+      "Combustion",
+      "Indefatigable",
+      "Indestructible",
+      "Inimical to Technology",
+      "Strong",
+      "Suppress Combustion"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Pixie",
     "sourceCode": "core",
     "experience": 1,
@@ -3998,6 +4861,39 @@ export const monsters: SeedMonster[] = [
         "label": "Empty",
         "order": 0,
         "items": []
+      }
+    ]
+  },
+  {
+    "name": "Polar Bear",
+    "sourceCode": "canada",
+    "experience": 3,
+    "stats": {
+      "speed": 7,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 2,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Large",
+      "Lunge",
+      "Strong",
+      "Trample"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
       }
     ]
   },
@@ -4055,6 +4951,34 @@ export const monsters: SeedMonster[] = [
       "Allergy (Fire)",
       "Damage Reduction (5)",
       "Strong",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Rack-Born",
+    "sourceCode": "carpathians",
+    "experience": 0,
+    "stats": {
+      "speed": 4,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 4,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Damage Reduction (4)",
+      "Indefatigable",
       "Weakened by Faith"
     ],
     "loadouts": [
@@ -4162,6 +5086,34 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Serpopard",
+    "sourceCode": "egypt",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 4,
+      "health": 16
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Silver)",
+      "Damage Reduction (7)",
+      "Hypnotic",
+      "Nimble"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Skeletal Roman Centurion",
     "sourceCode": "britain",
     "experience": 0,
@@ -4264,6 +5216,33 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Skeleton",
+    "sourceCode": "egypt",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 1
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Damage Reduction - Projectiles Only (8)",
+      "Indefatigable",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Spectral Soldier",
     "sourceCode": "italy",
     "experience": 1,
@@ -4299,6 +5278,166 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Swarms",
+    "sourceCode": "egypt",
+    "experience": 0,
+    "stats": {
+      "speed": 5,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 6
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Salt)",
+      "Damage Reduction - Projectiles Only (9)",
+      "Damage Reduction (7)",
+      "Expert Climber",
+      "Indefatigable",
+      "Maximum Damage (5)",
+      "Nimble"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Swarms (Locust)",
+    "sourceCode": "egypt",
+    "experience": 0,
+    "stats": {
+      "speed": 5,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 6
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Salt)",
+      "Damage Reduction - Projectiles Only (9)",
+      "Damage Reduction (7)",
+      "Expert Climber",
+      "Flying",
+      "Indefatigable",
+      "Maximum Damage (5)",
+      "Nimble"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Swarms (Scorpion)",
+    "sourceCode": "egypt",
+    "experience": 0,
+    "stats": {
+      "speed": 5,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 6
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Salt)",
+      "Damage Reduction - Projectiles Only (9)",
+      "Damage Reduction (7)",
+      "Expert Climber",
+      "Indefatigable",
+      "Maximum Damage (5)",
+      "Nimble",
+      "Venomous"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Swarms (Snake)",
+    "sourceCode": "egypt",
+    "experience": 0,
+    "stats": {
+      "speed": 5,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 6
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Salt)",
+      "Damage Reduction - Projectiles Only (9)",
+      "Damage Reduction (7)",
+      "Expert Climber",
+      "Indefatigable",
+      "Maximum Damage (5)",
+      "Nimble",
+      "Venomous"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Tomb Wraith",
+    "sourceCode": "carpathians",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 10,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Salt)",
+      "Chilling Touch",
+      "Ethereal",
+      "Hard to Put Down",
+      "Indefatigable",
+      "Indestructible",
+      "Reform over Grave",
+      "Soul Shear"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Troll",
     "sourceCode": "core",
     "experience": 2,
@@ -4329,6 +5468,101 @@ export const monsters: SeedMonster[] = [
             "qty": 1
           }
         ]
+      }
+    ]
+  },
+  {
+    "name": "Tsemaus",
+    "sourceCode": "canada",
+    "experience": 3,
+    "stats": {
+      "speed": 5,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 3,
+      "health": 20
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Aquatic",
+      "Damage Reduction (2)",
+      "Large",
+      "Lunge",
+      "Master of Cover",
+      "Strong",
+      "Swimmer"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Undead Werewolf (Pricolici)",
+    "sourceCode": "carpathians",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 3,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Silver)",
+      "Damage Reduction (5)",
+      "Indefatigable",
+      "Nimble",
+      "Soul Shear",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Uraeus",
+    "sourceCode": "egypt",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Silver)",
+      "Damage Reduction (5)",
+      "Venomous"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
       }
     ]
   },
@@ -4392,6 +5626,130 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Viper",
+    "sourceCode": "egypt",
+    "experience": 0,
+    "stats": {
+      "speed": 4,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 1
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Maximum Damage (3)",
+      "Small",
+      "Venomous"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Vrykolakas",
+    "sourceCode": "carpathians",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 5,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Silver)",
+      "Flying",
+      "Indefatigable",
+      "Indestructible",
+      "Soul Shear",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Wendigo",
+    "sourceCode": "canada",
+    "experience": 3,
+    "stats": {
+      "speed": 7,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 4,
+      "health": 16
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Damage Reduction (4)",
+      "Large",
+      "Lunge",
+      "Master of Cover",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Werejackal",
+    "sourceCode": "egypt",
+    "experience": 1,
+    "stats": {
+      "speed": 7,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 2,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Cold Iron)",
+      "Damage Reduction (4)",
+      "Leap",
+      "Nimble"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Werewolf",
     "sourceCode": "core",
     "experience": 2,
@@ -4414,6 +5772,33 @@ export const monsters: SeedMonster[] = [
       "Nimble",
       "Quick Healing",
       "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Zombie Camel",
+    "sourceCode": "egypt",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 5,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Damage Reduction - Projectiles Only (4)",
+      "Indefatigable"
     ],
     "loadouts": [
       {

@@ -6,7 +6,7 @@
   interface Props {
     slug: string;
     sources: { id: string; name: string }[];
-    allAttributes: { id: string; name: string; isOfficer: boolean; rules: string | null }[];
+    allAttributes: { id: string; name: string; pickScope: string; rules: string | null }[];
     allEquipment: { id: string; name: string; slotCost: number; isSpecial: boolean; rules: string | null }[];
     target: { mode: 'new'; sourceId?: string } | { mode: 'edit'; row: Row } | null;
     onsaved: () => void;

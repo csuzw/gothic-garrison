@@ -18,7 +18,7 @@
     mode: 'new' | 'edit';
     row?: Record<string, any>;
     sources: { id: string; name: string }[];
-    allAttributes: { id: string; name: string; isOfficer: boolean; rules: string | null }[];
+    allAttributes: { id: string; name: string; pickScope: string; rules: string | null }[];
     allEquipment: { id: string; name: string; slotCost: number; isSpecial: boolean; rules: string | null }[];
     saving: boolean;
     error: string | null;
@@ -71,8 +71,8 @@
         (attrSearch === '' || a.name.toLowerCase().includes(attrSearch.toLowerCase())),
     ),
   );
-  const filteredOfficerAttrs = $derived(filteredAttrs.filter((a) => a.isOfficer));
-  const filteredOtherAttrs = $derived(filteredAttrs.filter((a) => !a.isOfficer));
+  const filteredOfficerAttrs = $derived(filteredAttrs.filter((a) => a.pickScope === 'officer' || a.pickScope === 'any'));
+  const filteredOtherAttrs = $derived(filteredAttrs.filter((a) => a.pickScope === 'none' || a.pickScope === 'soldier'));
 
   function setEquipmentMode(m: 'fixed' | 'choice') {
     equipmentMode = m;

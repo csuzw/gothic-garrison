@@ -1,1 +1,0 @@
-ALTER TABLE "nations" ADD COLUMN "flag" text;

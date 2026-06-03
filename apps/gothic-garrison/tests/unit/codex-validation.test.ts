@@ -60,11 +60,16 @@ describe('validateNation', () => {
 });
 
 describe('validateAttribute', () => {
-  it('requires a boolean isOfficer', () => {
-    expect(() => validateAttribute({ name: 'Tough', rules: 'd', isOfficer: 'yes', sourceId: SRC })).toThrow(/isOfficer/);
+  it('rejects an invalid pickScope', () => {
+    expect(() => validateAttribute({ name: 'Tough', rules: 'd', pickScope: 'yes', costDelta: 0, sourceId: SRC })).toThrow(/pickScope/);
   });
-  it('parses a valid attribute', () => {
-    expect(validateAttribute({ name: 'Tough', rules: 'd', isOfficer: true, sourceId: SRC }).isOfficer).toBe(true);
+  it('parses a valid officer attribute', () => {
+    expect(validateAttribute({ name: 'Tough', rules: 'd', pickScope: 'officer', costDelta: 0, sourceId: SRC }).pickScope).toBe('officer');
+  });
+  it('parses a purchasable attribute with costDelta', () => {
+    const v = validateAttribute({ name: 'Fey-Touched', rules: 'd', pickScope: 'any', costDelta: 4, sourceId: SRC });
+    expect(v.pickScope).toBe('any');
+    expect(v.costDelta).toBe(4);
   });
 });
 

@@ -1,1 +1,0 @@
-ALTER TABLE "soldier_types" DROP COLUMN IF EXISTS "abilities";

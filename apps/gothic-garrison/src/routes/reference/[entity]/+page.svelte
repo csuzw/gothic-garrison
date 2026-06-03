@@ -21,7 +21,7 @@
   let rows = $state<Row[]>([]);
   let sources = $state<{ id: string; name: string; code: string }[]>([]);
   let nations = $state<{ id: string; name: string; flag: string | null }[]>([]);
-  let allAttributes = $state<{ id: string; name: string; isOfficer: boolean; rules: string | null }[]>([]);
+  let allAttributes = $state<{ id: string; name: string; pickScope: string; rules: string | null }[]>([]);
   let allEquipment = $state<{ id: string; name: string; slotCost: number; isSpecial: boolean; rules: string | null }[]>([]);
   let loading = $state(true);
   let loadError = $state<string | null>(null);
@@ -233,6 +233,9 @@
                     {row.name}
                     {#if row.sourceId}
                       <span class="badge badge-outline badge-xs font-mono">{sourceCode(row.sourceId)}</span>
+                    {/if}
+                    {#if row.alsoInSourceId}
+                      <span class="badge badge-outline badge-xs font-mono opacity-60" title="Also in supplement">{sourceCode(row.alsoInSourceId)}</span>
                     {/if}
                   </span>
                 </td>

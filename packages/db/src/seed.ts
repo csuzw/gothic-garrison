@@ -46,10 +46,10 @@ const nationByName = new Map((await db.select({ id: t.nations.id, name: t.nation
 // ── attributes (officer-flagged + extras) ──────────────────────────────────────
 await db
   .insert(t.attributes)
-  .values(attributeData.map((a) => ({ name: a.name, rules: a.rules || a.name, isOfficer: a.isOfficer, sourceId: srcId(a.sourceCode) })))
+  .values(attributeData.map((a) => ({ name: a.name, rules: a.rules || a.name, pickScope: a.pickScope, costDelta: a.costDelta, sourceId: srcId(a.sourceCode) })))
   .onConflictDoUpdate({
     target: t.attributes.name,
-    set: { rules: sql`excluded.rules`, isOfficer: sql`excluded.is_officer`, sourceId: sql`excluded.source_id` },
+    set: { rules: sql`excluded.rules`, pickScope: sql`excluded.pick_scope`, costDelta: sql`excluded.cost_delta`, sourceId: sql`excluded.source_id` },
   });
 const attrByName = new Map((await db.select({ id: t.attributes.id, name: t.attributes.name }).from(t.attributes)).map((r) => [r.name, r.id]));
 
@@ -70,6 +70,7 @@ await db
     soldierData.map((s) => ({
       name: s.name,
       sourceId: srcId(s.sourceCode),
+      alsoInSourceId: s.alsoInSourceCode ? srcId(s.alsoInSourceCode) : null,
       recruitmentCost: s.recruitmentCost,
       stats: s.stats,
       maxPerUnit: s.maxPerUnit,
@@ -83,7 +84,8 @@ await db
   .onConflictDoUpdate({
     target: t.soldierTypes.name,
     set: {
-      sourceId: sql`excluded.source_id`, recruitmentCost: sql`excluded.recruitment_cost`, stats: sql`excluded.stats`,
+      sourceId: sql`excluded.source_id`, alsoInSourceId: sql`excluded.also_in_source_id`,
+      recruitmentCost: sql`excluded.recruitment_cost`, stats: sql`excluded.stats`,
       maxPerUnit: sql`excluded.max_per_unit`, equipmentMode: sql`excluded.equipment_mode`,
       equipmentSlots: sql`excluded.equipment_slots`, specialSlots: sql`excluded.special_slots`, attributePicks: sql`excluded.attribute_picks`,
       description: sql`excluded.description`,

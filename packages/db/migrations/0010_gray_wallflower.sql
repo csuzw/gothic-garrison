@@ -1,1 +1,0 @@
-ALTER TABLE "monster_types" ALTER COLUMN "experience" SET DATA TYPE integer USING CASE WHEN experience = '0 or 1' THEN 0 ELSE experience::integer END;

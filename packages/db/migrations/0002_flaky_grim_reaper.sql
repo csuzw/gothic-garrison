@@ -1,1 +1,0 @@
-ALTER TABLE "warbands" ALTER COLUMN "nation_id" DROP NOT NULL;

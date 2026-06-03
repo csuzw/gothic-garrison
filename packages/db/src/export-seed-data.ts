@@ -123,13 +123,14 @@ export type SourceKind = 'core' | 'supplement';
 
 export interface SeedSource { code: string; name: string; kind: SourceKind; publishedDate: string; author: string; ospreyCoverUrl: string | null; coverImageUrl: string | null; }
 export interface SeedNation { name: string; sourceCode: string; description: string | null; flag: string | null; soldiers: string[]; }
-export interface SeedAttribute { name: string; isOfficer: boolean; sourceCode: string; rules: string; }
+export interface SeedAttribute { name: string; pickScope: 'none' | 'officer' | 'soldier' | 'any'; costDelta: number; sourceCode: string; rules: string; }
 export interface SeedEquipment { name: string; category: string; slotCost: number; isSpecial: boolean; sourceCode: string; rules: string; }
 export interface SeedLoadoutItem { name: string; qty: number; }
 export interface SeedLoadout { label: string; order: number; items: SeedLoadoutItem[]; }
 export interface SeedSoldier {
   name: string;
   sourceCode: string;
+  alsoInSourceCode: string | null;
   recruitmentCost: number;
   stats: { speed: number; melee: number; accuracy: number; defence: number; courage: number; health: number };
   maxPerUnit: number | null;
@@ -281,7 +282,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
       .sort(byName);
 
     const attributes = attributeRows
-      .map((a) => ({ name: a.name, isOfficer: a.isOfficer, sourceCode: srcCode(a.sourceId), rules: a.rules }))
+      .map((a) => ({ name: a.name, pickScope: a.pickScope, costDelta: a.costDelta, sourceCode: srcCode(a.sourceId), rules: a.rules }))
       .sort(byName);
 
     const equipment = equipmentRows
@@ -301,6 +302,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
         return {
           name: s.name,
           sourceCode: srcCode(s.sourceId),
+          alsoInSourceCode: s.alsoInSourceId ? srcCode(s.alsoInSourceId) : null,
           recruitmentCost: s.recruitmentCost,
           stats: { speed: st.speed, melee: st.melee, accuracy: st.accuracy, defence: st.defence, courage: st.courage, health: st.health },
           maxPerUnit: s.maxPerUnit,
@@ -380,7 +382,7 @@ export async function exportSeedData(opts: { note?: string; databaseUrl?: string
 
     // Temporarily disabled while base data is being entered.
     // Re-enable WRITE_CHANGELOG when the reference data is stable.
-    const WRITE_CHANGELOG = false;
+    const WRITE_CHANGELOG = true;
     let note: string | null = null;
     if (WRITE_CHANGELOG && changes.length > 0) {
       note = opts.note?.trim() || summarize(changes);

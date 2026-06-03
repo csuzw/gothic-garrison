@@ -26,6 +26,13 @@ export const sourceKindEnum = pgEnum('source_kind', ['core', 'supplement']);
 
 export const equipmentModeEnum = pgEnum('equipment_mode', ['fixed', 'choice', 'pool']);
 
+// Governs who may pick an attribute during unit building:
+//   none    — baked-on fixed attribute (not player-selectable)
+//   officer — free pick from the officer/attribute-pick pool
+//   soldier — any soldier may purchase it for costDelta pts
+//   any     — officer pool AND any soldier may purchase (e.g. Fey-Touched)
+export const pickScopeEnum = pgEnum('pick_scope', ['none', 'officer', 'soldier', 'any']);
+
 
 // ── reference data ──────────────────────────────────────────────────────────
 //
@@ -53,15 +60,12 @@ export const nations = pgTable('nations', {
   flag: text('flag'),
 });
 
-// All game attributes, officer-selectable or not. `isOfficer` marks the ones an
-// Officer (or a soldier with an "officer attribute pick") may choose from the
-// global pool; the rest are standard soldier / monster attributes (Miracles,
-// Spells, Skinshift, Damage Reduction, …) baked onto a soldier type.
 export const attributes = pgTable('attributes', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull().unique(),
   rules: text('rules').notNull(),
-  isOfficer: boolean('is_officer').notNull().default(false),
+  pickScope: pickScopeEnum('pick_scope').notNull().default('none'),
+  costDelta: integer('cost_delta').notNull().default(0),
   sourceId: uuid('source_id')
     .notNull()
     .references(() => sources.id, { onDelete: 'restrict' }),
@@ -98,6 +102,11 @@ export const soldierTypes = pgTable(
 
     // Attribute policy
     attributePicks: integer('attribute_picks').notNull().default(0),
+
+    // Set when the soldier type's rules are reprinted in a second supplement
+    // (e.g. Woodsman appears in both Carpathians and Canada). The source filter
+    // shows the soldier if either sourceId OR alsoInSourceId is enabled.
+    alsoInSourceId: uuid('also_in_source_id').references(() => sources.id, { onDelete: 'set null' }),
 
     description: text('description'),
   },

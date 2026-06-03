@@ -159,6 +159,7 @@ function soldierTypeRow(v: SoldierTypeInput) {
   return {
     name: v.name,
     sourceId: v.sourceId,
+    alsoInSourceId: v.alsoInSourceId,
     recruitmentCost: v.recruitmentCost,
     stats: v.stats,
     maxPerUnit: v.maxPerUnit,

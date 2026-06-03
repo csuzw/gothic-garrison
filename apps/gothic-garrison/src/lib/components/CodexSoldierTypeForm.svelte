@@ -19,7 +19,7 @@
     row?: Record<string, any>;
     sources: { id: string; name: string }[];
     nations: { id: string; name: string }[];
-    allAttributes: { id: string; name: string; isOfficer: boolean; rules: string | null }[];
+    allAttributes: { id: string; name: string; pickScope: string; rules: string | null }[];
     allEquipment: { id: string; name: string; slotCost: number; isSpecial: boolean; rules: string | null }[];
     saving: boolean;
     error: string | null;
@@ -47,6 +47,7 @@
 
   let name = $state<string>(r.name ?? '');
   let sourceId = $state<string>(r.sourceId ?? untrack(() => sources[0]?.id) ?? '');
+  let alsoInSourceId = $state<string>(r.alsoInSourceId ?? '');
   let recruitmentCost = $state<number>(Number(r.recruitmentCost ?? 0));
   let maxPerUnit = $state<number | null>(r.maxPerUnit ?? null);
   let description = $state<string>(r.description ?? '');
@@ -78,8 +79,8 @@
         (attrSearch === '' || a.name.toLowerCase().includes(attrSearch.toLowerCase())),
     ),
   );
-  const filteredOfficerAttrs = $derived(filteredAttrs.filter((a) => a.isOfficer));
-  const filteredOtherAttrs = $derived(filteredAttrs.filter((a) => !a.isOfficer));
+  const filteredOfficerAttrs = $derived(filteredAttrs.filter((a) => a.pickScope === 'officer' || a.pickScope === 'any'));
+  const filteredOtherAttrs = $derived(filteredAttrs.filter((a) => a.pickScope === 'none' || a.pickScope === 'soldier'));
 
   function setEquipmentMode(m: 'fixed' | 'choice' | 'pool') {
     equipmentMode = m;
@@ -131,6 +132,7 @@
     return {
       name,
       sourceId,
+      alsoInSourceId: alsoInSourceId || null,
       recruitmentCost,
       stats: { ...stats },
       maxPerUnit,
@@ -188,6 +190,13 @@
             <span class="mb-1 block text-sm font-medium">Source <span class="text-error">*</span></span>
             <select bind:value={sourceId} required class="select w-full">
               {#each sources as s (s.id)}<option value={s.id}>{s.name}</option>{/each}
+            </select>
+          </label>
+          <label class="block flex-1 min-w-0">
+            <span class="mb-1 block text-sm font-medium">Also in supplement</span>
+            <select bind:value={alsoInSourceId} class="select w-full">
+              <option value="">—</option>
+              {#each sources.filter((s) => s.id !== sourceId) as s (s.id)}<option value={s.id}>{s.name}</option>{/each}
             </select>
           </label>
           <label class="block w-24 shrink-0">

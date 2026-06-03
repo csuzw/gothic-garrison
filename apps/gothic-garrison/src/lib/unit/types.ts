@@ -21,6 +21,8 @@ export type { CommandStyle };
 export interface AttributeSnapshot {
   id: string;
   name: string;
+  /** Only set for soldier-purchased attributes (pickScope 'soldier'|'any'). */
+  costDelta?: number;
 }
 
 export interface EquipmentSnapshot {
@@ -79,6 +81,8 @@ export interface MemberSnapshot {
   stats: SoldierStats | null;
   /** Attributes picked from the officer pool (for soldiers with attribute_picks). */
   attributes: AttributeSnapshot[];
+  /** Optionally purchased attributes (e.g. Fey-Touched +4 pts). Snapshotted with costDelta. */
+  purchasedAttributes: AttributeSnapshot[];
   /** Carried equipment: the fixed/chosen loadout's items, or pool-built items. */
   equipment: EquipmentSnapshot[];
   /** Special Armoury picks for fixed/choice-mode soldiers (1 normally, 2 with Supernatural Veteran). Pool soldiers manage special via EquipmentBuilder. */
@@ -165,6 +169,7 @@ export function normalizeUnitDoc(raw: any): UnitDoc {
         : m.specialEquipment
         ? [m.specialEquipment]
         : [],
+      purchasedAttributes: Array.isArray(m.purchasedAttributes) ? m.purchasedAttributes : [],
     })),
   };
 }
@@ -218,8 +223,12 @@ export function unitBudget(doc: UnitDoc): number {
   return recruitmentBudget(BASE_RECRUITMENT_BUDGET, doc.officer.commandStyle);
 }
 
+export function memberPurchasedCost(m: MemberSnapshot): number {
+  return (m.purchasedAttributes ?? []).reduce((s, a) => s + (a.costDelta ?? 0), 0);
+}
+
 export function unitSpent(doc: UnitDoc): number {
-  return spentPoints(doc.members.map((m) => m.cost));
+  return spentPoints(doc.members.map((m) => m.cost + memberPurchasedCost(m)));
 }
 
 export function toSummary(doc: UnitDoc): UnitSummary {

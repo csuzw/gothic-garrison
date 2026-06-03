@@ -12,6 +12,7 @@
   import {
     unitBudget,
     unitSpent,
+    memberPurchasedCost,
     officerSpecialMax,
     soldierSpecialMax,
     memberSpecialPicks,
@@ -60,6 +61,17 @@
         unitSource = result.source;
         if (result.doc) {
           doc = normalizeUnitDoc(result.doc);
+          // Heal stale loadout IDs: seed re-runs regenerate UUIDs, so a saved
+          // unit's loadoutId may no longer match any current reference row.
+          // Re-select the first available loadout silently before taking the
+          // snapshot so this doesn't appear as an unsaved change.
+          for (const m of doc.members) {
+            const ref = data.reference.soldiers.find((s) => s.id === m.soldierTypeId);
+            if (ref?.equipmentMode === 'choice' && !ref.loadouts.some((l) => l.id === m.loadoutId)) {
+              const first = ref.loadouts[0];
+              if (first) { m.loadoutId = first.id; m.equipment = snapshotItems(first.items); }
+            }
+          }
           savedSnapshot = JSON.stringify(doc);
         } else notFound = true;
       } catch (e) {
@@ -112,7 +124,16 @@
     return doc?.enabledSourceCodes == null || doc.enabledSourceCodes.includes(sourceCode);
   }
 
-  const officerPool = $derived(data.reference.attributes.filter((a) => a.isOfficer && sourceEnabled(a.sourceCode)));
+  const officerPool = $derived(
+    data.reference.attributes.filter(
+      (a) => (a.pickScope === 'officer' || a.pickScope === 'any') && sourceEnabled(a.sourceCode),
+    ),
+  );
+  const soldierPickableAttrs = $derived(
+    data.reference.attributes.filter(
+      (a) => (a.pickScope === 'soldier' || a.pickScope === 'any') && sourceEnabled(a.sourceCode),
+    ),
+  );
   const equipCatalog = $derived(data.reference.equipment.filter((e) => sourceEnabled(e.sourceCode)));
   const equipById = $derived(new Map(equipCatalog.map((e) => [e.id, e])));
   const specialCatalog = $derived(equipCatalog.filter((e) => e.isSpecial));
@@ -121,7 +142,12 @@
   const available = $derived(
     nationId === null
       ? []
-      : data.reference.soldiers.filter((s) => s.nationIds.includes(nationId!) && sourceEnabled(s.sourceCode)),
+      : data.reference.soldiers.filter(
+          (s) =>
+            s.nationIds.includes(nationId!) &&
+            (sourceEnabled(s.sourceCode) ||
+              (s.alsoInSourceCode != null && sourceEnabled(s.alsoInSourceCode))),
+        ),
   );
   const addable = $derived(
     available.filter((s) => {
@@ -145,6 +171,12 @@
     const i = list.findIndex((a) => a.id === attrId);
     if (i >= 0) list.splice(i, 1);
     else if (list.length < max) list.push({ id: attrId, name });
+  }
+
+  function togglePurchasedAttr(m: MemberSnapshot, attr: { id: string; name: string; costDelta: number }) {
+    const i = m.purchasedAttributes.findIndex((a) => a.id === attr.id);
+    if (i >= 0) m.purchasedAttributes.splice(i, 1);
+    else m.purchasedAttributes.push({ id: attr.id, name: attr.name, costDelta: attr.costDelta });
   }
 
   // ── equipment ───────────────────────────────────────────────────────────────
@@ -174,6 +206,7 @@
       ...(outsideNation && { isOutsideNationPick: true }),
       stats: s.stats,
       attributes: [],
+      purchasedAttributes: [],
       equipment: [],
       specialEquipment: [],
       loadoutId: null,
@@ -206,6 +239,10 @@
     for (const m of d.members) {
       const ref = soldierRef(m.soldierTypeId);
       if (!ref) continue;
+      if (ref.equipmentMode === 'choice' && !ref.loadouts.some((l) => l.id === m.loadoutId)) {
+        const who = m.customName ? `${m.name} (${m.customName})` : m.name;
+        return `${who} needs a loadout selected.`;
+      }
       const max = ref.equipmentMode === 'pool'
         ? soldierSpecialMax(m, ref.specialSlots ?? 2, ref.fixedAttributes)
         : memberSpecialPicks(m, ref.fixedAttributes);
@@ -553,7 +590,7 @@
                   <div class="flex items-center justify-between gap-3">
                     <div class="flex min-w-0 flex-1 items-center gap-2">
                       <span class="font-medium">{m.name}</span>
-                      <span class="badge badge-sm shrink-0">{m.cost} pts</span>
+                      <span class="badge badge-sm shrink-0">{m.cost + memberPurchasedCost(m)} pts</span>
                       {#if m.isOutsideNationPick}
                         <span class="badge badge-warning badge-xs shrink-0">outside nation</span>
                       {/if}
@@ -598,6 +635,28 @@
                       </div>
                     {/if}
 
+                    {#if soldierPickableAttrs.length > 0}
+                      {@const alreadyPickedIds = new Set(m.attributes.map((a) => a.id))}
+                      {@const buyable = soldierPickableAttrs.filter((a) => !alreadyPickedIds.has(a.id))}
+                      {#if buyable.length > 0}
+                        <div>
+                          <span class="mb-1 block text-xs font-medium opacity-70">Optional upgrades</span>
+                          <div class="flex flex-wrap gap-1">
+                            {#each buyable as attr (attr.id)}
+                              {@const isPicked = m.purchasedAttributes.some((a) => a.id === attr.id)}
+                              <button
+                                type="button"
+                                class="btn btn-xs {isPicked ? 'btn-primary' : 'btn-outline'}"
+                                title={attr.rules || attr.name}
+                                disabled={!isPicked && spent + attr.costDelta > budget}
+                                onclick={() => togglePurchasedAttr(m, attr)}
+                              >{attr.name}{#if attr.costDelta > 0} <span class="opacity-60">+{attr.costDelta}</span>{/if}</button>
+                            {/each}
+                          </div>
+                        </div>
+                      {/if}
+                    {/if}
+
                     <div>
                       <span class="mb-1 block text-xs font-medium opacity-70">Equipment</span>
                       {#if ref.equipmentMode === 'pool'}
@@ -609,6 +668,9 @@
                           onChange={(newItems) => { m.equipment = newItems; }}
                         />
                       {:else if ref.equipmentMode === 'choice'}
+                        {#if m.loadoutId === null}
+                          <p class="text-xs text-warning">Pick a loadout to continue.</p>
+                        {/if}
                         <div class="join flex-wrap gap-y-1">
                           {#each ref.loadouts as lo (lo.id)}
                             <button

@@ -86,6 +86,15 @@ function uuid(o: Record<string, unknown>, key: string): string {
   return v;
 }
 
+function nullableUuid(o: Record<string, unknown>, key: string): string | null {
+  const v = o[key];
+  if (v === undefined || v === null || v === '') return null;
+  if (typeof v !== 'string' || !UUID_RE.test(v)) {
+    throw new CodexError(`"${key}" must be a valid UUID or null`);
+  }
+  return v;
+}
+
 function strArray(o: Record<string, unknown>, key: string): string[] {
   const v = o[key];
   if (v === undefined || v === null) return [];
@@ -136,10 +145,13 @@ export interface NationInput {
   flag: string | null;
 }
 
+export const PICK_SCOPES = ['none', 'officer', 'soldier', 'any'] as const;
+
 export interface AttributeInput {
   name: string;
   rules: string;
-  isOfficer: boolean;
+  pickScope: (typeof PICK_SCOPES)[number];
+  costDelta: number;
   sourceId: string;
 }
 
@@ -182,6 +194,7 @@ export interface MonsterTypeInput {
 export interface SoldierTypeInput {
   name: string;
   sourceId: string;
+  alsoInSourceId: string | null;
   recruitmentCost: number;
   stats: SoldierStatsInput;
   maxPerUnit: number | null;
@@ -224,7 +237,8 @@ export function validateAttribute(body: unknown): AttributeInput {
   return {
     name: reqStr(o, 'name'),
     rules: reqStr(o, 'rules'),
-    isOfficer: bool(o, 'isOfficer'),
+    pickScope: enumOf(o, 'pickScope', PICK_SCOPES),
+    costDelta: nullableInt(o, 'costDelta', { min: 0, max: 99 }) ?? 0,
     sourceId: uuid(o, 'sourceId'),
   };
 }
@@ -341,6 +355,7 @@ export function validateSoldierType(body: unknown): SoldierTypeInput {
   return {
     name: reqStr(o, 'name'),
     sourceId: uuid(o, 'sourceId'),
+    alsoInSourceId: nullableUuid(o, 'alsoInSourceId'),
     recruitmentCost: int(o, 'recruitmentCost', { min: 0, max: 999 }),
     stats: validateStats(o.stats),
     maxPerUnit: nullableInt(o, 'maxPerUnit', { min: 1, max: 99 }),

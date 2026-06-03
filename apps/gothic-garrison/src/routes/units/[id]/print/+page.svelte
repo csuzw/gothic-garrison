@@ -9,6 +9,7 @@
     officerStats,
     unitBudget,
     unitSpent,
+    memberPurchasedCost,
     STAT_META,
     type UnitDoc,
     type EquipmentSnapshot,
@@ -55,6 +56,9 @@
       const ref = soldierRef(m.soldierTypeId);
       for (const a of ref?.fixedAttributes ?? []) add(a.name, a.rules);
       for (const a of m.attributes) {
+        add(a.name, data.reference.attributes.find((r) => r.id === a.id)?.rules);
+      }
+      for (const a of m.purchasedAttributes ?? []) {
         add(a.name, data.reference.attributes.find((r) => r.id === a.id)?.rules);
       }
     }
@@ -192,7 +196,7 @@
     <!-- Soldier cards -->
     {#each doc.members as m (m.id)}
       {@const ref = soldierRef(m.soldierTypeId)}
-      {@const allAttrStr = [...(ref?.fixedAttributes ?? []).map((a) => a.name), ...m.attributes.map((a) => a.name)].join(', ')}
+      {@const allAttrStr = [...(ref?.fixedAttributes ?? []).map((a) => a.name), ...m.attributes.map((a) => a.name), ...(m.purchasedAttributes ?? []).map((a) => a.name)].join(', ')}
       {@const allEquip = [...m.equipment, ...m.specialEquipment]}
       <table class="w-full border-collapse text-xs print:break-inside-avoid">
         <tbody>
@@ -222,7 +226,7 @@
             {:else}
               {#each STAT_META as _}<td class="border border-black h-8"></td>{/each}
             {/if}
-            <td class="border border-black h-8 text-center align-middle">{m.cost}</td>
+            <td class="border border-black h-8 text-center align-middle">{m.cost + memberPurchasedCost(m)}</td>
           </tr>
           <tr>
             <td colspan="7" class="border border-black px-2 py-1">
