@@ -12,7 +12,7 @@ const CODEX_UI = /codex-ui\.spec\.ts/;
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
+  retries: 0,
   reporter: process.env.CI
     ? [['github'], ['html', { open: 'never' }]]
     : [['list'], ['html', { open: 'never' }]],
