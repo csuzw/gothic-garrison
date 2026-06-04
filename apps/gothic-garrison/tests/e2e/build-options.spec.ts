@@ -6,16 +6,16 @@ import { type Page, expect, test } from '@playwright/test';
 async function createUnit(page: Page, nation = 'France') {
   await page.goto('/');
   await page.getByRole('button', { name: 'New unit' }).click();
-  await page.locator('button.card')
+  await page.locator('[role="button"].card')
     .filter({ has: page.locator('span.font-semibold', { hasText: new RegExp(`^${nation}$`) }) })
     .click();
   await page.getByRole('button', { name: 'Create' }).click();
   await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
 }
 
-/** Open the Build options <details> panel in the new-unit picker. */
+/** Open the Build options modal in the new-unit picker. */
 async function openBuildOptions(page: Page) {
-  await page.locator('summary').filter({ hasText: 'Build options' }).click();
+  await page.getByRole('button', { name: /Build options/ }).click();
 }
 
 // ── supplement filter ─────────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ test.describe('build options — supplement filter', () => {
 
     // A supplement nation (Trading Companies, from the Canada supplement) shows by default
     await expect(
-      page.locator('button.card').filter({
+      page.locator('[role="button"].card').filter({
         has: page.locator('span.font-semibold', { hasText: /^Trading Companies$/ }),
       }),
     ).toBeVisible();
@@ -42,20 +42,20 @@ test.describe('build options — supplement filter', () => {
 
     // Canadian supplement nations disappear
     await expect(
-      page.locator('button.card').filter({
+      page.locator('[role="button"].card').filter({
         has: page.locator('span.font-semibold', { hasText: /^Trading Companies$/ }),
       }),
     ).not.toBeVisible();
 
     // Core nations are unaffected
     await expect(
-      page.locator('button.card').filter({
+      page.locator('[role="button"].card').filter({
         has: page.locator('span.font-semibold', { hasText: /^France$/ }),
       }),
     ).toBeVisible();
 
-    // The "customised" badge appears on the collapsed summary
-    await expect(page.locator('summary').filter({ hasText: 'Build options' })).toContainText('customised');
+    // The "customised" badge appears on the Build options button
+    await expect(page.getByRole('button', { name: 'Build options (customised)' })).toBeVisible();
   });
 
   test('re-checking a supplement restores its nations', async ({ page }) => {
@@ -68,7 +68,7 @@ test.describe('build options — supplement filter', () => {
     await canadaCheckbox.check();
 
     await expect(
-      page.locator('button.card').filter({
+      page.locator('[role="button"].card').filter({
         has: page.locator('span.font-semibold', { hasText: /^Trading Companies$/ }),
       }),
     ).toBeVisible();
@@ -80,8 +80,9 @@ test.describe('build options — supplement filter', () => {
 
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: 'Canada' }).getByRole('checkbox').uncheck();
+    await page.getByRole('button', { name: 'Close' }).click();
 
-    await page.locator('button.card')
+    await page.locator('[role="button"].card')
       .filter({ has: page.locator('span.font-semibold', { hasText: /^France$/ }) })
       .click();
     await page.getByRole('button', { name: 'Create' }).click();
@@ -113,7 +114,7 @@ test.describe('build options — outside-nation soldier rule', () => {
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: /outside-nation soldier/i }).getByRole('checkbox').uncheck();
 
-    await expect(page.locator('summary').filter({ hasText: 'Build options' })).toContainText('customised');
+    await expect(page.getByRole('button', { name: 'Build options (customised)' })).toBeVisible();
   });
 
   test('outside-nation recruit section appears in the builder when the rule is on', async ({ page }) => {
@@ -129,8 +130,9 @@ test.describe('build options — outside-nation soldier rule', () => {
 
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: /outside-nation soldier/i }).getByRole('checkbox').uncheck();
+    await page.getByRole('button', { name: 'Close' }).click();
 
-    await page.locator('button.card')
+    await page.locator('[role="button"].card')
       .filter({ has: page.locator('span.font-semibold', { hasText: /^France$/ }) })
       .click();
     await page.getByRole('button', { name: 'Create' }).click();

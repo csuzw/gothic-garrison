@@ -9,7 +9,7 @@ async function createUnit(page: Page, nation = 'France') {
   // Use the span.font-semibold inside each nation card for an exact name match so
   // nations whose descriptions mention other nations (e.g. Spain mentioning "French")
   // don't accidentally satisfy a plain hasText filter.
-  await page.locator('button.card')
+  await page.locator('[role="button"].card')
     .filter({ has: page.locator('span.font-semibold', { hasText: new RegExp(`^${nation}$`) }) })
     .click();
   await page.getByRole('button', { name: 'Create' }).click();
@@ -176,7 +176,7 @@ test.describe('units', () => {
 
     await expect(page.getByText(/Synced to your account/i)).toBeVisible();
     await page.getByRole('button', { name: 'New unit' }).click();
-    await page.locator('button.card')
+    await page.locator('[role="button"].card')
       .filter({ has: page.locator('span.font-semibold', { hasText: /^France$/ }) })
       .click();
     await page.getByRole('button', { name: 'Create' }).click();

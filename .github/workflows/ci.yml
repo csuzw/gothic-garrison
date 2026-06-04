@@ -87,6 +87,7 @@ jobs:
       AUTH_SECRET: ci-secret-not-used-in-tests
       PUBLIC_APP_URL: http://localhost:4173
       RESEND_API_KEY: dev-key
+      RESEND_API_URL: http://localhost:8025
 
     steps:
       - uses: actions/checkout@v4
@@ -109,8 +110,17 @@ jobs:
       - name: Seed database
         run: pnpm db:seed
 
+      - name: Start petite-poste (mock mailer)
+        run: pnpm dev:mailer &
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('apps/gothic-garrison/package.json') }}
+
       - name: Install Playwright browsers
-        run: pnpm --filter gothic-garrison exec playwright install --with-deps chromium
+        run: pnpm --filter gothic-garrison exec playwright install --with-deps chromium webkit
 
       - name: Run e2e tests (production surface)
         run: pnpm --filter gothic-garrison test:e2e --project=chromium-desktop --project=mobile-safari
