@@ -2,10 +2,17 @@ import { type Page, expect, test } from '@playwright/test';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
+/** Open the new-unit nation picker if it isn't already open. */
+async function openPicker(page: Page) {
+  // Picker auto-opens when there are no units; only click when it's closed.
+  const isOpen = await page.getByRole('button', { name: 'Create' }).isVisible();
+  if (!isOpen) await page.getByRole('button', { name: 'New unit' }).click();
+}
+
 /** Open the new-unit nation picker, click a nation, and click Create. */
 async function createUnit(page: Page, nation = 'France') {
   await page.goto('/');
-  await page.getByRole('button', { name: 'New unit' }).click();
+  await openPicker(page);
   await page.locator('[role="button"].card')
     .filter({ has: page.locator('span.font-semibold', { hasText: new RegExp(`^${nation}$`) }) })
     .click();
@@ -23,7 +30,7 @@ async function openBuildOptions(page: Page) {
 test.describe('build options — supplement filter', () => {
   test('all supplement nations are visible by default', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
 
     // A supplement nation (Trading Companies, from the Canada supplement) shows by default
     await expect(
@@ -35,7 +42,7 @@ test.describe('build options — supplement filter', () => {
 
   test('unchecking a supplement hides its nations and shows the customised badge', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
 
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: 'Canada' }).getByRole('checkbox').uncheck();
@@ -60,7 +67,7 @@ test.describe('build options — supplement filter', () => {
 
   test('re-checking a supplement restores its nations', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
 
     await openBuildOptions(page);
     const canadaCheckbox = page.locator('label').filter({ hasText: 'Canada' }).getByRole('checkbox');
@@ -76,7 +83,7 @@ test.describe('build options — supplement filter', () => {
 
   test('supplement restriction is recorded in the builder and shown as an indicator', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
 
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: 'Canada' }).getByRole('checkbox').uncheck();
@@ -99,7 +106,7 @@ test.describe('build options — supplement filter', () => {
 test.describe('build options — outside-nation soldier rule', () => {
   test('outside-nation soldier rule is on by default', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
 
     await openBuildOptions(page);
     await expect(
@@ -109,7 +116,7 @@ test.describe('build options — outside-nation soldier rule', () => {
 
   test('unchecking the rule shows the customised badge', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
 
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: /outside-nation soldier/i }).getByRole('checkbox').uncheck();
@@ -126,7 +133,7 @@ test.describe('build options — outside-nation soldier rule', () => {
 
   test('outside-nation recruit section is absent when the rule is disabled at creation', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
 
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: /outside-nation soldier/i }).getByRole('checkbox').uncheck();

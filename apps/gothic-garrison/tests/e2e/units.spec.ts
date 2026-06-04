@@ -2,10 +2,17 @@ import { type Page, expect, test } from '@playwright/test';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
+/** Open the new-unit nation picker if it isn't already open. */
+async function openPicker(page: Page) {
+  // Picker auto-opens when there are no units; only click when it's closed.
+  const isOpen = await page.getByRole('button', { name: 'Create' }).isVisible();
+  if (!isOpen) await page.getByRole('button', { name: 'New unit' }).click();
+}
+
 /** Open the new-unit nation picker, pick a nation, click Create. */
 async function createUnit(page: Page, nation = 'France') {
   await page.goto('/');
-  await page.getByRole('button', { name: 'New unit' }).click();
+  await openPicker(page);
   // Use the span.font-semibold inside each nation card for an exact name match so
   // nations whose descriptions mention other nations (e.g. Spain mentioning "French")
   // don't accidentally satisfy a plain hasText filter.
