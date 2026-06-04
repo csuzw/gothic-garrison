@@ -57,6 +57,7 @@
     error = null;
     try {
       units = await getUnitStore(signedIn).list();
+      if (units.length === 0) pickerOpen = true;
     } catch (e) {
       error = (e as Error).message;
     } finally {
@@ -213,10 +214,7 @@
   {:else if units.length === 0}
     <div class="card bg-base-200">
       <div class="card-body items-center text-center">
-        <p class="opacity-70">No units yet.</p>
-        <button class="btn btn-primary btn-sm" onclick={togglePicker} disabled={creating}>
-          Choose a nation to get started
-        </button>
+        <p class="opacity-70">No units yet — choose a nation above to get started.</p>
       </div>
     </div>
   {:else}

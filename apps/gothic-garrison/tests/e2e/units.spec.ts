@@ -2,10 +2,21 @@ import { type Page, expect, test } from '@playwright/test';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
+/** Open the new-unit nation picker if it isn't already open. */
+async function openPicker(page: Page) {
+  // Wait for the page load to settle, then check whether the picker auto-opened.
+  // isVisible() fires instantly and races with onMount; waitFor avoids that.
+  const opened = await page.getByRole('button', { name: 'Create' })
+    .waitFor({ state: 'visible', timeout: 3000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!opened) await page.getByRole('button', { name: 'New unit' }).click();
+}
+
 /** Open the new-unit nation picker, pick a nation, click Create. */
 async function createUnit(page: Page, nation = 'France') {
   await page.goto('/');
-  await page.getByRole('button', { name: 'New unit' }).click();
+  await openPicker(page);
   // Use the span.font-semibold inside each nation card for an exact name match so
   // nations whose descriptions mention other nations (e.g. Spain mentioning "French")
   // don't accidentally satisfy a plain hasText filter.
@@ -175,7 +186,7 @@ test.describe('units', () => {
     await expect(page.getByRole('heading', { name: /Your units/i })).toBeVisible();
 
     await expect(page.getByText(/Synced to your account/i)).toBeVisible();
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
     await page.locator('[role="button"].card')
       .filter({ has: page.locator('span.font-semibold', { hasText: /^France$/ }) })
       .click();
