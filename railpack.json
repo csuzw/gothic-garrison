@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "steps": {
+    "build": {
+      "commands": ["pnpm --filter gothic-garrison build"]
+    }
+  },
+  "deploy": {
+    "startCommand": "pnpm db:migrate && pnpm db:seed && node apps/gothic-garrison/build"
+  }
+}
