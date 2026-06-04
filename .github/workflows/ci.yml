@@ -110,7 +110,7 @@ jobs:
         run: pnpm db:seed
 
       - name: Install Playwright browsers
-        run: pnpm --filter gothic-garrison exec playwright install --with-deps chromium
+        run: pnpm --filter gothic-garrison exec playwright install --with-deps chromium webkit
 
       - name: Run e2e tests (production surface)
         run: pnpm --filter gothic-garrison test:e2e --project=chromium-desktop --project=mobile-safari
