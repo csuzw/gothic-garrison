@@ -19,7 +19,9 @@ function createAuth() {
       schema: { user, session, account, verification },
     }),
     secret: serverEnv.authSecret(),
-    baseURL: serverEnv.publicAppUrl(),
+    // baseURL intentionally omitted in code — better-auth reads BETTER_AUTH_URL
+    // from process.env automatically (set it in Railway; leave unset in dev/CI
+    // so better-auth infers from each request and CSRF works on any port).
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,

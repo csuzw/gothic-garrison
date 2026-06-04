@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   ci:
     name: Check, test & build
@@ -125,10 +130,21 @@ jobs:
       - name: Run e2e tests (production surface)
         run: pnpm --filter gothic-garrison test:e2e --project=chromium-desktop --project=mobile-safari
 
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+      - name: Upload Playwright report to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         if: always()
         with:
-          name: playwright-report
           path: apps/gothic-garrison/playwright-report/
-          retention-days: 14
+
+  publish-report:
+    name: Publish Playwright report
+    needs: e2e
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
