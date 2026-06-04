@@ -80,6 +80,7 @@ test.describe('build options — supplement filter', () => {
 
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: 'Canada' }).getByRole('checkbox').uncheck();
+    await page.getByRole('button', { name: 'Close' }).click();
 
     await page.locator('[role="button"].card')
       .filter({ has: page.locator('span.font-semibold', { hasText: /^France$/ }) })
@@ -129,6 +130,7 @@ test.describe('build options — outside-nation soldier rule', () => {
 
     await openBuildOptions(page);
     await page.locator('label').filter({ hasText: /outside-nation soldier/i }).getByRole('checkbox').uncheck();
+    await page.getByRole('button', { name: 'Close' }).click();
 
     await page.locator('[role="button"].card')
       .filter({ has: page.locator('span.font-semibold', { hasText: /^France$/ }) })
