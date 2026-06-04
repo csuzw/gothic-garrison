@@ -4,9 +4,13 @@ import { type Page, expect, test } from '@playwright/test';
 
 /** Open the new-unit nation picker if it isn't already open. */
 async function openPicker(page: Page) {
-  // Picker auto-opens when there are no units; only click when it's closed.
-  const isOpen = await page.getByRole('button', { name: 'Create' }).isVisible();
-  if (!isOpen) await page.getByRole('button', { name: 'New unit' }).click();
+  // Wait for the page load to settle, then check whether the picker auto-opened.
+  // isVisible() fires instantly and races with onMount; waitFor avoids that.
+  const opened = await page.getByRole('button', { name: 'Create' })
+    .waitFor({ state: 'visible', timeout: 3000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!opened) await page.getByRole('button', { name: 'New unit' }).click();
 }
 
 /** Open the new-unit nation picker, click a nation, and click Create. */
