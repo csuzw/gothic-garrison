@@ -186,7 +186,7 @@ test.describe('units', () => {
     await expect(page.getByRole('heading', { name: /Your units/i })).toBeVisible();
 
     await expect(page.getByText(/Synced to your account/i)).toBeVisible();
-    await page.getByRole('button', { name: 'New unit' }).click();
+    await openPicker(page);
     await page.locator('[role="button"].card')
       .filter({ has: page.locator('span.font-semibold', { hasText: /^France$/ }) })
       .click();
