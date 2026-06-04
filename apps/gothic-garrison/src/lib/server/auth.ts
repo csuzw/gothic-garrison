@@ -19,11 +19,7 @@ function createAuth() {
       schema: { user, session, account, verification },
     }),
     secret: serverEnv.authSecret(),
-    // baseURL is intentionally omitted: better-auth infers it (and the trusted
-    // origin for its CSRF check) from each request's host, so sign-in works on
-    // whatever port dev/preview lands on. Set this explicitly from
-    // PUBLIC_APP_URL once email/callback URLs (which need an absolute base) are
-    // wired up alongside the mailer.
+    baseURL: serverEnv.publicAppUrl(),
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
