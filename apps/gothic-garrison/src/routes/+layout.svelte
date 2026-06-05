@@ -51,6 +51,15 @@
   }
 </script>
 
+<svelte:head>
+  <title>Gothic Garrison – Silver Bayonet List Builder</title>
+  <meta name="description" content="Build and manage your Silver Bayonet warband. Free, unofficial fan-made list builder — works offline on mobile." />
+  <meta property="og:title" content="Gothic Garrison" />
+  <meta property="og:description" content="Build and manage your Silver Bayonet warband. Free, unofficial fan-made list builder — works offline on mobile." />
+  <meta property="og:url" content="https://gothic-garrison.app" />
+  <meta property="og:type" content="website" />
+</svelte:head>
+
 <div class="flex min-h-dvh flex-col">
   <header class="navbar bg-base-200 border-b border-primary shadow-sm print:hidden">
     <div class="container mx-auto flex items-center gap-2 px-4">
