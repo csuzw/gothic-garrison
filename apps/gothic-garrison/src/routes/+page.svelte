@@ -117,9 +117,15 @@
   }
 </script>
 
-<svelte:head><title>Units · Gothic Garrison</title></svelte:head>
+<svelte:head>
+  <title>Gothic Garrison – Silver Bayonet List Builder</title>
+  <meta name="description" content="Free fan-made list builder for The Silver Bayonet tabletop wargame. Build and print your warband, works offline on mobile." />
+</svelte:head>
 
 <section class="space-y-6">
+  <p class="text-sm opacity-60">
+    Gothic Garrison is a free, unofficial list builder for <em>The Silver Bayonet</em> — the gothic horror skirmish wargame by Joseph A. McCullough. Build your warband, browse soldiers and equipment, and print your unit cards.
+  </p>
   <div class="flex flex-wrap items-center justify-between gap-3">
     <h1 class="text-2xl font-semibold">Your units</h1>
     <button class="btn btn-primary btn-sm" onclick={togglePicker} disabled={creating}>

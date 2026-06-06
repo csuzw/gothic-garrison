@@ -53,11 +53,22 @@
 
 <svelte:head>
   <title>Gothic Garrison – Silver Bayonet List Builder</title>
-  <meta name="description" content="Build and manage your Silver Bayonet warband. Free, unofficial fan-made list builder — works offline on mobile." />
-  <meta property="og:title" content="Gothic Garrison" />
-  <meta property="og:description" content="Build and manage your Silver Bayonet warband. Free, unofficial fan-made list builder — works offline on mobile." />
+  <meta name="description" content="Free fan-made list builder for The Silver Bayonet tabletop wargame. Build and print your warband, works offline on mobile." />
+  <meta property="og:title" content="Gothic Garrison – Silver Bayonet List Builder" />
+  <meta property="og:description" content="Free fan-made list builder for The Silver Bayonet tabletop wargame. Build and print your warband, works offline on mobile." />
   <meta property="og:url" content="https://gothic-garrison.app" />
   <meta property="og:type" content="website" />
+  {@html `<script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Gothic Garrison",
+    "url": "https://gothic-garrison.app",
+    "description": "Free fan-made list builder for The Silver Bayonet tabletop wargame. Build and print your warband, works offline on mobile.",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+    "keywords": "Silver Bayonet, list builder, warband builder, tabletop wargame, gothic horror, skirmish game"
+  })}</script>`}
 </svelte:head>
 
 <div class="flex min-h-dvh flex-col">
