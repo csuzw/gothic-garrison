@@ -5,6 +5,8 @@ import {
   type CommandStyle,
 } from './budget.ts';
 
+export { BASE_RECRUITMENT_BUDGET };
+
 // The denormalised unit document. This is the single source of truth, stored
 // verbatim in `units.data` (jsonb) for signed-in users and in IndexedDB for
 // anonymous ones — the *same shape* in both places (see CLAUDE.md). Snapshotted
@@ -186,6 +188,8 @@ export interface UnitDoc {
   optionalRules: string[];
   /** Source codes enabled for this unit. null = all sources. Core is always included. Set at creation, read-only after. */
   enabledSourceCodes: string[] | null;
+  /** House-rule starting recruitment budget. Defaults to BASE_RECRUITMENT_BUDGET (100) when absent. Min 50. */
+  baseBudget?: number;
   updatedAt: string; // ISO timestamp
 }
 
@@ -220,7 +224,7 @@ export function createUnitDoc(name = 'New unit'): UnitDoc {
 }
 
 export function unitBudget(doc: UnitDoc): number {
-  return recruitmentBudget(BASE_RECRUITMENT_BUDGET, doc.officer.commandStyle);
+  return recruitmentBudget(doc.baseBudget ?? BASE_RECRUITMENT_BUDGET, doc.officer.commandStyle);
 }
 
 export function memberPurchasedCost(m: MemberSnapshot): number {
