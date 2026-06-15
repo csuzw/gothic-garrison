@@ -5,7 +5,7 @@
   import type { PageProps } from './$types';
   import NationFlag from '$lib/components/NationFlag.svelte';
   import { getUnitStore, indexedDbStore } from '$lib/unit/store';
-  import { createUnitDoc, OUTSIDE_NATION_RULE_CODE, type UnitSummary } from '$lib/unit/types';
+  import { createUnitDoc, OUTSIDE_NATION_RULE_CODE, BASE_RECRUITMENT_BUDGET, type UnitSummary } from '$lib/unit/types';
 
   let { data }: PageProps = $props();
 
@@ -28,6 +28,10 @@
     untrack(() => data.sources.filter((s) => s.kind === 'supplement').map((s) => s.code)),
   );
   let allowOutsideNation = $state(true);
+  let baseBudget = $state(BASE_RECRUITMENT_BUDGET);
+
+  const MIN_BUDGET = 50;
+  const MAX_BUDGET = 300;
 
   const allSupplementsEnabled = $derived(
     supplementSources.every((s) => enabledSupplementCodes.includes(s.code)),
@@ -35,7 +39,7 @@
   const filteredNations = $derived(
     data.nations.filter((n) => n.sourceCode === 'core' || enabledSupplementCodes.includes(n.sourceCode)),
   );
-  const optionsCustomised = $derived(!allSupplementsEnabled || !allowOutsideNation);
+  const optionsCustomised = $derived(!allSupplementsEnabled || !allowOutsideNation || baseBudget !== BASE_RECRUITMENT_BUDGET);
   const infoNation = $derived(infoNationId ? filteredNations.find((n) => n.id === infoNationId) : null);
 
   $effect(() => {
@@ -79,6 +83,9 @@
       }
       if (allowOutsideNation) {
         doc.optionalRules = [OUTSIDE_NATION_RULE_CODE];
+      }
+      if (baseBudget !== BASE_RECRUITMENT_BUDGET) {
+        doc.baseBudget = baseBudget;
       }
       // When offline and signed in, save to IndexedDB so the unit persists
       // locally and migrates to the server automatically on reconnect.
@@ -310,6 +317,19 @@
           <input type="checkbox" class="checkbox checkbox-sm" bind:checked={allowOutsideNation} />
           <span class="text-sm">Allow one outside-nation soldier (+8 pts)</span>
         </label>
+      </div>
+      <div>
+        <p class="mb-2 text-xs font-medium opacity-70">Recruitment budget</p>
+        <div class="flex items-center gap-2">
+          <div class="join">
+            <button class="btn btn-ghost btn-sm join-item" onclick={() => (baseBudget = Math.max(MIN_BUDGET, baseBudget - 5))} disabled={baseBudget <= MIN_BUDGET}>−5</button>
+            <span class="btn btn-sm join-item pointer-events-none tabular-nums">{baseBudget} pts</span>
+            <button class="btn btn-ghost btn-sm join-item" onclick={() => (baseBudget = Math.min(MAX_BUDGET, baseBudget + 5))} disabled={baseBudget >= MAX_BUDGET}>+5</button>
+          </div>
+          {#if baseBudget !== BASE_RECRUITMENT_BUDGET}
+            <button class="btn btn-ghost btn-xs opacity-60" onclick={() => (baseBudget = BASE_RECRUITMENT_BUDGET)}>Reset</button>
+          {/if}
+        </div>
       </div>
     </div>
   </div>

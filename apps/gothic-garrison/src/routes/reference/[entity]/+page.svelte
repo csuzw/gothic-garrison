@@ -250,16 +250,16 @@
                   <div class="flex max-w-xs flex-wrap gap-1">
                     {#each attrIds as aid (aid)}
                       {@const attr = allAttributes.find((a) => a.id === aid)}
-                      {#if attr}<span class="badge badge-outline badge-xs" title={attr.rules ?? attr.name}>{attr.name}</span>{/if}
+                      {#if attr}<span class="badge badge-outline badge-xs whitespace-nowrap" title={attr.rules ?? attr.name}>{attr.name}</span>{/if}
                     {/each}
                     {#if (row.attributePicks as number) > 0}
-                      <span class="badge badge-outline badge-xs opacity-60">Officer ({row.attributePicks})</span>
+                      <span class="badge badge-outline badge-xs whitespace-nowrap opacity-60">Officer ({row.attributePicks})</span>
                     {/if}
                   </div>
                 </td>
                 <td>
                   {#if row.equipmentMode === 'pool'}
-                    <span class="badge badge-outline badge-xs opacity-60">Officer</span>
+                    <span class="badge badge-outline badge-xs whitespace-nowrap opacity-60">Officer</span>
                   {:else}
                     <div class="flex flex-col gap-1">
                       {#each los as lo}
@@ -268,7 +268,7 @@
                           {#each lo.items as item (item.equipmentItemId)}
                             {@const eq = allEquipment.find((e) => e.id === item.equipmentItemId)}
                             {#if eq}
-                              <span class="badge badge-outline badge-xs" title={eq.rules || eq.name}
+                              <span class="badge badge-outline badge-xs whitespace-nowrap" title={eq.rules || eq.name}
                                 >{eq.name}{item.quantity > 1 ? ` ×${item.quantity}` : ''}</span>
                             {/if}
                           {/each}
@@ -339,7 +339,7 @@
                   <div class="flex max-w-xs flex-wrap gap-1">
                     {#each attrIds as aid (aid)}
                       {@const attr = allAttributes.find((a) => a.id === aid)}
-                      {#if attr}<span class="badge badge-outline badge-xs" title={attr.rules ?? attr.name}>{attr.name}</span>{/if}
+                      {#if attr}<span class="badge badge-outline badge-xs whitespace-nowrap" title={attr.rules ?? attr.name}>{attr.name}</span>{/if}
                     {/each}
                   </div>
                 </td>
@@ -351,7 +351,7 @@
                         {#each lo.items as item (item.equipmentItemId)}
                           {@const eq = allEquipment.find((e) => e.id === item.equipmentItemId)}
                           {#if eq}
-                            <span class="badge badge-outline badge-xs" title={eq.rules || eq.name}
+                            <span class="badge badge-outline badge-xs whitespace-nowrap" title={eq.rules || eq.name}
                               >{eq.name}{item.quantity > 1 ? ` ×${item.quantity}` : ''}</span>
                           {/if}
                         {/each}

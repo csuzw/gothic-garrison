@@ -25,6 +25,7 @@
     OFFICER_ATTRIBUTE_PICKS,
     OUTSIDE_NATION_RULE_CODE,
     OUTSIDE_NATION_SOLDIER_COST,
+    BASE_RECRUITMENT_BUDGET,
     type UnitDoc,
     type AttributeSnapshot,
     type EquipmentSnapshot,
@@ -95,6 +96,7 @@
   const budget = $derived(doc ? unitBudget(doc) : 0);
   const spent = $derived(doc ? unitSpent(doc) : 0);
   const overBudget = $derived(spent > budget);
+  const baseBudget = $derived(doc?.baseBudget ?? BASE_RECRUITMENT_BUDGET);
   const officerStatLine = $derived(doc ? officerStats(doc.officer) : null);
 
   const nationId = $derived(doc?.nationId ?? null);
@@ -395,6 +397,7 @@
         <div class="stat-desc">
           pts spent
           {#if doc.officer.commandStyle === 'recruitment'}· +5 from Command Style{/if}
+          {#if baseBudget !== BASE_RECRUITMENT_BUDGET}· base {baseBudget} pts{/if}
           {#if overBudget}· over budget{/if}
         </div>
       </div>
