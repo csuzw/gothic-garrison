@@ -385,4 +385,8 @@
 
   </div>
 
+  <p class="cs-credit pt-2 text-center text-xs opacity-60 print:text-[6pt]">
+    Based on a cheat sheet by PureZestyLemons.
+  </p>
+
 </div>
