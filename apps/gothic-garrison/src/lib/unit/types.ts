@@ -13,7 +13,55 @@ export { BASE_RECRUITMENT_BUDGET };
 // fields (member name/cost/stats) make a unit renderable without current
 // reference data.
 
-export const UNIT_SCHEMA_VERSION = 1;
+export const UNIT_SCHEMA_VERSION = 2;
+
+// ── Campaign types ───────────────────────────────────────────────────────────
+
+export type MemberStatus = 'active' | 'retired' | 'dead' | 'permanently_insane';
+
+export type TierUpgradeType =
+  | 'stat_courage' | 'stat_health' | 'stat_melee' | 'stat_accuracy'
+  | 'new_attribute' | 'budget_5' | 'budget_10'; // budget_* are officer-only
+
+export interface TierUpgrade {
+  tier: number;
+  type: TierUpgradeType;
+  attributeId?: string;
+  attributeName?: string;
+}
+
+export interface CampaignEffect {
+  id: string;
+  label: string;
+  /** Absent for label-only effects (most madness results). */
+  statDelta?: Partial<SoldierStats>;
+}
+
+// XP thresholds for tiers 1–9
+export const XP_TIER_THRESHOLDS = [5, 10, 18, 30, 45, 65, 100, 150, 200] as const;
+
+// Upgrade options available per tier; budget_* excluded for non-officers
+export const TIER_UPGRADE_OPTIONS: Record<number, TierUpgradeType[]> = {
+  1: ['stat_courage'],
+  2: ['stat_health', 'new_attribute', 'budget_5'],
+  3: ['stat_melee', 'stat_accuracy', 'budget_10'],
+  4: ['stat_courage'],
+  5: ['stat_health', 'new_attribute', 'budget_5'],
+  6: ['stat_courage', 'stat_health', 'new_attribute', 'budget_5'],
+  7: ['stat_courage', 'stat_health', 'new_attribute', 'budget_5'],
+  8: ['stat_courage', 'stat_health', 'new_attribute', 'budget_5'],
+  9: ['stat_courage', 'stat_health', 'new_attribute', 'budget_5'],
+};
+
+export const TIER_UPGRADE_LABELS: Record<TierUpgradeType, string> = {
+  stat_courage: '+1 Courage',
+  stat_health: '+1 Health',
+  stat_melee: '+1 Melee',
+  stat_accuracy: '+1 Shoot',
+  new_attribute: 'New Attribute',
+  budget_5: '+5 Recruit',
+  budget_10: '+10 Recruit',
+};
 
 // Officer's three confirmed binary choices (one per row).
 export type CombatTraining = 'melee' | 'accuracy';
@@ -44,6 +92,13 @@ export interface OfficerSnapshot {
   /** Pick exactly 2 from the officer-flagged pool. */
   attributes: AttributeSnapshot[];
   equipment: EquipmentSnapshot[];
+  // Campaign fields — absent on non-campaign units
+  xp?: number;
+  tierUpgrades?: TierUpgrade[];
+  campaignEffects?: CampaignEffect[];
+  /** Set only when archived in removedOfficers. */
+  status?: Exclude<MemberStatus, 'active'>;
+  removalReason?: string;
 }
 
 export interface SoldierStats {
@@ -93,6 +148,12 @@ export interface MemberSnapshot {
   loadoutId: string | null;
   /** True when this soldier was recruited via the outside-nation optional rule (+8 pts). */
   isOutsideNationPick?: boolean;
+  // Campaign fields — absent on non-campaign units
+  xp?: number;
+  tierUpgrades?: TierUpgrade[];
+  campaignEffects?: CampaignEffect[];
+  status?: MemberStatus;
+  removalReason?: string;
 }
 
 export const OUTSIDE_NATION_RULE_CODE = 'outside-nation-soldier';
@@ -164,6 +225,8 @@ export function normalizeUnitDoc(raw: any): UnitDoc {
     ...raw,
     enabledSourceCodes: raw.enabledSourceCodes ?? null,
     optionalRules: raw.optionalRules ?? [],
+    campaignMode: raw.campaignMode ?? false,
+    removedOfficers: raw.removedOfficers ?? [],
     members: (raw.members ?? []).map((m: any) => ({
       ...m,
       specialEquipment: Array.isArray(m.specialEquipment)
@@ -172,6 +235,8 @@ export function normalizeUnitDoc(raw: any): UnitDoc {
         ? [m.specialEquipment]
         : [],
       purchasedAttributes: Array.isArray(m.purchasedAttributes) ? m.purchasedAttributes : [],
+      tierUpgrades: m.tierUpgrades ?? [],
+      campaignEffects: m.campaignEffects ?? [],
     })),
   };
 }
@@ -191,6 +256,10 @@ export interface UnitDoc {
   /** House-rule starting recruitment budget. Defaults to BASE_RECRUITMENT_BUDGET (100) when absent. Min 50. */
   baseBudget?: number;
   updatedAt: string; // ISO timestamp
+  // Campaign fields
+  campaignMode?: boolean;
+  /** Officers archived due to death, insanity, or retirement. doc.officer is always the current active one. */
+  removedOfficers?: OfficerSnapshot[];
 }
 
 export interface UnitSummary {
@@ -223,8 +292,63 @@ export function createUnitDoc(name = 'New unit'): UnitDoc {
   };
 }
 
+export function xpToTier(xp: number): number {
+  let tier = 0;
+  for (let i = 0; i < XP_TIER_THRESHOLDS.length; i++) {
+    if (xp >= XP_TIER_THRESHOLDS[i]) tier = i + 1;
+    else break;
+  }
+  return tier;
+}
+
+export function pendingUpgradeCount(xp: number, tierUpgrades: TierUpgrade[]): number {
+  return xpToTier(xp) - tierUpgrades.length;
+}
+
+export function officerCampaignBudgetBonus(officer: OfficerSnapshot): number {
+  return (officer.tierUpgrades ?? []).reduce((sum, u) => {
+    if (u.type === 'budget_5') return sum + 5;
+    if (u.type === 'budget_10') return sum + 10;
+    return sum;
+  }, 0);
+}
+
+/** Compute effective stats from base stats plus tier upgrade bonuses and campaign effect penalties. */
+export function effectiveStats(
+  base: SoldierStats,
+  tierUpgrades: TierUpgrade[] = [],
+  campaignEffects: CampaignEffect[] = [],
+): SoldierStats {
+  const result = { ...base };
+  for (const u of tierUpgrades) {
+    if (u.type === 'stat_courage') result.courage += 1;
+    else if (u.type === 'stat_health') result.health += 1;
+    else if (u.type === 'stat_melee') result.melee += 1;
+    else if (u.type === 'stat_accuracy') result.accuracy += 1;
+  }
+  for (const e of campaignEffects) {
+    if (e.statDelta) {
+      for (const [k, delta] of Object.entries(e.statDelta) as [keyof SoldierStats, number][]) {
+        result[k] += delta;
+      }
+    }
+  }
+  return result;
+}
+
+export function unitPowerRanking(doc: UnitDoc): number {
+  if (!doc.campaignMode) return 0;
+  const officerTier = xpToTier(doc.officer.xp ?? 0);
+  const memberTiers = doc.members
+    .filter((m) => (m.status ?? 'active') === 'active')
+    .reduce((sum, m) => sum + xpToTier(m.xp ?? 0), 0);
+  return officerTier + memberTiers;
+}
+
 export function unitBudget(doc: UnitDoc): number {
-  return recruitmentBudget(doc.baseBudget ?? BASE_RECRUITMENT_BUDGET, doc.officer.commandStyle);
+  const base = recruitmentBudget(doc.baseBudget ?? BASE_RECRUITMENT_BUDGET, doc.officer.commandStyle);
+  if (doc.campaignMode) return base + officerCampaignBudgetBonus(doc.officer);
+  return base;
 }
 
 export function memberPurchasedCost(m: MemberSnapshot): number {
@@ -232,7 +356,8 @@ export function memberPurchasedCost(m: MemberSnapshot): number {
 }
 
 export function unitSpent(doc: UnitDoc): number {
-  return spentPoints(doc.members.map((m) => m.cost + memberPurchasedCost(m)));
+  const activeMembers = doc.members.filter((m) => (m.status ?? 'active') === 'active');
+  return spentPoints(activeMembers.map((m) => m.cost + memberPurchasedCost(m)));
 }
 
 export function toSummary(doc: UnitDoc): UnitSummary {

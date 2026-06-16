@@ -35,11 +35,21 @@
     };
   });
 
-  // href === null → shown but disabled ("coming soon").
-  const navLinks: { label: string; href: string | null }[] = [
+  // href === null → shown but disabled ("coming soon"). children → submenu group.
+  interface NavChild { label: string; href: string; }
+  interface NavLink { label: string; href: string | null; children?: NavChild[]; }
+
+  const navLinks: NavLink[] = [
     { label: 'Units', href: '/' },
     { label: 'Campaigns', href: null },
-    { label: 'Cheat Sheet', href: '/cheat-sheet' },
+    {
+      label: 'Cheat Sheets',
+      href: null,
+      children: [
+        { label: 'Rules', href: '/cheat-sheet' },
+        { label: 'Campaign Post-Battle', href: '/cheat-sheet/campaign' },
+      ],
+    },
     { label: 'Reference', href: '/reference' },
   ];
 
@@ -48,6 +58,17 @@
     if (!href) return false;
     if (href === '/') return pathname === '/' || pathname.startsWith('/units');
     return pathname === href || pathname.startsWith(href + '/');
+  }
+  function isGroupActive(link: NavLink): boolean {
+    if (link.children) return link.children.some((c) => isActive(c.href));
+    return isActive(link.href);
+  }
+  function closeParentDetails(e: MouseEvent) {
+    let el = (e.currentTarget as HTMLElement).parentElement;
+    while (el) {
+      if (el.tagName === 'DETAILS') (el as HTMLDetailsElement).open = false;
+      el = el.parentElement;
+    }
   }
 </script>
 
@@ -83,13 +104,26 @@
         </summary>
         <ul class="dropdown-content menu bg-base-200 rounded-box z-10 mt-2 w-52 p-2 shadow">
           {#each navLinks as link (link.label)}
-            <li>
-              {#if link.href}
+            {#if link.children}
+              <li>
+                <details>
+                  <summary class:menu-active={isGroupActive(link)}>{link.label}</summary>
+                  <ul>
+                    {#each link.children as child}
+                      <li><a href={child.href} class:menu-active={pathname === child.href} onclick={closeParentDetails}>{child.label}</a></li>
+                    {/each}
+                  </ul>
+                </details>
+              </li>
+            {:else if link.href}
+              <li>
                 <a href={link.href} class:menu-active={isActive(link.href)}>{link.label}</a>
-              {:else}
+              </li>
+            {:else}
+              <li>
                 <span class="opacity-40">{link.label} <span class="badge badge-ghost badge-xs">soon</span></span>
-              {/if}
-            </li>
+              </li>
+            {/if}
           {/each}
         </ul>
       </details>
@@ -102,7 +136,21 @@
       <!-- Desktop: inline page links -->
       <nav class="ml-4 hidden items-center gap-1 lg:flex">
         {#each navLinks as link (link.label)}
-          {#if link.href}
+          {#if link.children}
+            <details class="dropdown">
+              <summary class="btn btn-ghost btn-sm list-none" class:btn-active={isGroupActive(link)}>
+                {link.label}
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <ul class="dropdown-content menu bg-base-200 rounded-box z-10 mt-1 w-52 p-2 shadow">
+                {#each link.children as child}
+                  <li><a href={child.href} class:menu-active={pathname === child.href} onclick={closeParentDetails}>{child.label}</a></li>
+                {/each}
+              </ul>
+            </details>
+          {:else if link.href}
             <a href={link.href} class="btn btn-ghost btn-sm" class:btn-active={isActive(link.href)}>
               {link.label}
             </a>

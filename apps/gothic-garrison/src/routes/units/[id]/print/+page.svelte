@@ -7,6 +7,8 @@
   import {
     normalizeUnitDoc,
     officerStats,
+    effectiveStats,
+    xpToTier,
     unitBudget,
     unitSpent,
     memberPurchasedCost,
@@ -37,7 +39,11 @@
 
   const budget = $derived(doc ? unitBudget(doc) : 0);
   const spent = $derived(doc ? unitSpent(doc) : 0);
-  const officerStatLine = $derived(doc ? officerStats(doc.officer) : null);
+  const officerStatLine = $derived(
+    doc ? effectiveStats(officerStats(doc.officer), doc.officer.tierUpgrades ?? [], doc.officer.campaignEffects ?? []) : null,
+  );
+  const officerTier = $derived(xpToTier(doc?.officer.xp ?? 0));
+  const activeMembers = $derived((doc?.members ?? []).filter((m) => (m.status ?? 'active') === 'active'));
   const equipById = $derived(new Map(data.reference.equipment.map((e) => [e.id, e])));
   const soldierRef = (typeId: string | null) => data.reference.soldiers.find((s) => s.id === typeId);
 
@@ -52,7 +58,7 @@
     for (const a of doc.officer.attributes) {
       add(a.name, data.reference.attributes.find((r) => r.id === a.id)?.rules);
     }
-    for (const m of doc.members) {
+    for (const m of activeMembers) {
       const ref = soldierRef(m.soldierTypeId);
       for (const a of ref?.fixedAttributes ?? []) add(a.name, a.rules);
       for (const a of m.attributes) {
@@ -73,7 +79,7 @@
       if (rules && !map.has(name)) map.set(name, rules);
     };
     for (const it of doc.officer.equipment) add(it.name, it.itemId);
-    for (const m of doc.members) {
+    for (const m of activeMembers) {
       for (const it of m.equipment) add(it.name, it.itemId);
       for (const it of m.specialEquipment) add(it.name, it.itemId);
     }
@@ -138,7 +144,7 @@
           {doc.nationName}
         </span>
       {/if}
-      <span class="text-sm opacity-60">{spent} / {budget} pts · {doc.members.length} soldier{doc.members.length !== 1 ? 's' : ''}</span>
+      <span class="text-sm opacity-60">{spent} / {budget} pts · {activeMembers.length} soldier{activeMembers.length !== 1 ? 's' : ''}</span>
       <label class="flex cursor-pointer items-center gap-2 text-sm">
         <input type="checkbox" class="checkbox checkbox-sm" bind:checked={showRules} />
         Rules reference
@@ -164,8 +170,8 @@
           <tr>
             <td colspan="4" class="border border-black h-8 px-2 align-middle">{doc.officer.name || ''}</td>
             <td class="border border-black h-8 px-2 align-middle">Officer</td>
-            <td class="border border-black h-8"></td>
-            <td class="border border-black h-8"></td>
+            <td class="border border-black h-8 text-center align-middle">{doc.campaignMode ? officerTier : ''}</td>
+            <td class="border border-black h-8 text-center align-middle">{doc.campaignMode ? (doc.officer.xp ?? 0) : ''}</td>
           </tr>
           <tr>
             {#each STAT_META as m}
@@ -181,7 +187,8 @@
           </tr>
           <tr>
             <td colspan="7" class="border border-black px-2 py-1">
-              <span class="cell-label font-semibold">Attributes:</span> {fmtAttributes(doc.officer.attributes)}
+              <span class="cell-label font-semibold">Attributes:</span>
+              {[...doc.officer.attributes.map(a => a.name), ...(doc.officer.tierUpgrades ?? []).filter(u => u.type === 'new_attribute').map(u => u.attributeName ?? ''), ...(doc.officer.campaignEffects ?? []).map(e => e.statDelta ? `${e.label} (${Object.entries(e.statDelta).map(([k,v]) => `${v > 0 ? '+' : ''}${v} ${k}`).join(', ')})` : e.label)].filter(Boolean).join(', ')}
             </td>
           </tr>
           <tr>
@@ -193,10 +200,14 @@
       </table>
     {/if}
 
-    <!-- Soldier cards -->
-    {#each doc.members as m (m.id)}
+    <!-- Soldier cards (active members only) -->
+    {#each activeMembers as m (m.id)}
       {@const ref = soldierRef(m.soldierTypeId)}
-      {@const allAttrStr = [...(ref?.fixedAttributes ?? []).map((a) => a.name), ...m.attributes.map((a) => a.name), ...(m.purchasedAttributes ?? []).map((a) => a.name)].join(', ')}
+      {@const mStats = m.stats ? effectiveStats(m.stats, m.tierUpgrades ?? [], m.campaignEffects ?? []) : null}
+      {@const mTier = xpToTier(m.xp ?? 0)}
+      {@const tierAttrNames = (m.tierUpgrades ?? []).filter(u => u.type === 'new_attribute').map(u => u.attributeName ?? '')}
+      {@const effectLabels = (m.campaignEffects ?? []).map(e => e.statDelta ? `${e.label} (${Object.entries(e.statDelta).map(([k,v]) => `${v > 0 ? '+' : ''}${v} ${k}`).join(', ')})` : e.label)}
+      {@const allAttrParts = [...(ref?.fixedAttributes ?? []).map((a) => a.name), ...m.attributes.map((a) => a.name), ...(m.purchasedAttributes ?? []).map((a) => a.name), ...tierAttrNames, ...effectLabels]}
       {@const allEquip = [...m.equipment, ...m.specialEquipment]}
       <table class="w-full border-collapse text-xs print:break-inside-avoid">
         <tbody>
@@ -209,8 +220,8 @@
           <tr>
             <td colspan="4" class="border border-black h-8 px-2 align-middle">{m.customName || ''}</td>
             <td class="border border-black h-8 px-2 align-middle">{m.name}</td>
-            <td class="border border-black h-8"></td>
-            <td class="border border-black h-8"></td>
+            <td class="border border-black h-8 text-center align-middle">{doc.campaignMode ? mTier : ''}</td>
+            <td class="border border-black h-8 text-center align-middle">{doc.campaignMode ? (m.xp ?? 0) : ''}</td>
           </tr>
           <tr>
             {#each STAT_META as meta}
@@ -219,9 +230,9 @@
             <th class="card-header bg-base-200 border border-black px-1 py-1 text-center font-normal">Recruitment</th>
           </tr>
           <tr>
-            {#if m.stats}
+            {#if mStats}
               {#each STAT_META as meta}
-                <td class="border border-black h-8 text-center align-middle">{fmtStat(m.stats[meta.key], meta.mod)}</td>
+                <td class="border border-black h-8 text-center align-middle">{fmtStat(mStats[meta.key], meta.mod)}</td>
               {/each}
             {:else}
               {#each STAT_META as _}<td class="border border-black h-8"></td>{/each}
@@ -230,7 +241,7 @@
           </tr>
           <tr>
             <td colspan="7" class="border border-black px-2 py-1">
-              <span class="cell-label font-semibold">Attributes:</span> {allAttrStr}
+              <span class="cell-label font-semibold">Attributes:</span> {allAttrParts.filter(Boolean).join(', ')}
             </td>
           </tr>
           <tr>

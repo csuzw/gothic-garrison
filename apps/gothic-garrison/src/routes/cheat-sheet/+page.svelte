@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Cheat Sheet · Gothic Garrison</title>
+  <title>Cheat Sheets · Gothic Garrison</title>
 </svelte:head>
 
 <style>
@@ -67,7 +67,7 @@
 </style>
 
 <div class="print:hidden mb-5 flex items-center justify-between gap-4">
-  <h1 class="text-2xl font-bold">Cheat Sheet</h1>
+  <h1 class="text-2xl font-bold">Rules Cheat Sheet</h1>
   <button class="btn btn-primary btn-sm" onclick={() => window.print()}>
     Print / Save PDF
   </button>
