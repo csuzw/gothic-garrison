@@ -19,6 +19,10 @@
     specialUsed,
     normalizeUnitDoc,
     officerStats,
+    effectiveStats,
+    xpToTier,
+    pendingUpgradeCount,
+    unitPowerRanking,
     OFFICER_BASE_STATS,
     MAX_SOLDIERS,
     OFFICER_EQUIPMENT_SLOTS,
@@ -26,10 +30,18 @@
     OUTSIDE_NATION_RULE_CODE,
     OUTSIDE_NATION_SOLDIER_COST,
     BASE_RECRUITMENT_BUDGET,
+    XP_TIER_THRESHOLDS,
+    TIER_UPGRADE_OPTIONS,
+    TIER_UPGRADE_LABELS,
     type UnitDoc,
+    type OfficerSnapshot,
     type AttributeSnapshot,
     type EquipmentSnapshot,
     type MemberSnapshot,
+    type TierUpgrade,
+    type TierUpgradeType,
+    type CampaignEffect,
+    type MemberStatus,
   } from '$lib/unit/types';
 
   let { data }: PageProps = $props();
@@ -97,11 +109,56 @@
   const spent = $derived(doc ? unitSpent(doc) : 0);
   const overBudget = $derived(spent > budget);
   const baseBudget = $derived(doc?.baseBudget ?? BASE_RECRUITMENT_BUDGET);
-  const officerStatLine = $derived(doc ? officerStats(doc.officer) : null);
+  const officerStatLine = $derived(
+    doc ? effectiveStats(officerStats(doc.officer), doc.officer.tierUpgrades ?? [], doc.officer.campaignEffects ?? []) : null,
+  );
 
   const nationId = $derived(doc?.nationId ?? null);
-  const members = $derived(doc?.members ?? []);
+  const members = $derived((doc?.members ?? []).filter((m) => (m.status ?? 'active') === 'active'));
+  const removedMembers = $derived((doc?.members ?? []).filter((m) => (m.status ?? 'active') !== 'active'));
   const rosterFull = $derived(members.length >= MAX_SOLDIERS);
+
+  // Campaign
+  const campaignMode = $derived(doc?.campaignMode ?? false);
+  const powerRanking = $derived(doc ? unitPowerRanking(doc) : 0);
+  const officerTier = $derived(xpToTier(doc?.officer.xp ?? 0));
+  const officerPending = $derived(pendingUpgradeCount(doc?.officer.xp ?? 0, doc?.officer.tierUpgrades ?? []));
+  function lowestPendingTier(xp: number, upgrades: TierUpgrade[]): number {
+    return upgrades.length + 1;
+  }
+
+  let campaignConfirming = $state(false);
+  interface TierUpgradeTarget { isOfficer: boolean; memberId: string | null; tier: number; }
+  let tierUpgradeTarget = $state<TierUpgradeTarget | null>(null);
+  let tierUpgradePickingAttr = $state(false);
+  interface TableResultTarget { isOfficer: boolean; memberId: string | null; table: 'injury' | 'madness'; }
+  let tableResultTarget = $state<TableResultTarget | null>(null);
+  let tableResultSubTable = $state(false);
+  let retireConfirmId = $state<string | null>(null);
+  let officerRemoveConfirming = $state(false);
+
+  // Table result definitions (Flesh Wound excluded — no effect to store)
+  const INJURY_RESULTS = [
+    { id: 'dead', label: 'Dead', desc: 'Removed from roster permanently', terminal: 'dead' as Exclude<MemberStatus, 'active'> },
+    { id: 'perm_injury', label: 'Permanent Injury', desc: 'Roll on Permanent Injury table', subTable: true as const },
+    { id: 'slow_recovery', label: 'Slow Recovery', desc: '-3 Health (start of next game)', effect: { label: 'Slow Recovery', statDelta: { health: -3 as number } } },
+  ] as const;
+  const PERM_INJURY_RESULTS = [
+    { id: 'leg', label: 'Leg wound (-1 Speed)', effect: { label: 'Leg wound', statDelta: { speed: -1 as number } } },
+    { id: 'arm', label: 'Arm wound (-1 Melee)', effect: { label: 'Arm wound', statDelta: { melee: -1 as number } } },
+    { id: 'shakes', label: 'Shakes (-1 Accuracy)', effect: { label: 'Shakes', statDelta: { accuracy: -1 as number } } },
+    { id: 'jitters', label: 'Jitters (-1 Courage)', effect: { label: 'Jitters', statDelta: { courage: -1 as number } } },
+    { id: 'internal', label: 'Internal Injuries (-1 Health)', effect: { label: 'Internal Injuries', statDelta: { health: -1 as number } } },
+  ] as const;
+  const MADNESS_RESULTS = [
+    { id: 'perm_insane', label: 'Permanently Insane', desc: 'Removed from roster permanently', terminal: 'permanently_insane' as Exclude<MemberStatus, 'active'> },
+    { id: 'episode', label: 'Episode of Madness', desc: 'In-game effect', effect: { label: 'Episode of Madness' } },
+    { id: 'spy', label: 'Spy for the Harvestmen', desc: 'In-game effect', effect: { label: 'Spy for the Harvestmen' } },
+    { id: 'cursed', label: 'Cursed', desc: 'In-game effect', effect: { label: 'Cursed' } },
+    { id: 'imbalanced', label: 'Imbalanced', desc: 'In-game effect', effect: { label: 'Imbalanced' } },
+    { id: 'confused', label: 'Confused', desc: 'In-game effect', effect: { label: 'Confused' } },
+    { id: 'nagging_doubt', label: 'Nagging Doubt (-1 Health)', desc: '-1 Health', effect: { label: 'Nagging Doubt', statDelta: { health: -1 as number } } },
+  ] as const;
 
   let soldierPickerCollapsed = $state(false);
   let _soldierPickerAutoInit = false;
@@ -212,6 +269,7 @@
       equipment: [],
       specialEquipment: [],
       loadoutId: null,
+      ...(doc.campaignMode && { xp: 0, tierUpgrades: [], campaignEffects: [] }),
     };
     const first = s.loadouts[0];
     if (first && s.equipmentMode === 'fixed') member.equipment = snapshotItems(first.items);
@@ -231,6 +289,123 @@
   function removeMember(memberId: string) {
     if (!doc) return;
     doc.members = doc.members.filter((m) => m.id !== memberId);
+  }
+
+  // ── campaign ─────────────────────────────────────────────────────────────────
+
+  function freshOfficer(): OfficerSnapshot {
+    return { name: '', combatTraining: 'melee', physicalEdge: 'health', commandStyle: 'courage', attributes: [], equipment: [], xp: 0, tierUpgrades: [], campaignEffects: [] };
+  }
+
+  function startCampaign() {
+    if (!doc) return;
+    doc.campaignMode = true;
+    doc.removedOfficers ??= [];
+    doc.officer.xp ??= 0;
+    doc.officer.tierUpgrades ??= [];
+    doc.officer.campaignEffects ??= [];
+    for (const m of doc.members) {
+      m.xp ??= 0;
+      m.tierUpgrades ??= [];
+      m.campaignEffects ??= [];
+    }
+    campaignConfirming = false;
+  }
+
+  function getCampaignTarget(isOfficer: boolean, memberId: string | null): OfficerSnapshot | MemberSnapshot | null {
+    if (!doc) return null;
+    if (isOfficer) return doc.officer;
+    return doc.members.find((m) => m.id === memberId) ?? null;
+  }
+
+  function applyTierUpgrade(type: TierUpgradeType, attrId?: string, attrName?: string) {
+    if (!doc || !tierUpgradeTarget) return;
+    const target = getCampaignTarget(tierUpgradeTarget.isOfficer, tierUpgradeTarget.memberId);
+    if (!target) return;
+    target.tierUpgrades ??= [];
+    const upgrade: TierUpgrade = { tier: tierUpgradeTarget.tier, type };
+    if (type === 'new_attribute' && attrId && attrName) {
+      upgrade.attributeId = attrId;
+      upgrade.attributeName = attrName;
+    }
+    target.tierUpgrades.push(upgrade);
+    tierUpgradeTarget = null;
+    tierUpgradePickingAttr = false;
+  }
+
+  function removeCampaignEffect(target: OfficerSnapshot | MemberSnapshot, effectId: string) {
+    target.campaignEffects = (target.campaignEffects ?? []).filter((e) => e.id !== effectId);
+  }
+
+  function applyInjuryResult(result: typeof INJURY_RESULTS[number]) {
+    if (!tableResultTarget || !doc) return;
+    const { isOfficer, memberId } = tableResultTarget;
+    if ('terminal' in result) {
+      archiveMember(isOfficer, memberId, result.terminal, result.terminal === 'dead' ? 'Killed in battle' : 'Permanent insanity');
+      tableResultTarget = null;
+      tableResultSubTable = false;
+    } else if ('subTable' in result) {
+      tableResultSubTable = true;
+    } else if ('effect' in result) {
+      const target = getCampaignTarget(isOfficer, memberId);
+      if (target) {
+        target.campaignEffects ??= [];
+        target.campaignEffects.push({ id: crypto.randomUUID(), label: result.effect.label, statDelta: result.effect.statDelta });
+      }
+      tableResultTarget = null;
+      tableResultSubTable = false;
+    }
+  }
+
+  function applyPermInjuryResult(result: typeof PERM_INJURY_RESULTS[number]) {
+    if (!tableResultTarget || !doc) return;
+    const target = getCampaignTarget(tableResultTarget.isOfficer, tableResultTarget.memberId);
+    if (target) {
+      target.campaignEffects ??= [];
+      target.campaignEffects.push({ id: crypto.randomUUID(), label: result.effect.label, statDelta: result.effect.statDelta });
+    }
+    tableResultTarget = null;
+    tableResultSubTable = false;
+  }
+
+  function applyMadnessResult(result: typeof MADNESS_RESULTS[number]) {
+    if (!tableResultTarget || !doc) return;
+    const { isOfficer, memberId } = tableResultTarget;
+    if ('terminal' in result) {
+      archiveMember(isOfficer, memberId, result.terminal, 'Permanent insanity');
+      tableResultTarget = null;
+    } else if ('effect' in result) {
+      const target = getCampaignTarget(isOfficer, memberId);
+      if (target) {
+        target.campaignEffects ??= [];
+        target.campaignEffects.push({ id: crypto.randomUUID(), label: result.effect.label, statDelta: 'statDelta' in result.effect ? result.effect.statDelta : undefined });
+      }
+      tableResultTarget = null;
+    }
+  }
+
+  function archiveMember(isOfficer: boolean, memberId: string | null, status: Exclude<MemberStatus, 'active'>, reason: string) {
+    if (!doc) return;
+    if (isOfficer) {
+      doc.removedOfficers ??= [];
+      doc.removedOfficers.push({ ...doc.officer, status, removalReason: reason });
+      doc.officer = freshOfficer();
+    } else {
+      const m = doc.members.find((x) => x.id === memberId);
+      if (m) { m.status = status; m.removalReason = reason; }
+    }
+  }
+
+  function retireMember(memberId: string) {
+    const m = doc?.members.find((x) => x.id === memberId);
+    if (m) { m.status = 'retired'; m.removalReason = 'Retired'; }
+    retireConfirmId = null;
+  }
+
+  function retireOfficer() {
+    if (!doc) return;
+    archiveMember(true, null, 'retired', 'Retired');
+    officerRemoveConfirming = false;
   }
 
   function validateBeforeSave(d: UnitDoc): string | null {
@@ -398,10 +573,25 @@
           pts spent
           {#if doc.officer.commandStyle === 'recruitment'}· +5 from Command Style{/if}
           {#if baseBudget !== BASE_RECRUITMENT_BUDGET}· base {baseBudget} pts{/if}
+          {#if campaignMode && doc.officer.tierUpgrades?.some(u => u.type === 'budget_5' || u.type === 'budget_10')}· +{doc.officer.tierUpgrades.reduce((s,u)=>s+(u.type==='budget_5'?5:u.type==='budget_10'?10:0),0)} from tier upgrades{/if}
           {#if overBudget}· over budget{/if}
         </div>
       </div>
+      {#if campaignMode}
+        <div class="stat">
+          <div class="stat-title">Unit Power</div>
+          <div class="stat-value text-2xl">{powerRanking}</div>
+          <div class="stat-desc">sum of tiers</div>
+        </div>
+      {/if}
     </div>
+
+    {#if !campaignMode}
+      <div class="flex items-center justify-between rounded-box bg-base-200 px-3 py-2">
+        <span class="text-sm opacity-70">Campaign mode</span>
+        <button class="btn btn-ghost btn-xs" onclick={() => (campaignConfirming = true)}>Start campaign</button>
+      </div>
+    {/if}
 
     <!-- Officer -->
     <div class="card bg-base-200">
@@ -470,6 +660,46 @@
             onChange={(newItems) => { doc!.officer.equipment = newItems; }}
           />
         </div>
+
+        {#if campaignMode}
+          <div class="border-t border-base-300 pt-3 space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="badge badge-outline shrink-0">Tier {officerTier}</span>
+              <label class="flex items-center gap-1.5 text-sm">
+                XP
+                <input type="number" min="0" step="1" bind:value={doc.officer.xp} class="input input-xs w-20 tabular-nums" />
+              </label>
+              {#if officerPending > 0}
+                <button
+                  class="badge badge-warning cursor-pointer"
+                  onclick={() => { tierUpgradeTarget = { isOfficer: true, memberId: null, tier: lowestPendingTier(doc!.officer.xp ?? 0, doc!.officer.tierUpgrades ?? []) }; tierUpgradePickingAttr = false; }}
+                >Choose Tier {lowestPendingTier(doc.officer.xp ?? 0, doc.officer.tierUpgrades ?? [])} upgrade ›</button>
+              {/if}
+            </div>
+            {#if (doc.officer.tierUpgrades ?? []).length > 0}
+              <div class="flex flex-wrap gap-1">
+                {#each doc.officer.tierUpgrades ?? [] as u}
+                  <span class="badge badge-success badge-xs">T{u.tier} {u.type === 'new_attribute' ? u.attributeName ?? 'Attribute' : TIER_UPGRADE_LABELS[u.type]}</span>
+                {/each}
+              </div>
+            {/if}
+            {#if (doc.officer.campaignEffects ?? []).length > 0}
+              <div class="flex flex-wrap gap-1">
+                {#each doc.officer.campaignEffects ?? [] as effect (effect.id)}
+                  <span class="badge badge-error badge-sm gap-1">
+                    {effect.label}
+                    <button class="ml-0.5 opacity-70 hover:opacity-100" onclick={() => removeCampaignEffect(doc!.officer, effect.id)} aria-label="Remove {effect.label}">×</button>
+                  </span>
+                {/each}
+              </div>
+            {/if}
+            <div class="flex flex-wrap gap-2">
+              <button class="btn btn-outline btn-xs" onclick={() => { tableResultTarget = { isOfficer: true, memberId: null, table: 'injury' }; tableResultSubTable = false; }}>Injury &amp; Death…</button>
+              <button class="btn btn-outline btn-xs" onclick={() => { tableResultTarget = { isOfficer: true, memberId: null, table: 'madness' }; tableResultSubTable = false; }}>Madness…</button>
+              <button class="btn btn-ghost btn-xs text-error ml-auto" onclick={() => (officerRemoveConfirming = true)}>Retire Officer…</button>
+            </div>
+          </div>
+        {/if}
       </div>
     </div>
 
@@ -516,11 +746,15 @@
                   <SoldierStatPopover soldier={s} />
                   <span class="badge badge-ghost badge-sm w-14 shrink-0 justify-center tabular-nums">{s.recruitmentCost} pts</span>
                   {#if count > 0}
-                    <button
-                      class="btn btn-ghost btn-xs shrink-0"
-                      onclick={() => removeSoldierFromTile(s.id)}
-                      aria-label="Remove one {s.name}"
-                    >−</button>
+                    {#if !campaignMode}
+                      <button
+                        class="btn btn-ghost btn-xs shrink-0"
+                        onclick={() => removeSoldierFromTile(s.id)}
+                        aria-label="Remove one {s.name}"
+                      >−</button>
+                    {:else}
+                      <span class="w-6"></span>
+                    {/if}
                     <span class="w-4 text-center text-sm font-medium tabular-nums">{count}</span>
                   {:else}
                     <span class="w-12"></span>
@@ -545,11 +779,13 @@
                   <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2 ring-1 ring-warning/30">
                     <span class="min-w-0 flex-1 text-sm font-medium">{outsideNationMember.name}</span>
                     <span class="badge badge-warning badge-sm shrink-0 tabular-nums">{outsideNationMember.cost} pts</span>
-                    <button
-                      class="btn btn-ghost btn-xs shrink-0"
-                      onclick={() => removeMember(outsideNationMember!.id)}
-                      aria-label="Remove outside-nation soldier"
-                    >−</button>
+                    {#if !campaignMode}
+                      <button
+                        class="btn btn-ghost btn-xs shrink-0"
+                        onclick={() => removeMember(outsideNationMember!.id)}
+                        aria-label="Remove outside-nation soldier"
+                      >−</button>
+                    {/if}
                   </div>
                 {:else}
                   {#each outsideNationAvailable as s (s.id)}
@@ -598,7 +834,9 @@
                         <span class="badge badge-warning badge-xs shrink-0">outside nation</span>
                       {/if}
                     </div>
-                    <button class="btn btn-ghost btn-xs text-error shrink-0" onclick={() => removeMember(m.id)} aria-label="Remove {m.name}">Remove</button>
+                    {#if !campaignMode}
+                      <button class="btn btn-ghost btn-xs text-error shrink-0" onclick={() => removeMember(m.id)} aria-label="Remove {m.name}">Remove</button>
+                    {/if}
                   </div>
 
                   <input
@@ -620,7 +858,8 @@
                   </details>
 
                   {#if m.stats}
-                    <StatLine stats={m.stats} />
+                    {@const effStats = effectiveStats(m.stats, m.tierUpgrades ?? [], m.campaignEffects ?? [])}
+                    <StatLine stats={effStats} baseStats={m.stats} />
                   {/if}
 
                   {#if ref}
@@ -711,6 +950,48 @@
                       {/if}
                     </div>
                   {/if}
+
+                  {#if campaignMode}
+                    {@const mTier = xpToTier(m.xp ?? 0)}
+                    {@const mPending = pendingUpgradeCount(m.xp ?? 0, m.tierUpgrades ?? [])}
+                    <div class="border-t border-base-300 pt-2 space-y-2">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="badge badge-outline badge-sm shrink-0">Tier {mTier}</span>
+                        <label class="flex items-center gap-1.5 text-xs">
+                          XP
+                          <input type="number" min="0" step="1" bind:value={m.xp} class="input input-xs w-16 tabular-nums" />
+                        </label>
+                        {#if mPending > 0}
+                          <button
+                            class="badge badge-warning badge-sm cursor-pointer"
+                            onclick={() => { tierUpgradeTarget = { isOfficer: false, memberId: m.id, tier: lowestPendingTier(m.xp ?? 0, m.tierUpgrades ?? []) }; tierUpgradePickingAttr = false; }}
+                          >Choose Tier {lowestPendingTier(m.xp ?? 0, m.tierUpgrades ?? [])} upgrade ›</button>
+                        {/if}
+                      </div>
+                      {#if (m.tierUpgrades ?? []).length > 0}
+                        <div class="flex flex-wrap gap-1">
+                          {#each m.tierUpgrades ?? [] as u}
+                            <span class="badge badge-success badge-xs">T{u.tier} {u.type === 'new_attribute' ? u.attributeName ?? 'Attribute' : TIER_UPGRADE_LABELS[u.type]}</span>
+                          {/each}
+                        </div>
+                      {/if}
+                      {#if (m.campaignEffects ?? []).length > 0}
+                        <div class="flex flex-wrap gap-1">
+                          {#each m.campaignEffects ?? [] as effect (effect.id)}
+                            <span class="badge badge-error badge-xs gap-1">
+                              {effect.label}
+                              <button class="ml-0.5 opacity-70 hover:opacity-100" onclick={() => removeCampaignEffect(m, effect.id)} aria-label="Remove {effect.label}">×</button>
+                            </span>
+                          {/each}
+                        </div>
+                      {/if}
+                      <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-outline btn-xs" onclick={() => { tableResultTarget = { isOfficer: false, memberId: m.id, table: 'injury' }; tableResultSubTable = false; }}>Injury &amp; Death…</button>
+                        <button class="btn btn-outline btn-xs" onclick={() => { tableResultTarget = { isOfficer: false, memberId: m.id, table: 'madness' }; tableResultSubTable = false; }}>Madness…</button>
+                        <button class="btn btn-ghost btn-xs text-error ml-auto" onclick={() => (retireConfirmId = m.id)}>Retire…</button>
+                      </div>
+                    </div>
+                  {/if}
                 </li>
               {/each}
             </ul>
@@ -718,6 +999,48 @@
         {/if}
       </div>
     </div>
+
+    <!-- Removed members -->
+    {#if campaignMode && (removedMembers.length > 0 || (doc.removedOfficers ?? []).length > 0)}
+      {@const allRemoved = [...(doc.removedOfficers ?? []).map(o => ({ kind: 'officer' as const, data: o })), ...removedMembers.map(m => ({ kind: 'soldier' as const, data: m }))]}
+      <details class="card bg-base-200">
+        <summary class="card-body py-3 cursor-pointer select-none flex-row items-center gap-2">
+          <span class="font-medium text-sm">Removed members</span>
+          <span class="badge badge-ghost badge-sm">{allRemoved.length}</span>
+        </summary>
+        <div class="card-body pt-0 space-y-2">
+          {#each allRemoved as entry (entry.kind === 'officer' ? 'officer-' + (entry.data as OfficerSnapshot).name : (entry.data as MemberSnapshot).id)}
+            {@const isOfficer = entry.kind === 'officer'}
+            {@const officer = isOfficer ? (entry.data as OfficerSnapshot) : null}
+            {@const soldier = !isOfficer ? (entry.data as MemberSnapshot) : null}
+            <div class="bg-base-100 rounded p-3 space-y-1 opacity-70">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-medium text-sm">{isOfficer ? (officer!.name || 'Unnamed Officer') : (soldier!.customName || soldier!.name)}</span>
+                {#if !isOfficer && soldier!.customName}<span class="text-xs opacity-60">{soldier!.name}</span>{/if}
+                <span class="badge badge-xs badge-ghost">{isOfficer ? 'Officer' : 'Soldier'}</span>
+                {#if officer?.status || soldier?.status}
+                  {@const st = officer?.status ?? soldier?.status}
+                  <span class="badge badge-xs {st === 'dead' ? 'badge-error' : st === 'permanently_insane' ? 'badge-warning' : 'badge-ghost'}">
+                    {st === 'dead' ? 'Killed' : st === 'permanently_insane' ? 'Permanently Insane' : 'Retired'}
+                  </span>
+                {/if}
+                {#if officer?.removalReason || soldier?.removalReason}
+                  <span class="text-xs opacity-50">{officer?.removalReason ?? soldier?.removalReason}</span>
+                {/if}
+                <span class="badge badge-xs badge-outline ml-auto">Tier {xpToTier(officer?.xp ?? soldier?.xp ?? 0)}</span>
+              </div>
+              {#if isOfficer}
+                {@const stats = effectiveStats(officerStats(officer!), officer!.tierUpgrades ?? [], officer!.campaignEffects ?? [])}
+                <StatLine stats={stats} />
+              {:else if soldier!.stats}
+                {@const stats = effectiveStats(soldier!.stats, soldier!.tierUpgrades ?? [], soldier!.campaignEffects ?? [])}
+                <StatLine stats={stats} />
+              {/if}
+            </div>
+          {/each}
+        </div>
+      </details>
+    {/if}
 
   </section>
 
@@ -733,6 +1056,131 @@
             {#if saving}<span class="loading loading-spinner loading-xs"></span>{/if}
             Save & Print
           </button>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Campaign: confirm start -->
+  {#if campaignConfirming}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-base-100 rounded-box w-full max-w-sm p-6 shadow-xl">
+        <h3 class="mb-1 font-semibold">Start campaign?</h3>
+        <p class="mb-4 text-sm opacity-70">Enables XP, tier, and injury tracking. This cannot be undone.</p>
+        <div class="flex justify-end gap-2">
+          <button class="btn btn-ghost btn-sm" onclick={() => (campaignConfirming = false)}>Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick={startCampaign}>Start Campaign</button>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Campaign: tier upgrade picker -->
+  {#if tierUpgradeTarget && doc}
+    {@const target = getCampaignTarget(tierUpgradeTarget.isOfficer, tierUpgradeTarget.memberId)}
+    {@const options = (TIER_UPGRADE_OPTIONS[tierUpgradeTarget.tier] ?? []).filter(t => tierUpgradeTarget!.isOfficer || (t !== 'budget_5' && t !== 'budget_10'))}
+    {@const alreadyPickedAttrIds = new Set([...(target && 'attributes' in target ? target.attributes.map(a => a.id) : []), ...(target?.tierUpgrades ?? []).filter(u => u.type === 'new_attribute').map(u => u.attributeId ?? '')])}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-base-100 rounded-box w-full max-w-sm p-6 shadow-xl">
+        {#if !tierUpgradePickingAttr}
+          <h3 class="mb-1 font-semibold">Tier {tierUpgradeTarget.tier} upgrade</h3>
+          <p class="mb-4 text-sm opacity-70">Choose one upgrade for reaching Tier {tierUpgradeTarget.tier}.</p>
+          <div class="space-y-2 mb-4">
+            {#each options as opt}
+              {#if opt === 'new_attribute'}
+                <button class="btn btn-outline btn-sm w-full justify-start" onclick={() => (tierUpgradePickingAttr = true)}>{TIER_UPGRADE_LABELS[opt]}</button>
+              {:else}
+                <button class="btn btn-outline btn-sm w-full justify-start" onclick={() => applyTierUpgrade(opt)}>{TIER_UPGRADE_LABELS[opt]}</button>
+              {/if}
+            {/each}
+          </div>
+          <div class="flex justify-end">
+            <button class="btn btn-ghost btn-sm" onclick={() => { tierUpgradeTarget = null; tierUpgradePickingAttr = false; }}>Cancel</button>
+          </div>
+        {:else}
+          <h3 class="mb-1 font-semibold">New Attribute</h3>
+          <p class="mb-3 text-sm opacity-70">Pick one attribute from the officer pool.</p>
+          <div class="max-h-64 overflow-y-auto space-y-1 mb-4">
+            {#each officerPool.filter(a => !alreadyPickedAttrIds.has(a.id)) as attr}
+              <button class="btn btn-outline btn-sm w-full justify-start text-left" onclick={() => applyTierUpgrade('new_attribute', attr.id, attr.name)}>{attr.name}</button>
+            {/each}
+          </div>
+          <div class="flex justify-end">
+            <button class="btn btn-ghost btn-sm" onclick={() => (tierUpgradePickingAttr = false)}>← Back</button>
+          </div>
+        {/if}
+      </div>
+    </div>
+  {/if}
+
+  <!-- Campaign: table result picker -->
+  {#if tableResultTarget && doc}
+    {@const targetName = tableResultTarget.isOfficer ? (doc.officer.name || 'Officer') : (doc.members.find(m => m.id === tableResultTarget!.memberId)?.customName || doc.members.find(m => m.id === tableResultTarget!.memberId)?.name || 'Soldier')}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-base-100 rounded-box w-full max-w-sm p-6 shadow-xl">
+        {#if !tableResultSubTable}
+          <h3 class="mb-1 font-semibold">{tableResultTarget.table === 'injury' ? 'Injury & Death' : 'Madness'} — {targetName}</h3>
+          <p class="mb-3 text-sm opacity-70">Select the result of the dice roll.</p>
+          <div class="space-y-2 mb-4">
+            {#if tableResultTarget.table === 'injury'}
+              {#each INJURY_RESULTS as result}
+                <button class="btn btn-outline btn-sm w-full text-left justify-start flex-col items-start h-auto py-2" onclick={() => applyInjuryResult(result)}>
+                  <span class="font-medium">{result.label}</span>
+                  <span class="text-xs opacity-60 normal-case">{result.desc}</span>
+                </button>
+              {/each}
+            {:else}
+              {#each MADNESS_RESULTS as result}
+                <button class="btn btn-outline btn-sm w-full text-left justify-start flex-col items-start h-auto py-2" onclick={() => applyMadnessResult(result)}>
+                  <span class="font-medium">{result.label}</span>
+                  <span class="text-xs opacity-60 normal-case">{result.desc}</span>
+                </button>
+              {/each}
+            {/if}
+          </div>
+          <div class="flex justify-end">
+            <button class="btn btn-ghost btn-sm" onclick={() => { tableResultTarget = null; tableResultSubTable = false; }}>Cancel</button>
+          </div>
+        {:else}
+          <h3 class="mb-1 font-semibold">Permanent Injury — {targetName}</h3>
+          <p class="mb-3 text-sm opacity-70">Select the injury result.</p>
+          <div class="space-y-2 mb-4">
+            {#each PERM_INJURY_RESULTS as result}
+              <button class="btn btn-outline btn-sm w-full justify-start" onclick={() => applyPermInjuryResult(result)}>{result.label}</button>
+            {/each}
+          </div>
+          <div class="flex justify-end">
+            <button class="btn btn-ghost btn-sm" onclick={() => (tableResultSubTable = false)}>← Back</button>
+          </div>
+        {/if}
+      </div>
+    </div>
+  {/if}
+
+  <!-- Campaign: retire soldier confirm -->
+  {#if retireConfirmId && doc}
+    {@const retiring = doc.members.find(m => m.id === retireConfirmId)}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-base-100 rounded-box w-full max-w-sm p-6 shadow-xl">
+        <h3 class="mb-1 font-semibold">Retire {retiring?.customName || retiring?.name}?</h3>
+        <p class="mb-4 text-sm opacity-70">They will be archived and no longer count toward your roster or budget. This cannot be undone.</p>
+        <div class="flex justify-end gap-2">
+          <button class="btn btn-ghost btn-sm" onclick={() => (retireConfirmId = null)}>Cancel</button>
+          <button class="btn btn-error btn-sm" onclick={() => retireMember(retireConfirmId!)}>Retire</button>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Campaign: retire officer confirm -->
+  {#if officerRemoveConfirming && doc}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-base-100 rounded-box w-full max-w-sm p-6 shadow-xl">
+        <h3 class="mb-1 font-semibold">Retire {doc.officer.name || 'Officer'}?</h3>
+        <p class="mb-4 text-sm opacity-70">The current officer will be archived and you'll fill in a fresh replacement. This cannot be undone.</p>
+        <div class="flex justify-end gap-2">
+          <button class="btn btn-ghost btn-sm" onclick={() => (officerRemoveConfirming = false)}>Cancel</button>
+          <button class="btn btn-error btn-sm" onclick={retireOfficer}>Retire &amp; Replace</button>
         </div>
       </div>
     </div>
