@@ -6,6 +6,7 @@
   import AttributePicker from '$lib/components/AttributePicker.svelte';
   import EquipmentBrowser from '$lib/components/EquipmentBrowser.svelte';
   import NationFlag from '$lib/components/NationFlag.svelte';
+  import NameRollButtons from '$lib/components/NameRollButtons.svelte';
   import SoldierStatPopover from '$lib/components/SoldierStatPopover.svelte';
   import StatLine from '$lib/components/StatLine.svelte';
   import { getUnitStore, getUnitById, indexedDbStore, type UnitSource } from '$lib/unit/store';
@@ -598,10 +599,13 @@
       <div class="card-body gap-4">
         <h2 class="card-title text-base">Officer <span class="badge badge-ghost">Leader · free</span></h2>
 
-        <label class="block">
+        <div class="block">
           <span class="mb-1 block text-sm font-medium">Name</span>
-          <input type="text" bind:value={doc.officer.name} class="input w-full" placeholder="Capitaine Renaud" />
-        </label>
+          <div class="flex items-center gap-2">
+            <input type="text" bind:value={doc.officer.name} class="input flex-1" placeholder="Capitaine Renaud" />
+            <NameRollButtons nation={doc.nationName ?? null} onroll={(name) => (doc!.officer.name = name)} />
+          </div>
+        </div>
 
         <details>
           <summary class="cursor-pointer text-xs opacity-60 select-none">Bio / notes</summary>
@@ -839,13 +843,16 @@
                     {/if}
                   </div>
 
-                  <input
-                    type="text"
-                    bind:value={m.customName}
-                    class="input input-xs w-full"
-                    placeholder="Character name (optional)"
-                    aria-label="Character name for {m.name}"
-                  />
+                  <div class="flex items-center gap-1">
+                    <input
+                      type="text"
+                      bind:value={m.customName}
+                      class="input input-xs flex-1"
+                      placeholder="Character name (optional)"
+                      aria-label="Character name for {m.name}"
+                    />
+                    <NameRollButtons nation={doc.nationName ?? null} soldierType={m.name} onroll={(name) => (m.customName = name)} />
+                  </div>
 
                   <details>
                     <summary class="cursor-pointer text-xs opacity-60 select-none">Bio / notes</summary>
