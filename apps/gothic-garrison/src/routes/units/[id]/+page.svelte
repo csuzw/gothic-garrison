@@ -223,6 +223,8 @@
   );
 
   const hasOutsideNationRule = $derived(doc?.optionalRules.includes(OUTSIDE_NATION_RULE_CODE) ?? false);
+  // Rarely used, and the list is long — collapsed until the player asks for it.
+  let outsideNationOpen = $state(false);
   const outsideNationMember = $derived(members.find((m) => m.isOutsideNationPick) ?? null);
   const outsideNationAvailable = $derived(
     hasOutsideNationRule && nationId !== null
@@ -810,11 +812,18 @@
             </div>
             {#if hasOutsideNationRule}
               <div class="mt-2 space-y-1">
-                <p class="text-xs font-medium opacity-60">
+                <button
+                  type="button"
+                  class="flex w-full cursor-pointer items-center gap-1 text-left text-xs font-medium opacity-60 hover:opacity-100"
+                  aria-expanded={outsideNationOpen}
+                  aria-controls="outside-nation-list"
+                  onclick={() => (outsideNationOpen = !outsideNationOpen)}
+                >
+                  <span class="inline-block w-3 transition-transform {outsideNationOpen ? 'rotate-90' : ''}" aria-hidden="true">▸</span>
                   Outside-nation recruit
                   <span class="badge badge-xs badge-ghost">+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
                   {#if outsideNationMember}<span class="badge badge-xs badge-warning">{outsideNationMember.name}</span>{/if}
-                </p>
+                </button>
                 {#if outsideNationMember}
                   <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2 ring-1 ring-warning/30">
                     <span class="min-w-0 flex-1 text-sm font-medium">{outsideNationMember.name}</span>
@@ -827,7 +836,8 @@
                       >−</button>
                     {/if}
                   </div>
-                {:else}
+                {:else if outsideNationOpen}
+                  <div id="outside-nation-list" class="space-y-1">
                   {#each outsideNationAvailable as s (s.id)}
                     {@const cantAdd = rosterFull || spent + s.recruitmentCost + OUTSIDE_NATION_SOLDIER_COST > budget}
                     <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2">
@@ -848,6 +858,7 @@
                       >+</button>
                     </div>
                   {/each}
+                  </div>
                 {/if}
               </div>
             {/if}
