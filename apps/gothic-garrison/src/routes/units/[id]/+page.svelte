@@ -21,6 +21,12 @@
     normalizeUnitDoc,
     officerStats,
     effectiveStats,
+    memberStats,
+    creationChoiceDefs,
+    missingCreationChoices,
+    toCreationChoice,
+    type CreationChoiceDef,
+    type CreationChoiceOption,
     xpToTier,
     pendingUpgradeCount,
     unitPowerRanking,
@@ -233,6 +239,31 @@
     else if (list.length < max) list.push({ id: attrId, name });
   }
 
+  // ── creation choices (Elite Guard, Mercenary) ────────────────────────────────
+  type SoldierRef = NonNullable<ReturnType<typeof soldierRef>>;
+  function memberAttrNames(m: MemberSnapshot, ref: SoldierRef): string[] {
+    return [...ref.fixedAttributes.map((a) => a.name), ...m.attributes.map((a) => a.name)];
+  }
+
+  function chooseCreationOption(m: MemberSnapshot, def: CreationChoiceDef, option: CreationChoiceOption) {
+    const attrId = option.grantsAttribute
+      ? data.reference.attributes.find((a) => a.name === option.grantsAttribute)?.id
+      : undefined;
+    const others = (m.creationChoices ?? []).filter((c) => c.attributeName !== def.attributeName);
+    m.creationChoices = [...others, toCreationChoice(def, option, attrId)];
+  }
+
+  /** Drop choices whose attribute the soldier no longer has (e.g. a picked attribute was removed). */
+  function pruneCreationChoices(m: MemberSnapshot, ref: SoldierRef) {
+    if (!m.creationChoices?.length) return;
+    const names = new Set(memberAttrNames(m, ref));
+    m.creationChoices = m.creationChoices.filter((c) => names.has(c.attributeName));
+  }
+
+  function attrRules(name: string): string | undefined {
+    return data.reference.attributes.find((a) => a.name === name)?.rules ?? undefined;
+  }
+
   function togglePurchasedAttr(m: MemberSnapshot, attr: { id: string; name: string; costDelta: number }) {
     const i = m.purchasedAttributes.findIndex((a) => a.id === attr.id);
     if (i >= 0) m.purchasedAttributes.splice(i, 1);
@@ -420,6 +451,11 @@
       if (ref.equipmentMode === 'choice' && !ref.loadouts.some((l) => l.id === m.loadoutId)) {
         const who = m.customName ? `${m.name} (${m.customName})` : m.name;
         return `${who} needs a loadout selected.`;
+      }
+      const missing = missingCreationChoices(m, memberAttrNames(m, ref));
+      if (missing.length > 0) {
+        const who = m.customName ? `${m.name} (${m.customName})` : m.name;
+        return `${who} needs an option chosen for ${missing.join(' and ')}.`;
       }
       const max = ref.equipmentMode === 'pool'
         ? soldierSpecialMax(m, ref.specialSlots ?? 2, ref.fixedAttributes)
@@ -865,8 +901,7 @@
                   </details>
 
                   {#if m.stats}
-                    {@const effStats = effectiveStats(m.stats, m.tierUpgrades ?? [], m.campaignEffects ?? [])}
-                    <StatLine stats={effStats} baseStats={m.stats} />
+                    <StatLine stats={memberStats(m)!} baseStats={m.stats} />
                   {/if}
 
                   {#if ref}
@@ -876,13 +911,34 @@
                         selected={m.attributes}
                         max={ref.attributePicks}
                         fixed={ref.fixedAttributes}
-                        onToggle={(aid, name) => toggleAttr(m.attributes, aid, name, ref.attributePicks)}
+                        onToggle={(aid, name) => { toggleAttr(m.attributes, aid, name, ref.attributePicks); pruneCreationChoices(m, ref); }}
                       />
                     {:else if ref.fixedAttributes.length}
                       <div class="flex flex-wrap gap-1">
                         {#each ref.fixedAttributes as a}<span class="badge badge-xs badge-ghost" title={a.rules || a.name}>{a.name}</span>{/each}
                       </div>
                     {/if}
+
+                    {#each creationChoiceDefs(memberAttrNames(m, ref)) as def (def.attributeName)}
+                      {@const chosen = (m.creationChoices ?? []).find((c) => c.attributeName === def.attributeName)}
+                      <div data-testid="creation-choice-{def.attributeName}">
+                        <span class="mb-1 block text-xs font-medium opacity-70">{def.attributeName} — choose one</span>
+                        {#if !chosen}
+                          <p class="mb-1 text-xs text-warning">Pick an option to continue.</p>
+                        {/if}
+                        <div class="join flex-wrap gap-y-1">
+                          {#each def.options as opt (opt.id)}
+                            <button
+                              type="button"
+                              class="btn btn-xs join-item {chosen?.optionId === opt.id ? 'btn-primary' : 'btn-outline'}"
+                              aria-pressed={chosen?.optionId === opt.id}
+                              title={opt.grantsAttribute ? attrRules(opt.grantsAttribute) : undefined}
+                              onclick={() => chooseCreationOption(m, def, opt)}
+                            >{opt.label}</button>
+                          {/each}
+                        </div>
+                      </div>
+                    {/each}
 
                     {#if soldierPickableAttrs.length > 0}
                       {@const alreadyPickedIds = new Set(m.attributes.map((a) => a.id))}
@@ -1040,8 +1096,7 @@
                 {@const stats = effectiveStats(officerStats(officer!), officer!.tierUpgrades ?? [], officer!.campaignEffects ?? [])}
                 <StatLine stats={stats} />
               {:else if soldier!.stats}
-                {@const stats = effectiveStats(soldier!.stats, soldier!.tierUpgrades ?? [], soldier!.campaignEffects ?? [])}
-                <StatLine stats={stats} />
+                <StatLine stats={memberStats(soldier!)!} />
               {/if}
             </div>
           {/each}
