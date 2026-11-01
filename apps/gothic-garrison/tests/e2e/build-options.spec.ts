@@ -1,36 +1,15 @@
 import { type Page, expect, test } from '@playwright/test';
+import { createUnit, openPicker } from './helpers.ts';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-/** Open the new-unit nation picker if it isn't already open. */
-async function openPicker(page: Page) {
-  // Wait for the page load to settle, then check whether the picker auto-opened.
-  // isVisible() fires instantly and races with onMount; waitFor avoids that.
-  const opened = await page.getByRole('button', { name: 'Create' })
-    .waitFor({ state: 'visible', timeout: 3000 })
-    .then(() => true)
-    .catch(() => false);
-  if (!opened) await page.getByRole('button', { name: 'New unit' }).click();
-}
-
-/** Open the new-unit nation picker, click a nation, and click Create. */
-async function createUnit(page: Page, nation = 'France') {
-  await page.goto('/');
-  await openPicker(page);
-  await page.locator('[role="button"].card')
-    .filter({ has: page.locator('span.font-semibold', { hasText: new RegExp(`^${nation}$`) }) })
-    .click();
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
-}
-
-/** Open the Build options modal in the new-unit picker. */
 /** Expand the (collapsed-by-default) outside-nation recruit list in the builder. */
 async function expandOutsideNation(soldiersCard: ReturnType<Page['locator']>) {
   const toggle = soldiersCard.getByRole('button', { name: /Outside-nation recruit/ });
   if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
 }
 
+/** Open the Build options modal in the new-unit picker. */
 async function openBuildOptions(page: Page) {
   await page.getByRole('button', { name: /Build options/ }).click();
 }

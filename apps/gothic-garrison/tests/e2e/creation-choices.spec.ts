@@ -1,22 +1,9 @@
 import { type Page, expect, test } from '@playwright/test';
+import { createUnit } from './helpers.ts';
 
 // Venice supplement: attributes that ask for a choice at character creation.
 // Elite Guard (Velite) — Grenadier (+1 Health, +1 Courage) or Chasseur (Light Infantry Training).
 // Mercenary (Mercenary) — +1 to one of Melee / Accuracy / Defence / Courage / Health.
-
-async function createUnit(page: Page, nation: string) {
-  await page.goto('/');
-  const opened = await page.getByRole('button', { name: 'Create' })
-    .waitFor({ state: 'visible', timeout: 3000 })
-    .then(() => true)
-    .catch(() => false);
-  if (!opened) await page.getByRole('button', { name: 'New unit' }).click();
-  await page.locator('[role="button"].card')
-    .filter({ has: page.locator('span.font-semibold', { hasText: new RegExp(`^${nation}$`) }) })
-    .click();
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
-}
 
 const memberCard = (page: Page, type: string) =>
   page.locator('li').filter({ has: page.locator(`[aria-label="Remove ${type}"]`) });
