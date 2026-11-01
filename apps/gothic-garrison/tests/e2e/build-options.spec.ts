@@ -1,27 +1,12 @@
 import { type Page, expect, test } from '@playwright/test';
+import { createUnit, openPicker } from './helpers.ts';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-/** Open the new-unit nation picker if it isn't already open. */
-async function openPicker(page: Page) {
-  // Wait for the page load to settle, then check whether the picker auto-opened.
-  // isVisible() fires instantly and races with onMount; waitFor avoids that.
-  const opened = await page.getByRole('button', { name: 'Create' })
-    .waitFor({ state: 'visible', timeout: 3000 })
-    .then(() => true)
-    .catch(() => false);
-  if (!opened) await page.getByRole('button', { name: 'New unit' }).click();
-}
-
-/** Open the new-unit nation picker, click a nation, and click Create. */
-async function createUnit(page: Page, nation = 'France') {
-  await page.goto('/');
-  await openPicker(page);
-  await page.locator('[role="button"].card')
-    .filter({ has: page.locator('span.font-semibold', { hasText: new RegExp(`^${nation}$`) }) })
-    .click();
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
+/** Expand the (collapsed-by-default) outside-nation recruit list in the builder. */
+async function expandOutsideNation(soldiersCard: ReturnType<Page['locator']>) {
+  const toggle = soldiersCard.getByRole('button', { name: /Outside-nation recruit/ });
+  if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
 }
 
 /** Open the Build options modal in the new-unit picker. */
@@ -128,11 +113,30 @@ test.describe('build options — outside-nation soldier rule', () => {
     await expect(page.getByRole('button', { name: 'Build options (customised)' })).toBeVisible();
   });
 
-  test('outside-nation recruit section appears in the builder when the rule is on', async ({ page }) => {
+  test('outside-nation recruit section appears in the builder, collapsed by default', async ({ page }, testInfo) => {
     await createUnit(page, 'France');
 
     const soldiersCard = page.locator('.card', { hasText: /^Soldiers/ });
-    await expect(soldiersCard.getByText('Outside-nation recruit')).toBeVisible();
+    const toggle = soldiersCard.getByRole('button', { name: /Outside-nation recruit/ });
+    await expect(toggle).toBeVisible();
+
+    // Collapsed: no recruit buttons until expanded
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggle).toContainText(/Show \d+/); // explicit cue that it expands
+    await expect(soldiersCard.getByRole('button', { name: /\(outside nation\)$/ })).toHaveCount(0);
+    await testInfo.attach('outside-nation-collapsed', {
+      body: await soldiersCard.screenshot({ path: `test-results/screenshots/outside-nation-collapsed-${testInfo.project.name}.png` }),
+      contentType: 'image/png',
+    });
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(toggle).toContainText('Hide');
+    await expect(soldiersCard.getByRole('button', { name: /\(outside nation\)$/ }).first()).toBeVisible();
+
+    // And collapses again
+    await toggle.click();
+    await expect(soldiersCard.getByRole('button', { name: /\(outside nation\)$/ })).toHaveCount(0);
   });
 
   test('outside-nation recruit section is absent when the rule is disabled at creation', async ({ page }) => {
@@ -157,6 +161,7 @@ test.describe('build options — outside-nation soldier rule', () => {
     await createUnit(page, 'France');
 
     const soldiersCard = page.locator('.card', { hasText: /^Soldiers/ });
+    await expandOutsideNation(soldiersCard);
 
     // At least one soldier is available as an outside-nation recruit
     const firstRecruitBtn = soldiersCard
@@ -182,6 +187,7 @@ test.describe('build options — outside-nation soldier rule', () => {
     await createUnit(page, 'France');
 
     const soldiersCard = page.locator('.card', { hasText: /^Soldiers/ });
+    await expandOutsideNation(soldiersCard);
     await soldiersCard.getByRole('button', { name: /\(outside nation\)$/ }).first().click();
 
     // No more recruit buttons — the slot is filled
@@ -194,6 +200,7 @@ test.describe('build options — outside-nation soldier rule', () => {
     await createUnit(page, 'France');
 
     const soldiersCard = page.locator('.card', { hasText: /^Soldiers/ });
+    await expandOutsideNation(soldiersCard);
 
     const firstRecruitBtn = soldiersCard.getByRole('button', { name: /\(outside nation\)$/ }).first();
     const ariaLabel = (await firstRecruitBtn.getAttribute('aria-label')) ?? '';

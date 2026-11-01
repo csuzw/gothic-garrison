@@ -57,6 +57,18 @@ const nations: Record<string, GenderedPool> = {
     },
   },
 
+  // Napoleonic Kingdom of Italy (1805–14) — northern / Lombard names.
+  'Kingdom of Italy': {
+    male: {
+      first: ['Giuseppe', 'Carlo', 'Luigi', 'Giovanni', 'Pietro', 'Paolo', 'Ambrogio', 'Gaetano', 'Achille', 'Federico', 'Ugo', 'Alessandro', 'Vincenzo', 'Filippo', 'Teodoro'],
+      surnames: ['Colombo', 'Brambilla', 'Ferrari', 'Rossi', 'Galli', 'Bianchi', 'Fontana', 'Villa', 'Sala', 'Riva', 'Mariani', 'Lombardi', 'Cattaneo', 'Moretti', 'Pellegrini'],
+    },
+    female: {
+      first: ['Teresa', 'Giulia', 'Luigia', 'Angela', 'Carolina', 'Antonia', 'Margherita', 'Rosa', 'Francesca', 'Beatrice', 'Clementina', 'Giovanna', 'Costanza', 'Matilde', 'Ottavia'],
+      surnames: ['Colombo', 'Brambilla', 'Ferrari', 'Rossi', 'Galli', 'Bianchi', 'Fontana', 'Villa', 'Sala', 'Riva', 'Mariani', 'Lombardi', 'Cattaneo', 'Moretti', 'Pellegrini'],
+    },
+  },
+
   'Kingdom of Naples': {
     male: {
       first: ['Ferdinando', 'Carlo', 'Gioacchino', 'Alfonso', 'Raffaele', 'Pasquale', 'Gennaro', 'Enrico', 'Nicola', 'Roberto', 'Vincenzo', 'Salvatore', 'Ettore', 'Marco', 'Adriano'],
@@ -112,6 +124,18 @@ const nations: Record<string, GenderedPool> = {
     },
   },
 
+  // Rome and the Papal States — a mix of Roman noble houses and common Roman surnames.
+  'The Vatican': {
+    male: {
+      first: ['Filippo', 'Pietro', 'Agostino', 'Benedetto', 'Clemente', 'Ignazio', 'Innocenzo', 'Gregorio', 'Leone', 'Bartolomeo', 'Stefano', 'Mattia', 'Raffaele', 'Ercole', 'Girolamo'],
+      surnames: ['Colonna', 'Orsini', 'Borghese', 'Caetani', 'Chigi', 'Altieri', 'Odescalchi', 'Mattei', 'Ricci', 'Mancini', 'Fabbri', 'Testa', 'Santucci', 'Proietti', 'Cenci'],
+    },
+    female: {
+      first: ['Agnese', 'Cecilia', 'Lucia', 'Vittoria', 'Olimpia', 'Costanza', 'Anna', 'Maria', 'Faustina', 'Clelia', 'Giacinta', 'Prassede', 'Cristina', 'Livia', 'Serafina'],
+      surnames: ['Colonna', 'Orsini', 'Borghese', 'Caetani', 'Chigi', 'Altieri', 'Odescalchi', 'Mattei', 'Ricci', 'Mancini', 'Fabbri', 'Testa', 'Santucci', 'Proietti', 'Cenci'],
+    },
+  },
+
   'Trading Companies': {
     male: {
       first: ['William', 'James', 'Robert', 'Charles', 'Thomas', 'John', 'Henry', 'George', 'Alexander', 'Francis', 'Angus', 'Duncan', 'Donald', 'Hamish', 'Lachlan'],
@@ -142,6 +166,18 @@ const nations: Record<string, GenderedPool> = {
     female: {
       first: ['Mary', 'Ann', 'Elizabeth', 'Jane', 'Sarah', 'Charlotte', 'Emily', 'Margaret', 'Frances', 'Catherine', 'Isabella', 'Agnes', 'Janet', 'Flora', 'Jessie'],
       surnames: ['Smith', 'Brown', 'Jones', 'Taylor', 'Wilson', 'MacDonald', 'Campbell', 'Stewart', 'Robertson', 'Murray', 'Fraser', 'MacLeod', 'Grant', 'Hamilton', 'Ross'],
+    },
+  },
+
+  // Venetian forms (Zuane, Alvise, Anzolo…) and old Republic families alongside common Veneto surnames.
+  Venice: {
+    male: {
+      first: ['Marco', 'Zuane', 'Alvise', 'Piero', 'Nicolò', 'Lorenzo', 'Andrea', 'Francesco', 'Giacomo', 'Domenico', 'Tommaso', 'Sebastiano', 'Vettor', 'Bortolo', 'Anzolo'],
+      surnames: ['Contarini', 'Morosini', 'Dandolo', 'Mocenigo', 'Grimani', 'Foscari', 'Loredan', 'Querini', 'Zen', 'Venier', 'Pisani', 'Scarpa', 'Vianello', 'Boscolo', 'Zanetti'],
+    },
+    female: {
+      first: ['Elena', 'Marina', 'Lucrezia', 'Cecilia', 'Isabella', 'Laura', 'Chiara', 'Caterina', 'Elisabetta', 'Giustina', 'Maddalena', 'Orsola', 'Paolina', 'Zanetta', 'Bianca'],
+      surnames: ['Contarini', 'Morosini', 'Dandolo', 'Mocenigo', 'Grimani', 'Foscari', 'Loredan', 'Querini', 'Zen', 'Venier', 'Pisani', 'Scarpa', 'Vianello', 'Boscolo', 'Zanetti'],
     },
   },
 };

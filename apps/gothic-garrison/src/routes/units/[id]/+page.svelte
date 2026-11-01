@@ -21,6 +21,12 @@
     normalizeUnitDoc,
     officerStats,
     effectiveStats,
+    memberStats,
+    creationChoiceDefs,
+    missingCreationChoices,
+    toCreationChoice,
+    type CreationChoiceDef,
+    type CreationChoiceOption,
     xpToTier,
     pendingUpgradeCount,
     unitPowerRanking,
@@ -217,6 +223,8 @@
   );
 
   const hasOutsideNationRule = $derived(doc?.optionalRules.includes(OUTSIDE_NATION_RULE_CODE) ?? false);
+  // Rarely used, and the list is long — collapsed until the player asks for it.
+  let outsideNationOpen = $state(false);
   const outsideNationMember = $derived(members.find((m) => m.isOutsideNationPick) ?? null);
   const outsideNationAvailable = $derived(
     hasOutsideNationRule && nationId !== null
@@ -231,6 +239,31 @@
     const i = list.findIndex((a) => a.id === attrId);
     if (i >= 0) list.splice(i, 1);
     else if (list.length < max) list.push({ id: attrId, name });
+  }
+
+  // ── creation choices (Elite Guard, Mercenary) ────────────────────────────────
+  type SoldierRef = NonNullable<ReturnType<typeof soldierRef>>;
+  function memberAttrNames(m: MemberSnapshot, ref: SoldierRef): string[] {
+    return [...ref.fixedAttributes.map((a) => a.name), ...m.attributes.map((a) => a.name)];
+  }
+
+  function chooseCreationOption(m: MemberSnapshot, def: CreationChoiceDef, option: CreationChoiceOption) {
+    const attrId = option.grantsAttribute
+      ? data.reference.attributes.find((a) => a.name === option.grantsAttribute)?.id
+      : undefined;
+    const others = (m.creationChoices ?? []).filter((c) => c.attributeName !== def.attributeName);
+    m.creationChoices = [...others, toCreationChoice(def, option, attrId)];
+  }
+
+  /** Drop choices whose attribute the soldier no longer has (e.g. a picked attribute was removed). */
+  function pruneCreationChoices(m: MemberSnapshot, ref: SoldierRef) {
+    if (!m.creationChoices?.length) return;
+    const names = new Set(memberAttrNames(m, ref));
+    m.creationChoices = m.creationChoices.filter((c) => names.has(c.attributeName));
+  }
+
+  function attrRules(name: string): string | undefined {
+    return data.reference.attributes.find((a) => a.name === name)?.rules ?? undefined;
   }
 
   function togglePurchasedAttr(m: MemberSnapshot, attr: { id: string; name: string; costDelta: number }) {
@@ -420,6 +453,11 @@
       if (ref.equipmentMode === 'choice' && !ref.loadouts.some((l) => l.id === m.loadoutId)) {
         const who = m.customName ? `${m.name} (${m.customName})` : m.name;
         return `${who} needs a loadout selected.`;
+      }
+      const missing = missingCreationChoices(m, memberAttrNames(m, ref));
+      if (missing.length > 0) {
+        const who = m.customName ? `${m.name} (${m.customName})` : m.name;
+        return `${who} needs an option chosen for ${missing.join(' and ')}.`;
       }
       const max = ref.equipmentMode === 'pool'
         ? soldierSpecialMax(m, ref.specialSlots ?? 2, ref.fixedAttributes)
@@ -774,11 +812,29 @@
             </div>
             {#if hasOutsideNationRule}
               <div class="mt-2 space-y-1">
-                <p class="text-xs font-medium opacity-60">
-                  Outside-nation recruit
-                  <span class="badge badge-xs badge-ghost">+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
-                  {#if outsideNationMember}<span class="badge badge-xs badge-warning">{outsideNationMember.name}</span>{/if}
-                </p>
+                {#if outsideNationMember}
+                  <p class="text-xs font-medium opacity-60">
+                    Outside-nation recruit
+                    <span class="badge badge-xs badge-ghost">+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
+                    <span class="badge badge-xs badge-warning">{outsideNationMember.name}</span>
+                  </p>
+                {:else}
+                  <!-- Styled as a dashed tile with an explicit Show/Hide cue so it reads as clickable when collapsed. -->
+                  <button
+                    type="button"
+                    class="group flex w-full cursor-pointer items-center gap-2 rounded border border-dashed border-base-content/25 px-3 py-2 text-left text-sm transition-colors hover:border-primary hover:bg-base-100 {outsideNationOpen ? 'border-primary/60' : ''}"
+                    aria-expanded={outsideNationOpen}
+                    aria-controls="outside-nation-list"
+                    onclick={() => (outsideNationOpen = !outsideNationOpen)}
+                  >
+                    <span class="inline-block w-3 text-primary transition-transform {outsideNationOpen ? 'rotate-90' : ''}" aria-hidden="true">▸</span>
+                    <span class="font-medium">Outside-nation recruit</span>
+                    <span class="badge badge-xs badge-ghost shrink-0">+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
+                    <span class="ml-auto shrink-0 text-xs font-semibold text-primary group-hover:underline">
+                      {outsideNationOpen ? 'Hide' : `Show ${outsideNationAvailable.length}`}
+                    </span>
+                  </button>
+                {/if}
                 {#if outsideNationMember}
                   <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2 ring-1 ring-warning/30">
                     <span class="min-w-0 flex-1 text-sm font-medium">{outsideNationMember.name}</span>
@@ -791,7 +847,8 @@
                       >−</button>
                     {/if}
                   </div>
-                {:else}
+                {:else if outsideNationOpen}
+                  <div id="outside-nation-list" class="space-y-1">
                   {#each outsideNationAvailable as s (s.id)}
                     {@const cantAdd = rosterFull || spent + s.recruitmentCost + OUTSIDE_NATION_SOLDIER_COST > budget}
                     <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2">
@@ -812,6 +869,7 @@
                       >+</button>
                     </div>
                   {/each}
+                  </div>
                 {/if}
               </div>
             {/if}
@@ -865,24 +923,49 @@
                   </details>
 
                   {#if m.stats}
-                    {@const effStats = effectiveStats(m.stats, m.tierUpgrades ?? [], m.campaignEffects ?? [])}
-                    <StatLine stats={effStats} baseStats={m.stats} />
+                    <StatLine stats={memberStats(m)!} baseStats={m.stats} />
                   {/if}
 
                   {#if ref}
+                    {@const granted = (m.creationChoices ?? [])
+                      .flatMap((c) => (c.grantedAttribute ? [c.grantedAttribute.name] : []))
+                      .map((name) => ({ name, rules: attrRules(name) ?? null }))}
                     {#if ref.attributePicks > 0}
                       <AttributePicker
                         pool={officerPool}
                         selected={m.attributes}
                         max={ref.attributePicks}
                         fixed={ref.fixedAttributes}
-                        onToggle={(aid, name) => toggleAttr(m.attributes, aid, name, ref.attributePicks)}
+                        {granted}
+                        onToggle={(aid, name) => { toggleAttr(m.attributes, aid, name, ref.attributePicks); pruneCreationChoices(m, ref); }}
                       />
-                    {:else if ref.fixedAttributes.length}
-                      <div class="flex flex-wrap gap-1">
+                    {:else if ref.fixedAttributes.length || granted.length}
+                      <div class="flex flex-wrap gap-1" data-testid="member-attributes">
                         {#each ref.fixedAttributes as a}<span class="badge badge-xs badge-ghost" title={a.rules || a.name}>{a.name}</span>{/each}
+                        {#each granted as g}<span class="badge badge-xs badge-outline badge-success" title={g.rules || g.name}>{g.name}</span>{/each}
                       </div>
                     {/if}
+
+                    {#each creationChoiceDefs(memberAttrNames(m, ref)) as def (def.attributeName)}
+                      {@const chosen = (m.creationChoices ?? []).find((c) => c.attributeName === def.attributeName)}
+                      <div data-testid="creation-choice-{def.attributeName}">
+                        <span class="mb-1 block text-xs font-medium opacity-70">{def.attributeName} — choose one</span>
+                        {#if !chosen}
+                          <p class="mb-1 text-xs text-warning">Pick an option to continue.</p>
+                        {/if}
+                        <div class="join flex-wrap gap-y-1">
+                          {#each def.options as opt (opt.id)}
+                            <button
+                              type="button"
+                              class="btn btn-xs join-item {chosen?.optionId === opt.id ? 'btn-primary' : 'btn-outline'}"
+                              aria-pressed={chosen?.optionId === opt.id}
+                              title={opt.grantsAttribute ? attrRules(opt.grantsAttribute) : undefined}
+                              onclick={() => chooseCreationOption(m, def, opt)}
+                            >{opt.label}</button>
+                          {/each}
+                        </div>
+                      </div>
+                    {/each}
 
                     {#if soldierPickableAttrs.length > 0}
                       {@const alreadyPickedIds = new Set(m.attributes.map((a) => a.id))}
@@ -1040,8 +1123,7 @@
                 {@const stats = effectiveStats(officerStats(officer!), officer!.tierUpgrades ?? [], officer!.campaignEffects ?? [])}
                 <StatLine stats={stats} />
               {:else if soldier!.stats}
-                {@const stats = effectiveStats(soldier!.stats, soldier!.tierUpgrades ?? [], soldier!.campaignEffects ?? [])}
-                <StatLine stats={stats} />
+                <StatLine stats={memberStats(soldier!)!} />
               {/if}
             </div>
           {/each}

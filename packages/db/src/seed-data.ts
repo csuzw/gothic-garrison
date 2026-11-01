@@ -94,6 +94,15 @@ export const sources: SeedSource[] = [
     "author": "T.C. Stephen",
     "ospreyCoverUrl": "https://www.ospreypublishing.com/uk/silver-bayonet-italy-the-shades-of-calabria-9781472865861/",
     "coverImageUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_300,c_scale/jackets/9781472865861.jpg"
+  },
+  {
+    "code": "venice",
+    "name": "Venice — The Alchemist's Legacy",
+    "kind": "supplement",
+    "publishedDate": "2026-10-22",
+    "author": "T.C. Stephen",
+    "ospreyCoverUrl": "https://www.ospreypublishing.com/uk/silver-bayonet-venice-the-alchemists-legacy-9781472870292/",
+    "coverImageUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_300,c_scale/jackets/9781472870292.jpg"
   }
 ];
 
@@ -105,6 +114,7 @@ export const nations: SeedNation[] = [
     "flag": "/flags/austria.svg",
     "soldiers": [
       "Agent Provocateur",
+      "Alchemist",
       "Artillerist",
       "Coachman",
       "Conscript",
@@ -117,6 +127,7 @@ export const nations: SeedNation[] = [
       "Junior Officer",
       "Light Cavalryman",
       "Light Infantryman",
+      "Local Guide",
       "Occultist",
       "Provincial Soldier",
       "Sapper",
@@ -133,6 +144,7 @@ export const nations: SeedNation[] = [
     "flag": "/flags/britain.svg",
     "soldiers": [
       "Agent Provocateur",
+      "Alchemist",
       "Artillerist",
       "Bow Street Runner",
       "Coachman",
@@ -146,6 +158,7 @@ export const nations: SeedNation[] = [
       "Junior Officer",
       "Light Cavalryman",
       "Light Infantryman",
+      "Local Guide",
       "Marine",
       "Native Scout",
       "Occultist",
@@ -164,12 +177,17 @@ export const nations: SeedNation[] = [
     "flag": "/flags/calabresi.svg",
     "soldiers": [
       "Agent Provocateur",
+      "Alchemist",
+      "Assassin",
       "Calabrian Clergyman",
       "Champion of Faith",
       "Coachman",
+      "Congregant",
       "Highwayman",
       "Irregular",
+      "Local Guide",
       "Lupo Mannaro",
+      "Mercenary",
       "Native Scout",
       "Occultist",
       "Supernatural Investigator",
@@ -184,7 +202,9 @@ export const nations: SeedNation[] = [
     "description": "Nominally under Ottoman rule but riven by French invasion (1798), British counter-intervention, and Mamluk power struggles—until the ruthless Muhammad Ali seized control in 1805 and began remaking it as his own.",
     "flag": "/flags/egypt.svg",
     "soldiers": [
+      "Alchemist",
       "Artillerist",
+      "Assassin",
       "Bedouin Raider",
       "Champion of Faith",
       "Coachman",
@@ -197,7 +217,9 @@ export const nations: SeedNation[] = [
       "Janissary",
       "Junior Officer",
       "Light Cavalryman",
+      "Local Guide",
       "Mameluke",
+      "Mercenary",
       "Native Scout",
       "Occultist",
       "Sailor",
@@ -214,10 +236,12 @@ export const nations: SeedNation[] = [
     "flag": "/flags/france.svg",
     "soldiers": [
       "Agent Provocateur",
+      "Alchemist",
       "Artillerist",
       "Coachman",
       "Conscript",
       "Doctor",
+      "Gendarme",
       "Grenadier",
       "Guard",
       "Heavy Cavalryman",
@@ -227,6 +251,7 @@ export const nations: SeedNation[] = [
       "Knight Hospitaller",
       "Light Cavalryman",
       "Light Infantryman",
+      "Local Guide",
       "Marine",
       "Native Scout",
       "Occultist",
@@ -234,6 +259,40 @@ export const nations: SeedNation[] = [
       "Sailor",
       "Sapper",
       "Supernatural Investigator",
+      "Velite",
+      "Veteran Hunter",
+      "Vivandiere",
+      "Voltigeur",
+      "Woodsman"
+    ]
+  },
+  {
+    "name": "Kingdom of Italy",
+    "sourceCode": "venice",
+    "description": "Napoleon's client kingdom in the north, crowned with the Iron Crown in 1805 and governed from Milan by his stepson Eugène de Beauharnais—its conscript regiments marching under French eagles from the Adriatic to Spain.",
+    "flag": "/flags/kingdom-of-italy.svg",
+    "soldiers": [
+      "Agent Provocateur",
+      "Alchemist",
+      "Artillerist",
+      "Champion of Faith",
+      "Coachman",
+      "Conscript",
+      "Doctor",
+      "Gendarme",
+      "Grenadier",
+      "Guard",
+      "Infantryman",
+      "Junior Officer",
+      "Light Cavalryman",
+      "Light Infantryman",
+      "Local Guide",
+      "Marine",
+      "Occultist",
+      "Provincial Soldier",
+      "Sapper",
+      "Supernatural Investigator",
+      "Velite",
       "Veteran Hunter",
       "Vivandiere",
       "Voltigeur",
@@ -247,7 +306,9 @@ export const nations: SeedNation[] = [
     "flag": "/flags/kingdom-of-naples.svg",
     "soldiers": [
       "Agent Provocateur",
+      "Alchemist",
       "Artillerist",
+      "Assassin",
       "Champion of Faith",
       "Coachman",
       "Conscript",
@@ -259,6 +320,8 @@ export const nations: SeedNation[] = [
       "Junior Officer",
       "Light Cavalryman",
       "Light Infantryman",
+      "Local Guide",
+      "Mercenary",
       "Native Scout",
       "Provincial Soldier",
       "Sapper",
@@ -273,6 +336,7 @@ export const nations: SeedNation[] = [
     "description": "A British colony of predominantly French-speaking Catholics, Lower Canada sat uneasily under the Crown—its habitants repelling American invasions during the War of 1812 while its ancient forests hid older dangers still.",
     "flag": "/flags/lower-canada.svg",
     "soldiers": [
+      "Alchemist",
       "Artillerist",
       "Champion of Faith",
       "Coachman",
@@ -282,6 +346,7 @@ export const nations: SeedNation[] = [
       "Infantryman",
       "Junior Officer",
       "Light Cavalryman",
+      "Local Guide",
       "Loup Garou",
       "Native Scout",
       "Occultist",
@@ -300,6 +365,7 @@ export const nations: SeedNation[] = [
     "flag": "/flags/prussia.svg",
     "soldiers": [
       "Agent Provocateur",
+      "Alchemist",
       "Artillerist",
       "Coachman",
       "Conscript",
@@ -312,6 +378,7 @@ export const nations: SeedNation[] = [
       "Junior Officer",
       "Light Cavalryman",
       "Light Infantryman",
+      "Local Guide",
       "Occultist",
       "Provincial Soldier",
       "Rifleman",
@@ -330,6 +397,7 @@ export const nations: SeedNation[] = [
     "flag": "/flags/russia.svg",
     "soldiers": [
       "Agent Provocateur",
+      "Alchemist",
       "Artillerist",
       "Champion of Faith",
       "Coachman",
@@ -344,6 +412,7 @@ export const nations: SeedNation[] = [
       "Knight Hospitaller",
       "Light Cavalryman",
       "Light Infantryman",
+      "Local Guide",
       "Marine",
       "Provincial Soldier",
       "Rifleman",
@@ -362,7 +431,9 @@ export const nations: SeedNation[] = [
     "flag": "/flags/spain.svg",
     "soldiers": [
       "Agent Provocateur",
+      "Alchemist",
       "Artillerist",
+      "Assassin",
       "Champion of Faith",
       "Coachman",
       "Conscript",
@@ -376,7 +447,9 @@ export const nations: SeedNation[] = [
       "Knight Hospitaller",
       "Light Cavalryman",
       "Light Infantryman",
+      "Local Guide",
       "Marine",
+      "Mercenary",
       "Native Scout",
       "Provincial Soldier",
       "Sailor",
@@ -388,11 +461,38 @@ export const nations: SeedNation[] = [
     ]
   },
   {
+    "name": "The Vatican",
+    "sourceCode": "venice",
+    "description": "Pope Pius VII's temporal domain was a pawn between empires—French troops occupied Rome in February 1808, and in 1809 Napoleon annexed the Papal States outright and carried the Pope off into captivity.",
+    "flag": "/flags/vatican.svg",
+    "soldiers": [
+      "Agent Provocateur",
+      "Alchemist",
+      "Assassin",
+      "Calabrian Clergyman",
+      "Champion of Faith",
+      "Coachman",
+      "Congregant",
+      "Doctor",
+      "Heavy Cavalryman",
+      "Knight Hospitaller",
+      "Local Guide",
+      "Mercenary",
+      "Native Scout",
+      "Occultist",
+      "Supernatural Investigator",
+      "Swiss Guardsman",
+      "Vatican Agent",
+      "Veteran Hunter"
+    ]
+  },
+  {
     "name": "Trading Companies",
     "sourceCode": "canada",
     "description": "The fur-trading giants—Hudson's Bay Company and the North West Company—acted as quasi-governmental powers across the Canadian interior, fielding their own hired fighters to protect interests that no government could reach.",
     "flag": "/flags/trading-companies.svg",
     "soldiers": [
+      "Alchemist",
       "Champion of Faith",
       "Coachman",
       "Dhamphir",
@@ -404,6 +504,7 @@ export const nations: SeedNation[] = [
       "Infantryman",
       "Junior Officer",
       "Light Cavalryman",
+      "Local Guide",
       "Loup Garou",
       "Marine",
       "Native Scout",
@@ -424,6 +525,7 @@ export const nations: SeedNation[] = [
     "description": "A young republic still finding its feet, the US stood on the precipice of war with Britain over trade and impressment—a conflict that became the War of 1812, fought largely on the Canadian frontier it tried and failed to seize.",
     "flag": "/flags/united-states.svg",
     "soldiers": [
+      "Alchemist",
       "Artillerist",
       "Champion of Faith",
       "Coachman",
@@ -434,6 +536,7 @@ export const nations: SeedNation[] = [
       "Infantryman",
       "Junior Officer",
       "Light Cavalryman",
+      "Local Guide",
       "Marine",
       "Native Scout",
       "Occultist",
@@ -451,6 +554,7 @@ export const nations: SeedNation[] = [
     "description": "The culturally British settlements along the northern shore of the Great Lakes, populated largely by Loyalists who had fled the American Revolution—and now in 1812 facing a fresh American invasion across the same border.",
     "flag": "/flags/upper-canada.svg",
     "soldiers": [
+      "Alchemist",
       "Artillerist",
       "Coachman",
       "Discovery Serviceman",
@@ -462,6 +566,7 @@ export const nations: SeedNation[] = [
       "Infantryman",
       "Junior Officer",
       "Light Cavalryman",
+      "Local Guide",
       "Marine",
       "Native Scout",
       "Occultist",
@@ -471,10 +576,51 @@ export const nations: SeedNation[] = [
       "Veteran Hunter",
       "Woodsman"
     ]
+  },
+  {
+    "name": "Venice",
+    "sourceCode": "venice",
+    "description": "The thousand-year Most Serene Republic fell to Napoleon in 1797, was traded to Austria, then returned to French hands in the Kingdom of Italy in 1806—a faded city of canals, archives and secret societies where forgotten alchemy still lingers.",
+    "flag": "/flags/venice.svg",
+    "soldiers": [
+      "Agent Provocateur",
+      "Alchemist",
+      "Assassin",
+      "Champion of Faith",
+      "Coachman",
+      "Doctor",
+      "Gondolier",
+      "Highwayman",
+      "Irregular",
+      "Knight Hospitaller",
+      "Local Guide",
+      "Mercenary",
+      "Native Scout",
+      "Occultist",
+      "Sailor",
+      "Supernatural Investigator",
+      "Swordsman",
+      "Veteran Hunter",
+      "Woodsman"
+    ]
   }
 ];
 
 export const attributes: SeedAttribute[] = [
+  {
+    "name": "Alchemical Boost",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Roll two dice to determine which alchemical enhancements this figure will receive - 2: Speed+1; 3: Melee+1; 4: Health+1; 5: Defence+1; 6: Speed+1, Melee+1; 7: Melee+1, Defence+1; 8: Defence+1, Health+1; 9: Melee+1, Speed+1, Health+1, Indefatigable; 10: Melee+1, Speed+1, Defence+1, Indefatigable; 11: Melee+1, Speed+1, Health+1, Defence+1, Indefatigable; 12: Melee+2, Speed+2, Health+2, Defence+2, Indefatigable; 13: Melee+2, Speed+2, Health+2, Defence+2, Indefatigable, Allergy to Fire, Damage Reduction (4); 14: Melee+2, Speed+2, Health+2, Defence+2, Indefatigable, Allergy to Enchanted, Damage Reduction (4); 15: Melee+2, Speed+2, Health+2, Defence+2, Indefatigable, Allergy to Fire, Damage Reduction against Projectile Weapons Only (4), Expert Climber; 16: Accuracy+2, Speed+2, Health+2, Defence+2, Indefatigable, Allergy to Fire and Enchanted, Damage Reduction against Projectile Weapons Only (4), Very Strong, Rock Hurler; 17: Melee+3, Speed+2, Health+2, Defence+2, Indefatigable, Allergy to Fire, Damage Reduction against Projectile Weapons Only (4), Venomous, Strong; 18: Melee+3, Speed+2, Health+2, Defence+2, Indefatigable, Allergy to Enchanted and Fire, Damage Reduction against Projectile Weapons Only (4), Amphibious, Swimmer, Fins, Aquatic, Strong; 19: Melee+3, Speed+2, Health+2, Defence+2, Indefatigable, Allergy to Enchanted and Fire, Hard to Put Down, Flying Infectious, Sow Fear (-1); 20: Melee+3, Speed+2, Health+3, Defence+2, Indefatigable, Allergy to Enchanted and Fire, Damage Reduction (2), Hard to Put Down, Strong;"
+  },
+  {
+    "name": "Alchemist",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Can choose two Alchemical Concoctions from the Alchemical Concoctions chat.  May also use Grimoires."
+  },
   {
     "name": "Allergy (Blessed Weapons)",
     "pickScope": "none",
@@ -516,6 +662,13 @@ export const attributes: SeedAttribute[] = [
     "costDelta": 0,
     "sourceCode": "core",
     "rules": "Indestructible and Damage Reduction are ignored for Silver attacks against this figure."
+  },
+  {
+    "name": "Alley Rat",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "At the end of deployment, this figure and up to 2 figures within 1\" make a free Move action.  Additional figures must remain within 1\" and cannot end action within 1\" of enemy or within line of sight."
   },
   {
     "name": "Amphibious",
@@ -574,6 +727,13 @@ export const attributes: SeedAttribute[] = [
     "rules": "Any figure that Backs Off when fighting  this figure moves 2\" in a random direction instead of directly away."
   },
   {
+    "name": "Chains of Death",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Whenever a figure with this Attribute is reduced to 0 Health, immediately return it to its point of origin.  It will return with full Health.  A figure with this Attribute cannot move more than 8\" from it's point of origin."
+  },
+  {
     "name": "Chaotic",
     "pickScope": "none",
     "costDelta": 0,
@@ -614,6 +774,13 @@ export const attributes: SeedAttribute[] = [
     "costDelta": 0,
     "sourceCode": "britain",
     "rules": "All Skeletal Roman Legionaries gain +1 Speed, +1 Courage, and the Strong attribute while this figure is in play."
+  },
+  {
+    "name": "Concealed Pistol",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Once per game, the first time an enemy figure moves into melee against it, a figure with this Attribute may make a Shooting Attack against the figure.  If it hits, the opposing figure takes damage and then must immediately back off."
   },
   {
     "name": "Curse of the Evil Eye",
@@ -714,6 +881,13 @@ export const attributes: SeedAttribute[] = [
     "rules": "Whenever this figure takes damage, reduce it by 8 (minimum 0)."
   },
   {
+    "name": "Dark Alchemy",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Roll against chart (1-2: Alchemical Fire, 3-4: Alchemical Poison, 5-6: Alchemical Powder, 7-8: Alchemical Sulphur, 9: Alchemical Acid Shot, 10: Alchemical Freezing Shot) to determine the type of Alchemical Concoction the figure possesses.  Every relevant attack they make will apply the Concoction's effects.  It does not cost an action to prepare.  However a critical failure will not only cause the attack to fail but the figure will also suffers the effect of it's own Concoction."
+  },
+  {
     "name": "Dark Gift",
     "pickScope": "none",
     "costDelta": 0,
@@ -735,6 +909,20 @@ export const attributes: SeedAttribute[] = [
     "rules": "Can make Shooting Attacks at 12\" that are enchanted and +2 damage.  Does not require reloading."
   },
   {
+    "name": "Dirty Fighter",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Once per game, the first time an enemy figure moves into melee against a figure with this Attribute, it suffers a -1 to it's Melee stat and the figure with this Attribute gains +1 to its Defence for the remainder of that round of melee combat."
+  },
+  {
+    "name": "Elite Guard",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "When creating a character wit this Attribute choose 1 of the following options - Grenadier: +1 Health, +1 Courage; Chasseur/Light Infantry: Gain Light Infantry Training Attribute."
+  },
+  {
     "name": "Ethereal",
     "pickScope": "none",
     "costDelta": 0,
@@ -754,6 +942,13 @@ export const attributes: SeedAttribute[] = [
     "costDelta": 0,
     "sourceCode": "italy",
     "rules": "Acts like a musket, but does not need reloading.  Can only fire once per turn.  Ignores armour and does +1 damage.  Optionally, hard mode, ignores cover."
+  },
+  {
+    "name": "Ethereal Hand Weapon",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "When a figure with this Attribute makes a Melee Attack, it adds +1 to Melee Checks and their Target suffers +1 Damage."
   },
   {
     "name": "Experience in the Desert",
@@ -791,6 +986,13 @@ export const attributes: SeedAttribute[] = [
     "rules": "All attacks made by this figure count as Enchanted. May be given to any soldier at +4 recruitment cost."
   },
   {
+    "name": "Fins",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "When in the water, the figure with this Attribute gains +2 Speed."
+  },
+  {
     "name": "Fire-Starter",
     "pickScope": "officer",
     "costDelta": 0,
@@ -824,6 +1026,13 @@ export const attributes: SeedAttribute[] = [
     "costDelta": 0,
     "sourceCode": "canada",
     "rules": "Ignores movements penalties for low walls, obstacles, and gates.  The area it passed through is no longer an obstacle."
+  },
+  {
+    "name": "Gendarme",
+    "pickScope": "officer",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Any allied figures within 6\" of the figure with this Attribute gain +1 bonus to all Courage and Terror checks."
   },
   {
     "name": "Great Faith",
@@ -966,6 +1175,13 @@ export const attributes: SeedAttribute[] = [
     "rules": "Activate within 1\" of a friendly figure without moving: spend action to heal 2 Health (cannot heal the same figure two turns in a row). If a figure is reduced to exactly 0 Health, lay it on its side — a Medic who reaches it may heal normally. Enemy contact removes a 0-Health figure."
   },
   {
+    "name": "Mercenary",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "A figure with this Attribute can be equipped the same way as an Officer.  In addition when creating a character with this Attribute, apply both of the following: Add +1 to Melee, Accuracy, Defence, Courage, or Health (only one), Gain one Officer (O) Attribute."
+  },
+  {
     "name": "Miracles",
     "pickScope": "none",
     "costDelta": 0,
@@ -985,6 +1201,13 @@ export const attributes: SeedAttribute[] = [
     "costDelta": 0,
     "sourceCode": "core",
     "rules": "Suffers no movement penalties for difficult ground."
+  },
+  {
+    "name": "No Opening",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Any figures with the Subterfuge or Alley Rat Attributes cannot end their movement within 6\" of a figure with this Attribute."
   },
   {
     "name": "Non-Aggressive",
@@ -1085,6 +1308,13 @@ export const attributes: SeedAttribute[] = [
     "rules": "Once per game, convert one Skill Die or Fate Die to a Monster Die; this figure regains up to 3 lost Health."
   },
   {
+    "name": "Self-Preservation",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "Every time a figure with this Attribute takes damage, roll a Courage Check (TN12).  If it fails the Courage Check, the figure must Back Off or Dive for Cover.  Its next activation can only be a single action, however this action does not have to be a Move action."
+  },
+  {
     "name": "Skeleton",
     "pickScope": "none",
     "costDelta": 0,
@@ -1125,6 +1355,13 @@ export const attributes: SeedAttribute[] = [
     "costDelta": 0,
     "sourceCode": "italy",
     "rules": "Once per scenario, move unseen by not attacking and staying more than own movement range from all enemies. Sneak persists until next activation or an enemy enters movement range. While sneaking: enemies cannot draw LoS unless (1) this figure is not in cover, or (2) the enemy is within movement range. Substantial cover maintains sneak even in melee range."
+  },
+  {
+    "name": "Sophisian Grimoire",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "When a figure with this Attribute is placed on the table, roll to determine what Grimoire it is using.  The Grimoire's effect starts immediately and is active without requiring an action to activate it.  Once the figure with this Attribute is reduced to 0 Health, the Grimoire is no longer active.  1-2: Grimoire of Dark Protection [Damage Reduction (2), Allergy to Enchanted to any Bestiary figure within 2\".  Does not stack]; 3-4: Grimoire of the Black Hand [Any Bestiary figure within 4\" gains +1 Melee]; 5-6: Grimoire of Noxious Arrows [Any Bestiary figure within 4\" gains +1 Accuracy.  Any figure hit by an affected Shooting Attack suffers -1 Health every activation to a maximum of -3, unless they receive some form of healing]; 7-8: Grimoire of Dead Waters [Every activation, a Drowned will appear within 3\" of the wielder in the direction of the closest enemy figure]; 9-10: Grimoire of Arcane Aegis [Any Bestiary figures within 4\" gain the Attribute Immune to Missile Weapons]."
   },
   {
     "name": "Soul Shear",
@@ -1174,6 +1411,13 @@ export const attributes: SeedAttribute[] = [
     "costDelta": 0,
     "sourceCode": "egypt",
     "rules": "While this figure is in water, LoS cannot be drawn to it by figures more than 6\" away."
+  },
+  {
+    "name": "Subterfuge",
+    "pickScope": "none",
+    "costDelta": 0,
+    "sourceCode": "venice",
+    "rules": "The figure with this Attribute can deploy up to 6\" beyond the normal deployment zone but not within 1\" of an opposing figure at the start of Turn 2, before Initiative is rolled.  If all players have a figure with this Attribute, the player with Initiative the previous turn places second.  If the figure with this Attribute also has the Sneak Attribute and is placed in cover and out of line of sight of any opposing figures, it begins the the turn with Sneak Attribute activated.  Note that, because the figure arrives on Turn 2, it does not count towards the figures that can be moved on Turn 1."
   },
   {
     "name": "Supernatural Veteran",
@@ -1254,7 +1498,15 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 1,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "8\", Power Die+1, −1 to Shoot Checks, 2 potential targets (with 1\" of each other, separate Check for each), ignore Armour (1), Shot Bag to reload, can be used as Improvised Weapon."
+    "rules": "8\", Power Die+1, −1 to Shoot Checks, 2 potential targets (within 1\" of common point, separate Check for each), ignore Armour (1), Shot Bag to reload, can be used as Improvised Weapon."
+  },
+  {
+    "name": "Bolt Quiver",
+    "category": "gear",
+    "slotCost": 0,
+    "isSpecial": false,
+    "sourceCode": "venice",
+    "rules": "Reload crossbow."
   },
   {
     "name": "Breastplate",
@@ -1287,6 +1539,14 @@ export const equipment: SeedEquipment[] = [
     "isSpecial": true,
     "sourceCode": "core",
     "rules": "Melee weapon upgrade, attacks ignore Damage Reduction and Indestructible on targets with Allergy (Cold Iron), 0 slots."
+  },
+  {
+    "name": "Crossbow",
+    "category": "weapon",
+    "slotCost": 1,
+    "isSpecial": false,
+    "sourceCode": "venice",
+    "rules": "18\", Power Die, Silent, Bolt Quiver to reload, can only use Melee Alchemical Concoctions."
   },
   {
     "name": "Fencing Weapon",
@@ -1329,6 +1589,14 @@ export const equipment: SeedEquipment[] = [
     "rules": "Melee, Power Die−1."
   },
   {
+    "name": "Multi-Barrelled Pistol",
+    "category": "weapon",
+    "slotCost": 1,
+    "isSpecial": false,
+    "sourceCode": "venice",
+    "rules": "8\", Power Die, -1 Shoot, 2 potential targets (within 1\" of common point, separate Check for each), ignore Armour (1), can be used in place of a Pistol, can be reloaded (2 Actions), can be used as Improvised Weapon."
+  },
+  {
     "name": "Musket",
     "category": "weapon",
     "slotCost": 2,
@@ -1351,6 +1619,14 @@ export const equipment: SeedEquipment[] = [
     "isSpecial": false,
     "sourceCode": "core",
     "rules": "8\", Power Die, Max 2 per figure, ignore Armour (1), can be used as Improvised Weapon."
+  },
+  {
+    "name": "Polearm",
+    "category": "weapon",
+    "slotCost": 2,
+    "isSpecial": false,
+    "sourceCode": "venice",
+    "rules": "Force attacks within 2\" rather than 1\", Skill Die"
   },
   {
     "name": "Rifle",
@@ -1398,7 +1674,7 @@ export const equipment: SeedEquipment[] = [
     "slotCost": 2,
     "isSpecial": false,
     "sourceCode": "core",
-    "rules": "14\", Power Die+1, −1 to Shoot Checks, 3 potentials targets  (with 1\" of each other, separate Check for each), ignores Armour (1), cannot be reloaded, 2 slots."
+    "rules": "14\", Power Die+1, −1 to Shoot Checks, 3 potentials targets  (within 1\" of common point, separate Check for each), ignores Armour (1), cannot be reloaded, 2 slots."
   }
 ];
 
@@ -1429,7 +1705,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Hand Weapon, 2 Pistols",
+        "label": "Hand Weapon, Pistol ×2",
         "order": 0,
         "items": [
           {
@@ -1461,7 +1737,7 @@ export const soldiers: SeedSoldier[] = [
         ]
       },
       {
-        "label": "Fencing Weapon, 2 Pistols",
+        "label": "Fencing Weapon, Pistol ×2",
         "order": 2,
         "items": [
           {
@@ -1495,6 +1771,42 @@ export const soldiers: SeedSoldier[] = [
     ]
   },
   {
+    "name": "Alchemist",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 21,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 2,
+      "health": 12
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "fixed",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [
+      "Alchemist",
+      "Supernatural Veteran"
+    ],
+    "loadouts": [
+      {
+        "label": "Pistol",
+        "order": 0,
+        "items": [
+          {
+            "name": "Pistol",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Artillerist",
     "sourceCode": "core",
     "alsoInSourceCode": null,
@@ -1518,7 +1830,47 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon, Pistol",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Assassin",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 25,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 1,
+      "defence": 14,
+      "courage": 1,
+      "health": 10
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "fixed",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [
+      "Sneak",
+      "Subterfuge"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon, Pistol",
         "order": 0,
         "items": [
           {
@@ -1716,7 +2068,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon",
         "order": 0,
         "items": [
           {
@@ -1751,7 +2103,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Blunderbuss, Shot Bag, Hand Weapon",
         "order": 0,
         "items": [
           {
@@ -1764,6 +2116,39 @@ export const soldiers: SeedSoldier[] = [
           },
           {
             "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Congregant",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 6,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": -1,
+      "health": 10
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "fixed",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [],
+    "loadouts": [
+      {
+        "label": "Improvised Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Improvised Weapon",
             "qty": 1
           }
         ]
@@ -1794,7 +2179,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -1907,7 +2292,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon, Pistol",
         "order": 0,
         "items": [
           {
@@ -1992,6 +2377,105 @@ export const soldiers: SeedSoldier[] = [
     ]
   },
   {
+    "name": "Gendarme",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 15,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 0,
+      "health": 10
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "choice",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [
+      "Gendarme"
+    ],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Hand Weapon, Pistol",
+        "order": 1,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Gondolier",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 13,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 10
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "choice",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [
+      "Steady Legs",
+      "Swimmer"
+    ],
+    "loadouts": [
+      {
+        "label": "Heavy Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Heavy Weapon",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Polearm",
+        "order": 1,
+        "items": [
+          {
+            "name": "Polearm",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Grenadier",
     "sourceCode": "core",
     "alsoInSourceCode": null,
@@ -2013,7 +2497,7 @@ export const soldiers: SeedSoldier[] = [
     "fixedAttributes": [],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -2052,7 +2536,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -2091,7 +2575,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Breastplate, Hand Weapon, Pistol",
         "order": 0,
         "items": [
           {
@@ -2185,7 +2669,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Pistol ×2",
         "order": 0,
         "items": [
           {
@@ -2218,7 +2702,7 @@ export const soldiers: SeedSoldier[] = [
     "fixedAttributes": [],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -2272,7 +2756,7 @@ export const soldiers: SeedSoldier[] = [
         ]
       },
       {
-        "label": "Hand Weapon, 2 Pistols",
+        "label": "Hand Weapon, Pistol ×2",
         "order": 1,
         "items": [
           {
@@ -2350,7 +2834,7 @@ export const soldiers: SeedSoldier[] = [
     "fixedAttributes": [],
     "loadouts": [
       {
-        "label": "Hand Weapon, 2 Pistols",
+        "label": "Hand Weapon, Pistol ×2",
         "order": 0,
         "items": [
           {
@@ -2364,7 +2848,7 @@ export const soldiers: SeedSoldier[] = [
         ]
       },
       {
-        "label": "Fencing Weapon, 2 Pistols",
+        "label": "Fencing Weapon, Pistol ×2",
         "order": 1,
         "items": [
           {
@@ -2403,7 +2887,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon, Holy Symbol",
         "order": 0,
         "items": [
           {
@@ -2442,7 +2926,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon, Pistol",
         "order": 0,
         "items": [
           {
@@ -2481,7 +2965,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -2490,6 +2974,41 @@ export const soldiers: SeedSoldier[] = [
           },
           {
             "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Local Guide",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 16,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 10
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "fixed",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [
+      "Alley Rat"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
             "qty": 1
           }
         ]
@@ -2666,7 +3185,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -2680,6 +3199,31 @@ export const soldiers: SeedSoldier[] = [
         ]
       }
     ]
+  },
+  {
+    "name": "Mercenary",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 30,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 2,
+      "health": 11
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "pool",
+    "equipmentSlots": 6,
+    "specialSlots": 2,
+    "attributePicks": 1,
+    "description": null,
+    "fixedAttributes": [
+      "Mercenary",
+      "Self-Preservation"
+    ],
+    "loadouts": []
   },
   {
     "name": "Native Scout",
@@ -2755,7 +3299,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon",
         "order": 0,
         "items": [
           {
@@ -2788,7 +3332,7 @@ export const soldiers: SeedSoldier[] = [
     "fixedAttributes": [],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -2865,7 +3409,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon, Pistol",
         "order": 0,
         "items": [
           {
@@ -2904,7 +3448,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box, Heavy Weapon",
         "order": 0,
         "items": [
           {
@@ -2948,7 +3492,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Fencing Weapon, 2 Pistols",
+        "label": "Fencing Weapon, Pistol ×2",
         "order": 0,
         "items": [
           {
@@ -2967,6 +3511,65 @@ export const soldiers: SeedSoldier[] = [
         "items": [
           {
             "name": "Heavy Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Swiss Guardsman",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 20,
+    "stats": {
+      "speed": 5,
+      "melee": 2,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 1,
+      "health": 12
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "choice",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [],
+    "loadouts": [
+      {
+        "label": "Breastplate, Heavy Weapon, Pistol",
+        "order": 0,
+        "items": [
+          {
+            "name": "Breastplate",
+            "qty": 1
+          },
+          {
+            "name": "Heavy Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Breastplate, Polearm, Pistol",
+        "order": 1,
+        "items": [
+          {
+            "name": "Breastplate",
+            "qty": 1
+          },
+          {
+            "name": "Polearm",
             "qty": 1
           },
           {
@@ -3001,7 +3604,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Fencing Weapon, Pistol",
         "order": 0,
         "items": [
           {
@@ -3070,6 +3673,86 @@ export const soldiers: SeedSoldier[] = [
     ]
   },
   {
+    "name": "Vatican Agent",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 22,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 1,
+      "health": 10
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "fixed",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [
+      "Master of Cover",
+      "Subterfuge",
+      "Supernatural Veteran"
+    ],
+    "loadouts": [
+      {
+        "label": "Fencing Weapon, Pistol ×2",
+        "order": 0,
+        "items": [
+          {
+            "name": "Fencing Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Velite",
+    "sourceCode": "venice",
+    "alsoInSourceCode": null,
+    "recruitmentCost": 21,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 14,
+      "courage": 1,
+      "health": 12
+    },
+    "maxPerUnit": null,
+    "equipmentMode": "fixed",
+    "equipmentSlots": null,
+    "specialSlots": null,
+    "attributePicks": 0,
+    "description": null,
+    "fixedAttributes": [
+      "Elite Guard"
+    ],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Veteran Hunter",
     "sourceCode": "core",
     "alsoInSourceCode": null,
@@ -3117,7 +3800,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Hand Weapon",
         "order": 0,
         "items": [
           {
@@ -3153,7 +3836,7 @@ export const soldiers: SeedSoldier[] = [
     ],
     "loadouts": [
       {
-        "label": "Standard",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -3514,6 +4197,157 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Bravo Brawler",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 1,
+      "health": 10
+    },
+    "equipmentMode": "choice",
+    "description": null,
+    "fixedAttributes": [
+      "Dirty Fighter",
+      "Master of Cover"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Polearm",
+        "order": 1,
+        "items": [
+          {
+            "name": "Polearm",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Heavy Weapon",
+        "order": 2,
+        "items": [
+          {
+            "name": "Heavy Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bravo Lieutenant",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 1,
+      "health": 12
+    },
+    "equipmentMode": "choice",
+    "description": null,
+    "fixedAttributes": [
+      "Concealed Pistol",
+      "Indefatigable",
+      "Master of Cover",
+      "Nimble",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Blunderbuss, Shot Bag",
+        "order": 0,
+        "items": [
+          {
+            "name": "Blunderbuss",
+            "qty": 1
+          },
+          {
+            "name": "Shot Bag",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Multi-Barrelled Pistol, Hand Weapon",
+        "order": 1,
+        "items": [
+          {
+            "name": "Multi-Barrelled Pistol",
+            "qty": 1
+          },
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bravo Scoundrel",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 1,
+      "defence": 12,
+      "courage": 1,
+      "health": 10
+    },
+    "equipmentMode": "choice",
+    "description": null,
+    "fixedAttributes": [
+      "Master of Cover"
+    ],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Pistol, Hand Weapon",
+        "order": 1,
+        "items": [
+          {
+            "name": "Pistol",
+            "qty": 1
+          },
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Brigante Chief",
     "sourceCode": "italy",
     "experience": 2,
@@ -3641,6 +4475,77 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Canal Lane Slasher",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 8,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 15,
+      "courage": 2,
+      "health": 17
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Fear of Fire",
+      "Indefatigable",
+      "Indestructible",
+      "Nimble",
+      "No Opening",
+      "Soul Shear",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Canal Serpent",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 7,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 0,
+      "health": 16
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Silver)",
+      "Amphibious",
+      "Aquatic",
+      "Damage Reduction (2)",
+      "Deathroll",
+      "Large",
+      "Lunge",
+      "Strong",
+      "Submerge",
+      "Venomous"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Changeling",
     "sourceCode": "core",
     "experience": 2,
@@ -3674,6 +4579,38 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Civic Guardsman",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Civilian",
     "sourceCode": "britain",
     "experience": 0,
@@ -3695,6 +4632,44 @@ export const monsters: SeedMonster[] = [
         "items": [
           {
             "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Count Monterosso",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 7,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Silver)",
+      "Damage Reduction (5)",
+      "Hard to Put Down",
+      "Indefatigable",
+      "Soul Shear",
+      "Strong",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Fencing Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Fencing Weapon",
             "qty": 1
           }
         ]
@@ -3879,6 +4854,35 @@ export const monsters: SeedMonster[] = [
     "loadouts": []
   },
   {
+    "name": "Deep One",
+    "sourceCode": "venice",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Damage Reduction (2)",
+      "Fins",
+      "Submerge",
+      "Swimmer"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Demon",
     "sourceCode": "core",
     "experience": 3,
@@ -3939,6 +4943,35 @@ export const monsters: SeedMonster[] = [
             "qty": 1
           }
         ]
+      }
+    ]
+  },
+  {
+    "name": "Drowned",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 4,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 5,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Amphibious",
+      "Damage Reduction - Projectiles Only (4)",
+      "Indefatigable",
+      "Infectious",
+      "Submerge"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
       }
     ]
   },
@@ -4368,6 +5401,31 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Homunculus",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 10,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Alchemical Boost"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Il Negromonte",
     "sourceCode": "italy",
     "experience": 3,
@@ -4431,6 +5489,67 @@ export const monsters: SeedMonster[] = [
       "Nimble",
       "Powerful Jaws",
       "Very Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Lion Statue Golem",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 4,
+      "melee": 4,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 0,
+      "health": 22
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Salt)",
+      "Damage Reduction (5)",
+      "Hard to Put Down",
+      "Immune to Missile Weapons",
+      "Very Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Lion Statue Guardian",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 0,
+      "health": 20
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Enchanted Weapons)",
+      "Damage Reduction (5)",
+      "Hard to Put Down",
+      "Strong",
+      "Weakened by Faith"
     ],
     "loadouts": [
       {
@@ -4865,6 +5984,34 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Plague Skeleton",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 5
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Damage Reduction - Projectiles Only (8)",
+      "Indefatigable",
+      "Infectious",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Polar Bear",
     "sourceCode": "canada",
     "experience": 3,
@@ -5012,6 +6159,40 @@ export const monsters: SeedMonster[] = [
         "label": "Empty",
         "order": 0,
         "items": []
+      }
+    ]
+  },
+  {
+    "name": "Rogue Alchemist",
+    "sourceCode": "venice",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 2,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Dark Alchemy"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon, Pistol",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 1
+          }
+        ]
       }
     ]
   },
@@ -5243,6 +6424,37 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Sophisian Occultist",
+    "sourceCode": "venice",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 3,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Indefatigable",
+      "Sophisian Grimoire"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Spectral Soldier",
     "sourceCode": "italy",
     "experience": 1,
@@ -5401,6 +6613,80 @@ export const monsters: SeedMonster[] = [
         "label": "Empty",
         "order": 0,
         "items": []
+      }
+    ]
+  },
+  {
+    "name": "The Broker",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 2,
+      "health": 15
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Concealed Pistol",
+      "Indefatigable",
+      "Nimble",
+      "No Opening",
+      "Quick Healing",
+      "Sophisian Grimoire"
+    ],
+    "loadouts": [
+      {
+        "label": "Multi-Barrelled Pistol, Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Multi-Barrelled Pistol",
+            "qty": 1
+          },
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Thrall Guard",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Silver)",
+      "Chilling Touch",
+      "Damage Reduction (4)",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Fencing Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Fencing Weapon",
+            "qty": 1
+          }
+        ]
       }
     ]
   },
@@ -5778,6 +7064,42 @@ export const monsters: SeedMonster[] = [
         "label": "Empty",
         "order": 0,
         "items": []
+      }
+    ]
+  },
+  {
+    "name": "Wreckbound",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 5,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 10,
+      "courage": 5,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Fire)",
+      "Chains of Death",
+      "Ethereal",
+      "Ethereal Hand Weapon",
+      "Indefatigable",
+      "Indestructible"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
       }
     ]
   },

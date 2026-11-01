@@ -148,6 +148,8 @@ export interface MemberSnapshot {
   loadoutId: string | null;
   /** True when this soldier was recruited via the outside-nation optional rule (+8 pts). */
   isOutsideNationPick?: boolean;
+  /** One-off choices made at character creation (Elite Guard, Mercenary). Absent on older units. */
+  creationChoices?: CreationChoice[];
   // Campaign fields — absent on non-campaign units
   xp?: number;
   tierUpgrades?: TierUpgrade[];
@@ -217,6 +219,100 @@ export function memberSpecialPicks(
   fixedAttributes: { name: string }[] = [],
 ): number {
   return hasSV(member.attributes, fixedAttributes) ? 2 : 1;
+}
+
+// ── creation choices ─────────────────────────────────────────────────────────
+// Some attributes ask the player to choose an option when the character is
+// created. Like Supernatural Veteran, these are keyed by attribute name: any
+// soldier carrying the attribute (fixed or picked) gets the choice. The chosen
+// option is snapshotted onto the member so the unit renders without reference data.
+
+export interface CreationChoiceOption {
+  id: string;
+  label: string;
+  statDelta?: Partial<SoldierStats>;
+  /** Name of an attribute the option grants (resolved to an id when picked). */
+  grantsAttribute?: string;
+}
+
+export interface CreationChoiceDef {
+  attributeName: string;
+  options: CreationChoiceOption[];
+}
+
+export interface CreationChoice {
+  /** The attribute that offered the choice, e.g. "Elite Guard". */
+  attributeName: string;
+  optionId: string;
+  label: string;
+  statDelta?: Partial<SoldierStats>;
+  grantedAttribute?: AttributeSnapshot;
+}
+
+export const CREATION_CHOICES: CreationChoiceDef[] = [
+  {
+    attributeName: 'Elite Guard',
+    options: [
+      { id: 'grenadier', label: 'Grenadier (+1 Health, +1 Courage)', statDelta: { health: 1, courage: 1 } },
+      { id: 'chasseur', label: 'Chasseur (Light Infantry Training)', grantsAttribute: 'Light Infantry Training' },
+    ],
+  },
+  {
+    attributeName: 'Mercenary',
+    options: (['melee', 'accuracy', 'defence', 'courage', 'health'] as const).map((key) => ({
+      id: key,
+      label: `+1 ${STAT_META.find((s) => s.key === key)!.label}`,
+      statDelta: { [key]: 1 },
+    })),
+  },
+];
+
+/** Creation choices offered by the given attribute names, in CREATION_CHOICES order. */
+export function creationChoiceDefs(attributeNames: string[]): CreationChoiceDef[] {
+  const names = new Set(attributeNames);
+  return CREATION_CHOICES.filter((d) => names.has(d.attributeName));
+}
+
+/** Snapshot an option as a member's choice. `attributeId` resolves `grantsAttribute`. */
+export function toCreationChoice(
+  def: CreationChoiceDef,
+  option: CreationChoiceOption,
+  attributeId?: string,
+): CreationChoice {
+  return {
+    attributeName: def.attributeName,
+    optionId: option.id,
+    label: option.label,
+    ...(option.statDelta && { statDelta: { ...option.statDelta } }),
+    ...(option.grantsAttribute && attributeId && { grantedAttribute: { id: attributeId, name: option.grantsAttribute } }),
+  };
+}
+
+/** Names of the required choices that have not been made yet. */
+export function missingCreationChoices(member: MemberSnapshot, attributeNames: string[]): string[] {
+  const made = new Set((member.creationChoices ?? []).map((c) => c.attributeName));
+  return creationChoiceDefs(attributeNames).map((d) => d.attributeName).filter((n) => !made.has(n));
+}
+
+/** Snapshotted base stats plus creation-choice bonuses (before campaign changes). */
+export function memberBaseStats(member: MemberSnapshot): SoldierStats | null {
+  if (!member.stats) return null;
+  const result = { ...member.stats };
+  for (const c of member.creationChoices ?? []) {
+    for (const [k, d] of Object.entries(c.statDelta ?? {}) as [keyof SoldierStats, number][]) result[k] += d;
+  }
+  return result;
+}
+
+/** A soldier's current stats: base + creation choices + tier upgrades + campaign effects. */
+export function memberStats(member: MemberSnapshot): SoldierStats | null {
+  const base = memberBaseStats(member);
+  return base ? effectiveStats(base, member.tierUpgrades ?? [], member.campaignEffects ?? []) : null;
+}
+
+/** Display text for a choice, e.g. "Elite Guard: Grenadier (+1 Health, +1 Courage)". */
+export function creationChoiceLabel(c: CreationChoice): string {
+  return `${c.attributeName}: ${c.label}`;
 }
 
 /** Normalize a raw stored UnitDoc to the current schema. Handles migrations from older shapes. */

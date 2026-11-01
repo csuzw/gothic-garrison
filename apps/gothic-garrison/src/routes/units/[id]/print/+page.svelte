@@ -8,6 +8,8 @@
     normalizeUnitDoc,
     officerStats,
     effectiveStats,
+    memberStats,
+    creationChoiceLabel,
     xpToTier,
     unitBudget,
     unitSpent,
@@ -66,6 +68,9 @@
       }
       for (const a of m.purchasedAttributes ?? []) {
         add(a.name, data.reference.attributes.find((r) => r.id === a.id)?.rules);
+      }
+      for (const c of m.creationChoices ?? []) {
+        if (c.grantedAttribute) add(c.grantedAttribute.name, data.reference.attributes.find((r) => r.id === c.grantedAttribute!.id)?.rules);
       }
     }
     return [...map.entries()].map(([name, rules]) => ({ name, rules })).sort((a, b) => a.name.localeCompare(b.name));
@@ -203,11 +208,12 @@
     <!-- Soldier cards (active members only) -->
     {#each activeMembers as m (m.id)}
       {@const ref = soldierRef(m.soldierTypeId)}
-      {@const mStats = m.stats ? effectiveStats(m.stats, m.tierUpgrades ?? [], m.campaignEffects ?? []) : null}
+      {@const mStats = memberStats(m)}
       {@const mTier = xpToTier(m.xp ?? 0)}
       {@const tierAttrNames = (m.tierUpgrades ?? []).filter(u => u.type === 'new_attribute').map(u => u.attributeName ?? '')}
       {@const effectLabels = (m.campaignEffects ?? []).map(e => e.statDelta ? `${e.label} (${Object.entries(e.statDelta).map(([k,v]) => `${v > 0 ? '+' : ''}${v} ${k}`).join(', ')})` : e.label)}
-      {@const allAttrParts = [...(ref?.fixedAttributes ?? []).map((a) => a.name), ...m.attributes.map((a) => a.name), ...(m.purchasedAttributes ?? []).map((a) => a.name), ...tierAttrNames, ...effectLabels]}
+      {@const choiceByAttr = new Map((m.creationChoices ?? []).map((c) => [c.attributeName, creationChoiceLabel(c)]))}
+      {@const allAttrParts = [...[...(ref?.fixedAttributes ?? []).map((a) => a.name), ...m.attributes.map((a) => a.name)].map((n) => choiceByAttr.get(n) ?? n), ...(m.purchasedAttributes ?? []).map((a) => a.name), ...tierAttrNames, ...effectLabels]}
       {@const allEquip = [...m.equipment, ...m.specialEquipment]}
       <table class="w-full border-collapse text-xs print:break-inside-avoid">
         <tbody>

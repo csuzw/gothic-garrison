@@ -385,6 +385,49 @@
 
   </div>
 
+  <!-- ── ROW 6: Alchemical Concoctions (Venice) ─────────────────── -->
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+    <section class="cs-section space-y-2 rounded-lg bg-base-200 p-3" aria-labelledby="cs-concoctions">
+      <h2 id="cs-concoctions" class="cs-heading flex items-center gap-2 text-base font-bold uppercase tracking-wide">
+        Alchemical Concoctions
+        <span class="src-tag badge badge-outline badge-xs font-mono font-normal normal-case tracking-normal">venice:55</span>
+      </h2>
+      <ul class="list-disc space-y-0.5 pl-4">
+        <li>Before each scenario the alchemist allocates each Concoction to a friendly figure, or keeps it. <strong>Max 1 per figure</strong> per scenario.</li>
+        <li>Spend an action to <strong>Prepare</strong> a Concoction before using it (unless stated otherwise).</li>
+        <li>Only usable if applicable — e.g. a melee Concoction needs a melee weapon.</li>
+      </ul>
+
+      <h3 class="cs-subheading font-semibold">Alchemical Healing</h3>
+      <p>Target regains up to <strong>2 Health</strong>; must be within 1" to use on another figure. Choosing it gives the alchemist <strong>1 Healing Potion</strong>; more from Investigating clues. Each use spends a potion. <strong>No Prepare action</strong> needed.</p>
+    </section>
+
+    <section class="cs-section space-y-2 rounded-lg bg-base-200 p-3">
+      <h2 class="cs-heading flex items-center gap-2 text-base font-bold uppercase tracking-wide">
+        Concoction List
+        <span class="src-tag badge badge-outline badge-xs font-mono font-normal normal-case tracking-normal">venice:56</span>
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="cs-table table table-xs w-full">
+          <tbody>
+            <tr><th colspan="2" class="opacity-70">Generic melee weapon — rest of scenario</th></tr>
+            <tr><td class="font-semibold">Poison</td><td>Gains <em>Venomous</em>. Enemies damaged in melee by it lose 1 Health each turn until healed (Medic / Alchemical Healing).</td></tr>
+            <tr><td class="font-semibold">Fire (Greek Fire)</td><td>Damage counts as fire. Figures hit gain <em>Combustion</em> + <em>Suppress Combustion</em>.</td></tr>
+            <tr><td class="font-semibold">Metallurgy</td><td>Damage counts as cold iron <em>or</em> silver (chosen at allocation). Not on Special Armoury items.</td></tr>
+            <tr><td class="font-semibold">Salt</td><td>Damage counts as salt.</td></tr>
+            <tr><th colspan="2" class="opacity-70">Generic firearm — next Shooting Attack</th></tr>
+            <tr><td class="font-semibold">Sulphur</td><td>Damage counts as fire. Figures hit gain <em>Combustion</em> + <em>Suppress Combustion</em>.</td></tr>
+            <tr><td class="font-semibold">Acid Shot</td><td>Target hit: −1 Health each turn (max −3) until healed. A hit also removes a Breastplate's +1 Armour for the scenario. Doesn't affect Damage Reduction.</td></tr>
+            <tr><td class="font-semibold">Powder</td><td>+4" range.</td></tr>
+            <tr><td class="font-semibold">Freezing Shot</td><td>Target hit: −1 Speed each turn (max −3, never below 1) until healed — healing restores Speed. At half Speed or less it gets 1 action per activation, which needn't be a move.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
   <p class="cs-credit pt-2 text-center text-xs opacity-60 print:text-[6pt]">
     Based on a cheat sheet by PureZestyLemons.
   </p>

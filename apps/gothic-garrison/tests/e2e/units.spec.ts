@@ -1,31 +1,7 @@
 import { type Page, expect, test } from '@playwright/test';
+import { createUnit, openPicker } from './helpers.ts';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
-
-/** Open the new-unit nation picker if it isn't already open. */
-async function openPicker(page: Page) {
-  // Wait for the page load to settle, then check whether the picker auto-opened.
-  // isVisible() fires instantly and races with onMount; waitFor avoids that.
-  const opened = await page.getByRole('button', { name: 'Create' })
-    .waitFor({ state: 'visible', timeout: 3000 })
-    .then(() => true)
-    .catch(() => false);
-  if (!opened) await page.getByRole('button', { name: 'New unit' }).click();
-}
-
-/** Open the new-unit nation picker, pick a nation, click Create. */
-async function createUnit(page: Page, nation = 'France') {
-  await page.goto('/');
-  await openPicker(page);
-  // Use the span.font-semibold inside each nation card for an exact name match so
-  // nations whose descriptions mention other nations (e.g. Spain mentioning "French")
-  // don't accidentally satisfy a plain hasText filter.
-  await page.locator('[role="button"].card')
-    .filter({ has: page.locator('span.font-semibold', { hasText: new RegExp(`^${nation}$`) }) })
-    .click();
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(/\/units\/[0-9a-f-]+$/i);
-}
 
 /** Expand the soldier picker tile list if it is currently collapsed. */
 async function expandSoldierPicker(soldiersCard: ReturnType<Page['locator']>) {
@@ -286,5 +262,36 @@ test.describe('units', () => {
     await expect(
       page.locator('li').filter({ has: page.locator('[aria-label="Remove Infantryman"]') }).getByRole('button', { name: 'Salt Bag' }),
     ).toHaveClass(/btn-primary/);
+  });
+
+  test('navbar Cheat Sheets menu opens above the builder Save/Print bar', async ({ page }, testInfo) => {
+    await createUnit(page);
+    const header = page.locator('header');
+    // Phones use the hamburger menu; desktop has the inline dropdown. (WebKit doesn't expose
+    // <summary> as a button role, so select the hamburger by its aria-label.)
+    const menuBtn = header.locator('summary[aria-label="Menu"]');
+    if (await menuBtn.isVisible()) await menuBtn.click();
+    await header.locator('summary:visible', { hasText: 'Cheat Sheets' }).click();
+
+    const link = header.getByRole('link', { name: 'Campaign Post-Battle' }).filter({ visible: true });
+    await expect(link).toBeVisible();
+    // The link must be the topmost element at its centre — not covered by the sticky bar.
+    // Polled: the submenu animates open, and WebKit's hit-test falls through mid-animation.
+    await expect
+      .poll(
+        () =>
+          link.evaluate((el) => {
+            const r = el.getBoundingClientRect();
+            const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            return hit && (hit === el || el.contains(hit)) ? 'link' : `${hit?.outerHTML.slice(0, 120)} @ y=${Math.round(r.top)}`;
+          }),
+        { timeout: 5000 },
+      )
+      .toBe('link');
+
+    await testInfo.attach('cheat-sheets-menu', {
+      body: await page.screenshot({ path: `test-results/screenshots/cheat-sheets-menu-${testInfo.project.name}.png` }),
+      contentType: 'image/png',
+    });
   });
 });
