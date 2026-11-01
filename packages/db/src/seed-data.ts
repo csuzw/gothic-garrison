@@ -4197,6 +4197,165 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Bravo Brawler",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 1,
+      "health": 10
+    },
+    "equipmentMode": "choice",
+    "description": null,
+    "fixedAttributes": [
+      "Dirty Fighter",
+      "Master of Cover"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Polearm",
+        "order": 1,
+        "items": [
+          {
+            "name": "Polearm",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Heavy Weapon",
+        "order": 2,
+        "items": [
+          {
+            "name": "Heavy Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bravo Lieutenant",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 1,
+      "health": 12
+    },
+    "equipmentMode": "choice",
+    "description": null,
+    "fixedAttributes": [
+      "Concealed Pistol",
+      "Indefatigable",
+      "Master of Cover",
+      "Nimble",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Blunderbuss, Shot Bag, Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Blunderbuss",
+            "qty": 1
+          },
+          {
+            "name": "Shot Bag",
+            "qty": 1
+          },
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Multi-Barrelled Pistol, Hand Weapon",
+        "order": 1,
+        "items": [
+          {
+            "name": "Multi-Barrelled Pistol",
+            "qty": 1
+          },
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bravo Scoundrel",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 1,
+      "defence": 12,
+      "courage": 1,
+      "health": 10
+    },
+    "equipmentMode": "choice",
+    "description": null,
+    "fixedAttributes": [
+      "Master of Cover"
+    ],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box, Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          },
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      },
+      {
+        "label": "Pistol, Hand Weapon",
+        "order": 1,
+        "items": [
+          {
+            "name": "Pistol",
+            "qty": 1
+          },
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Brigante Chief",
     "sourceCode": "italy",
     "experience": 2,
@@ -4324,6 +4483,77 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Canal Lane Slasher",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 8,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 15,
+      "courage": 2,
+      "health": 17
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Fear of Fire",
+      "Indefatigable",
+      "Indestructible",
+      "Nimble",
+      "No Opening",
+      "Soul Shear",
+      "Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Canal Serpent",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 7,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 0,
+      "health": 16
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Silver)",
+      "Amphibious",
+      "Aquatic",
+      "Damage Reduction (2)",
+      "Deathroll",
+      "Large",
+      "Lunge",
+      "Strong",
+      "Submerge",
+      "Venomous"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Changeling",
     "sourceCode": "core",
     "experience": 2,
@@ -4357,6 +4587,38 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Civic Guardsman",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [],
+    "loadouts": [
+      {
+        "label": "Musket, Cartridge Box",
+        "order": 0,
+        "items": [
+          {
+            "name": "Musket",
+            "qty": 1
+          },
+          {
+            "name": "Cartridge Box",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Civilian",
     "sourceCode": "britain",
     "experience": 0,
@@ -4378,6 +4640,44 @@ export const monsters: SeedMonster[] = [
         "items": [
           {
             "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Count Monterosso",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 7,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 0,
+      "health": 18
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Silver)",
+      "Damage Reduction (5)",
+      "Hard to Put Down",
+      "Indefatigable",
+      "Soul Shear",
+      "Strong",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Fencing Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Fencing Weapon",
             "qty": 1
           }
         ]
@@ -4562,6 +4862,35 @@ export const monsters: SeedMonster[] = [
     "loadouts": []
   },
   {
+    "name": "Deep One",
+    "sourceCode": "venice",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 14
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Fire)",
+      "Damage Reduction (2)",
+      "Fins",
+      "Submerge",
+      "Swimmer"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Demon",
     "sourceCode": "core",
     "experience": 3,
@@ -4622,6 +4951,35 @@ export const monsters: SeedMonster[] = [
             "qty": 1
           }
         ]
+      }
+    ]
+  },
+  {
+    "name": "Drowned",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 4,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 5,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Amphibious",
+      "Damage Reduction - Projectiles Only (4)",
+      "Indefatigable",
+      "Infectious",
+      "Submerge"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
       }
     ]
   },
@@ -5051,6 +5409,31 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Homunculus",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 10,
+      "courage": 0,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Alchemical Boost"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Il Negromonte",
     "sourceCode": "italy",
     "experience": 3,
@@ -5114,6 +5497,67 @@ export const monsters: SeedMonster[] = [
       "Nimble",
       "Powerful Jaws",
       "Very Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Lion Statue Golem",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 4,
+      "melee": 4,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 0,
+      "health": 22
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Salt)",
+      "Damage Reduction (5)",
+      "Hard to Put Down",
+      "Immune to Missile Weapons",
+      "Very Strong"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
+    "name": "Lion Statue Guardian",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 3,
+      "accuracy": 0,
+      "defence": 14,
+      "courage": 0,
+      "health": 20
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Enchanted Weapons)",
+      "Damage Reduction (5)",
+      "Hard to Put Down",
+      "Strong",
+      "Weakened by Faith"
     ],
     "loadouts": [
       {
@@ -5548,6 +5992,34 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Plague Skeleton",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 5
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Damage Reduction - Projectiles Only (8)",
+      "Indefatigable",
+      "Infectious",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Empty",
+        "order": 0,
+        "items": []
+      }
+    ]
+  },
+  {
     "name": "Polar Bear",
     "sourceCode": "canada",
     "experience": 3,
@@ -5695,6 +6167,40 @@ export const monsters: SeedMonster[] = [
         "label": "Empty",
         "order": 0,
         "items": []
+      }
+    ]
+  },
+  {
+    "name": "Rogue Alchemist",
+    "sourceCode": "venice",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 13,
+      "courage": 2,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Dark Alchemy"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon, Pistol",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          },
+          {
+            "name": "Pistol",
+            "qty": 1
+          }
+        ]
       }
     ]
   },
@@ -5926,6 +6432,37 @@ export const monsters: SeedMonster[] = [
     ]
   },
   {
+    "name": "Sophisian Occultist",
+    "sourceCode": "venice",
+    "experience": 1,
+    "stats": {
+      "speed": 6,
+      "melee": 0,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 3,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Indefatigable",
+      "Sophisian Grimoire"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Spectral Soldier",
     "sourceCode": "italy",
     "experience": 1,
@@ -6084,6 +6621,80 @@ export const monsters: SeedMonster[] = [
         "label": "Empty",
         "order": 0,
         "items": []
+      }
+    ]
+  },
+  {
+    "name": "The Broker",
+    "sourceCode": "venice",
+    "experience": 2,
+    "stats": {
+      "speed": 6,
+      "melee": 2,
+      "accuracy": 1,
+      "defence": 13,
+      "courage": 2,
+      "health": 15
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Concealed Pistol",
+      "Indefatigable",
+      "Nimble",
+      "No Opening",
+      "Quick Healing",
+      "Sophisian Grimoire"
+    ],
+    "loadouts": [
+      {
+        "label": "Multi-Barrelled Pistol, Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Multi-Barrelled Pistol",
+            "qty": 1
+          },
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Thrall Guard",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 6,
+      "melee": 1,
+      "accuracy": 0,
+      "defence": 12,
+      "courage": 0,
+      "health": 12
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Blessed Weapons)",
+      "Allergy (Fire)",
+      "Allergy (Silver)",
+      "Chilling Touch",
+      "Damage Reduction (4)",
+      "Weakened by Faith"
+    ],
+    "loadouts": [
+      {
+        "label": "Fencing Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Fencing Weapon",
+            "qty": 1
+          }
+        ]
       }
     ]
   },
@@ -6461,6 +7072,42 @@ export const monsters: SeedMonster[] = [
         "label": "Empty",
         "order": 0,
         "items": []
+      }
+    ]
+  },
+  {
+    "name": "Wreckbound",
+    "sourceCode": "venice",
+    "experience": 0,
+    "stats": {
+      "speed": 5,
+      "melee": 2,
+      "accuracy": 0,
+      "defence": 10,
+      "courage": 5,
+      "health": 10
+    },
+    "equipmentMode": "fixed",
+    "description": null,
+    "fixedAttributes": [
+      "Allergy (Enchanted Weapons)",
+      "Allergy (Fire)",
+      "Chains of Death",
+      "Ethereal",
+      "Ethereal Hand Weapon",
+      "Indefatigable",
+      "Indestructible"
+    ],
+    "loadouts": [
+      {
+        "label": "Hand Weapon",
+        "order": 0,
+        "items": [
+          {
+            "name": "Hand Weapon",
+            "qty": 1
+          }
+        ]
       }
     ]
   },
