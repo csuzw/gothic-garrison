@@ -4270,7 +4270,7 @@ export const monsters: SeedMonster[] = [
     ],
     "loadouts": [
       {
-        "label": "Blunderbuss, Shot Bag, Hand Weapon",
+        "label": "Blunderbuss, Shot Bag",
         "order": 0,
         "items": [
           {
@@ -4279,10 +4279,6 @@ export const monsters: SeedMonster[] = [
           },
           {
             "name": "Shot Bag",
-            "qty": 1
-          },
-          {
-            "name": "Hand Weapon",
             "qty": 1
           }
         ]
@@ -4322,7 +4318,7 @@ export const monsters: SeedMonster[] = [
     ],
     "loadouts": [
       {
-        "label": "Musket, Cartridge Box, Hand Weapon",
+        "label": "Musket, Cartridge Box",
         "order": 0,
         "items": [
           {
@@ -4331,10 +4327,6 @@ export const monsters: SeedMonster[] = [
           },
           {
             "name": "Cartridge Box",
-            "qty": 1
-          },
-          {
-            "name": "Hand Weapon",
             "qty": 1
           }
         ]

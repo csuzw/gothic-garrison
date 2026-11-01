@@ -26,115 +26,8 @@ export interface ReferenceChangelogEntry {
 
 export const referenceChangelog: ReferenceChangelogEntry[] = [
   {
-    "date": "2026-11-01T12:25:36.985Z",
-    "note": "Venice bestiary (18 monsters)",
-    "changes": [
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Bravo Brawler"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Bravo Lieutenant"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Bravo Scoundrel"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Canal Lane Slasher"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Canal Serpent"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Civic Guardsman"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Count Monterosso"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Deep One"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Drowned"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Homunculus"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Lion Statue Golem"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Lion Statue Guardian"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Plague Skeleton"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Rogue Alchemist"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Sophisian Occultist"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "The Broker"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Thrall Guard"
-      },
-      {
-        "kind": "added",
-        "entity": "monster type",
-        "name": "Wreckbound"
-      }
-    ]
-  },
-  {
-    "date": "2026-11-01T11:44:44.821Z",
-    "note": "Mercenary fix",
-    "changes": [
-      {
-        "kind": "updated",
-        "entity": "soldier type",
-        "name": "Mercenary"
-      }
-    ]
-  },
-  {
-    "date": "2026-11-01T11:31:01.702Z",
-    "note": "Add Venice supplement (Nations, Soldiers, Attributes, Equipment)",
+    "date": "2026-11-01T12:51:49.255Z",
+    "note": "Add Venice — The Alchemist's Legacy supplement",
     "changes": [
       {
         "kind": "added",
@@ -505,6 +398,96 @@ export const referenceChangelog: ReferenceChangelogEntry[] = [
         "kind": "updated",
         "entity": "soldier type",
         "name": "Voltigeur"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Bravo Brawler"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Bravo Lieutenant"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Bravo Scoundrel"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Canal Lane Slasher"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Canal Serpent"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Civic Guardsman"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Count Monterosso"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Deep One"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Drowned"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Homunculus"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Lion Statue Golem"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Lion Statue Guardian"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Plague Skeleton"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Rogue Alchemist"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Sophisian Occultist"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "The Broker"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Thrall Guard"
+      },
+      {
+        "kind": "added",
+        "entity": "monster type",
+        "name": "Wreckbound"
       }
     ]
   }

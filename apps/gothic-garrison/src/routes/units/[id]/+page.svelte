@@ -812,18 +812,29 @@
             </div>
             {#if hasOutsideNationRule}
               <div class="mt-2 space-y-1">
-                <button
-                  type="button"
-                  class="flex w-full cursor-pointer items-center gap-1 text-left text-xs font-medium opacity-60 hover:opacity-100"
-                  aria-expanded={outsideNationOpen}
-                  aria-controls="outside-nation-list"
-                  onclick={() => (outsideNationOpen = !outsideNationOpen)}
-                >
-                  <span class="inline-block w-3 transition-transform {outsideNationOpen ? 'rotate-90' : ''}" aria-hidden="true">▸</span>
-                  Outside-nation recruit
-                  <span class="badge badge-xs badge-ghost">+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
-                  {#if outsideNationMember}<span class="badge badge-xs badge-warning">{outsideNationMember.name}</span>{/if}
-                </button>
+                {#if outsideNationMember}
+                  <p class="text-xs font-medium opacity-60">
+                    Outside-nation recruit
+                    <span class="badge badge-xs badge-ghost">+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
+                    <span class="badge badge-xs badge-warning">{outsideNationMember.name}</span>
+                  </p>
+                {:else}
+                  <!-- Styled as a dashed tile with an explicit Show/Hide cue so it reads as clickable when collapsed. -->
+                  <button
+                    type="button"
+                    class="group flex w-full cursor-pointer items-center gap-2 rounded border border-dashed border-base-content/25 px-3 py-2 text-left text-sm transition-colors hover:border-primary hover:bg-base-100 {outsideNationOpen ? 'border-primary/60' : ''}"
+                    aria-expanded={outsideNationOpen}
+                    aria-controls="outside-nation-list"
+                    onclick={() => (outsideNationOpen = !outsideNationOpen)}
+                  >
+                    <span class="inline-block w-3 text-primary transition-transform {outsideNationOpen ? 'rotate-90' : ''}" aria-hidden="true">▸</span>
+                    <span class="font-medium">Outside-nation recruit</span>
+                    <span class="badge badge-xs badge-ghost shrink-0">+{OUTSIDE_NATION_SOLDIER_COST} pts</span>
+                    <span class="ml-auto shrink-0 text-xs font-semibold text-primary group-hover:underline">
+                      {outsideNationOpen ? 'Hide' : `Show ${outsideNationAvailable.length}`}
+                    </span>
+                  </button>
+                {/if}
                 {#if outsideNationMember}
                   <div class="bg-base-100 flex items-center gap-2 rounded px-3 py-2 ring-1 ring-warning/30">
                     <span class="min-w-0 flex-1 text-sm font-medium">{outsideNationMember.name}</span>

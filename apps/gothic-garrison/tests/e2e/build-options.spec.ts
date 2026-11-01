@@ -143,6 +143,7 @@ test.describe('build options — outside-nation soldier rule', () => {
 
     // Collapsed: no recruit buttons until expanded
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggle).toContainText(/Show \d+/); // explicit cue that it expands
     await expect(soldiersCard.getByRole('button', { name: /\(outside nation\)$/ })).toHaveCount(0);
     await testInfo.attach('outside-nation-collapsed', {
       body: await soldiersCard.screenshot({ path: `test-results/screenshots/outside-nation-collapsed-${testInfo.project.name}.png` }),
@@ -151,6 +152,7 @@ test.describe('build options — outside-nation soldier rule', () => {
 
     await toggle.click();
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(toggle).toContainText('Hide');
     await expect(soldiersCard.getByRole('button', { name: /\(outside nation\)$/ }).first()).toBeVisible();
 
     // And collapses again

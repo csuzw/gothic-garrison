@@ -93,7 +93,8 @@
 </svelte:head>
 
 <div class="flex min-h-dvh flex-col">
-  <header class="navbar bg-base-200 border-b border-primary shadow-sm print:hidden">
+  <!-- relative z-30: navbar dropdowns must layer above page-level sticky bars (the builder's Save/Print bar is z-20). -->
+  <header class="navbar relative z-30 bg-base-200 border-b border-primary shadow-sm print:hidden">
     <div class="container mx-auto flex items-center gap-2 px-4">
       <!-- Mobile: page links in a dropdown -->
       <details class="dropdown lg:hidden">
