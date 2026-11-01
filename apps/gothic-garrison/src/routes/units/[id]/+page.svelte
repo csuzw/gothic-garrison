@@ -905,17 +905,22 @@
                   {/if}
 
                   {#if ref}
+                    {@const granted = (m.creationChoices ?? [])
+                      .flatMap((c) => (c.grantedAttribute ? [c.grantedAttribute.name] : []))
+                      .map((name) => ({ name, rules: attrRules(name) ?? null }))}
                     {#if ref.attributePicks > 0}
                       <AttributePicker
                         pool={officerPool}
                         selected={m.attributes}
                         max={ref.attributePicks}
                         fixed={ref.fixedAttributes}
+                        {granted}
                         onToggle={(aid, name) => { toggleAttr(m.attributes, aid, name, ref.attributePicks); pruneCreationChoices(m, ref); }}
                       />
-                    {:else if ref.fixedAttributes.length}
-                      <div class="flex flex-wrap gap-1">
+                    {:else if ref.fixedAttributes.length || granted.length}
+                      <div class="flex flex-wrap gap-1" data-testid="member-attributes">
                         {#each ref.fixedAttributes as a}<span class="badge badge-xs badge-ghost" title={a.rules || a.name}>{a.name}</span>{/each}
+                        {#each granted as g}<span class="badge badge-xs badge-outline badge-success" title={g.rules || g.name}>{g.name}</span>{/each}
                       </div>
                     {/if}
 

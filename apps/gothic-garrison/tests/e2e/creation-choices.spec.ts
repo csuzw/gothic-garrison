@@ -58,9 +58,17 @@ test.describe('creation choices', () => {
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Velite needs an option chosen for Elite Guard.')).toBeVisible();
 
-    // Chasseur first, then switch to Grenadier — only one option is ever selected
+    // Chasseur grants Light Infantry Training, shown next to Elite Guard
+    const attrs = card.getByTestId('member-attributes');
+    await expect(attrs.getByText('Light Infantry Training')).toHaveCount(0);
     await choice.getByRole('button', { name: 'Chasseur (Light Infantry Training)' }).click();
+    await expect(attrs.getByText('Elite Guard')).toBeVisible();
+    await expect(attrs.getByText('Light Infantry Training')).toBeVisible();
+    await shot(page, testInfo, 'velite-chasseur', card);
+
+    // Switch to Grenadier — only one option is ever selected, and the granted attribute goes away
     await choice.getByRole('button', { name: /^Grenadier/ }).click();
+    await expect(attrs.getByText('Light Infantry Training')).toHaveCount(0);
     await expect(choice.getByRole('button', { name: /^Grenadier/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(choice.getByRole('button', { name: 'Chasseur (Light Infantry Training)' })).toHaveAttribute('aria-pressed', 'false');
     await expect(choice.getByText('Pick an option to continue.')).toHaveCount(0);

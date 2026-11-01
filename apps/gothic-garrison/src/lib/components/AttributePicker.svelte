@@ -6,12 +6,15 @@
     selected,
     max,
     fixed = [],
+    granted = [],
     onToggle,
   }: {
     pool: { id: string; name: string; rules: string | null }[];
     selected: AttributeSnapshot[];
     max: number;
     fixed?: { name: string; rules: string | null }[];
+    /** Attributes granted by a creation choice (e.g. Elite Guard → Light Infantry Training). */
+    granted?: { name: string; rules: string | null }[];
     onToggle: (id: string, name: string) => void;
   } = $props();
 
@@ -20,10 +23,11 @@
 </script>
 
 <div class="space-y-2">
-  {#if fixed.length}
+  {#if fixed.length || granted.length}
     <div class="flex flex-wrap items-center gap-1">
       <span class="text-xs opacity-60">Has:</span>
       {#each fixed as f}<span class="badge badge-sm badge-ghost" title={f.rules || f.name}>{f.name}</span>{/each}
+      {#each granted as g}<span class="badge badge-sm badge-outline badge-success" title={g.rules || g.name}>{g.name}</span>{/each}
     </div>
   {/if}
 
